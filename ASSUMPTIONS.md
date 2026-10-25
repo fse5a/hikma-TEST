@@ -1,0 +1,15 @@
+# Backend and free-tier assumptions
+
+- The app runs as a static Vercel frontend with Vercel Functions in `/api`. Anonymous Supabase Auth and optional email upgrade are implemented, with bearer verification on worker routes; library sync and activation lookup are not wired yet.
+- Vercel Hobby serverless execution is intentionally capped to short steps and resumable jobs. The project follows the documented pattern that long operations should be split into queued jobs rather than single long-running requests. Current assumption: function runtime is limited to roughly 10 seconds on Vercel Hobby; the app is designed around that limit.
+- Supabase Free plan assumptions are 500 MB database, 1 GB file storage, 50 MB max upload, and possible inactivity pausing. No scheduled keep-alive workflow is currently implemented.
+- `voices.json` and `test-sentences.json` remain public metadata files loaded with same-origin URLs relative to `document.baseURI`. They do not contain keys, private recordings, or other secrets.
+- Friend voice entries keep `consent: false` in the public metadata. Real friend-voice synthesis requires explicit consent, storage in a private bucket, and an allowed local or hosted worker. The UI must show that a voice is used only with permission.
+- Device speech is the free fallback. Optional translation, speech, and diacritization worker URLs are server-only. Configured workers use an atomic Supabase IP/user-minute and user-daily quota RPC; speech audio is cached in IndexedDB and private Storage after migrations are applied. Monthly budget alerts are not implemented.
+- For protected imports, the app must never trust content from the web or PDFs without sanitization. Untrusted text is treated as data, not instructions, and used with prompt-injection safeguards.
+- Text-layer PDF files are parsed locally with PDF.js; the original file is not uploaded. Scanned-page OCR is deferred until small, licensed Arabic/English data can be bundled and tested offline.
+- Hosting works under a site path prefix when scripts and JSON stay beside `index.html`. Use an HTTP static preview; browsers may block `fetch()` from `file://` pages.
+- The app does not claim complete accessibility certification. Physical TalkBack, VoiceOver, NVDA, browser timing checks, axe-core runs, and human voice-quality review still require separate verification.
+- Free-tier use is an operating constraint. Provider traffic has per-IP/per-user minute and per-user daily limits when Supabase and the service-role key are configured. Do not configure paid or uncapped providers; monthly budget alerts are not present.
+- No voice-cloning engine has been selected. XTTS-v2 uses the Coqui Public Model License, which is not an ordinary OSI open-source license; defer friend-voice synthesis until license, consent, and deployment-cost review.
+- Speech workers accept JSON `{text, language, voice, rate, pitch}` and return base64 audio plus an `audio/*` content type. Diacritization workers accept `{text, instruction}`; output is rejected if original letters differ after Arabic marks are removed.

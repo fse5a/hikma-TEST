@@ -1,0 +1,18 @@
+[
+  {
+    "id": "friend-voice-1",
+    "language": "en",
+    "displayName": "Friend voice 1",
+    "engineVoiceId": "",
+    "consent": false,
+    "consentFile": "voices/voice1/consent.json"
+  },
+  {
+    "id": "friend-voice-2",
+    "language": "ar",
+    "displayName": "Friend voice 2",
+    "engineVoiceId": "",
+    "consent": false,
+    "consentFile": "voices/voice2/consent.json"
+  }
+]
