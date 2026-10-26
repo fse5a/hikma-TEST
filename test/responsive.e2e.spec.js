@@ -185,9 +185,10 @@ test('PWA manifest and service worker are available', async ({page}) => {
   expect(serviceWorker.error).toBeUndefined();
   expect(serviceWorker.scriptURL, JSON.stringify(serviceWorker)).toContain('/sw.js');
   expect(serviceWorker.state, JSON.stringify(serviceWorker)).toBe('activated');
-  const cachedAssets = await page.evaluate(() => caches.open('hikma-shell-v5').then(cache => cache.keys().then(keys => keys.map(key => new URL(key.url).pathname))));
+  const cachedAssets = await page.evaluate(() => caches.open('hikma-shell-v6').then(cache => cache.keys().then(keys => keys.map(key => new URL(key.url).pathname))));
   expect(cachedAssets).toContain('/api-client.js');
   expect(cachedAssets).toContain('/manifest.webmanifest');
+  expect(cachedAssets).toContain('/style.css');
   expect(cachedAssets).toContain('/pdf-import.js');
   expect(cachedAssets).toContain('/vendor/pdf.worker.min.mjs');
 });

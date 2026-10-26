@@ -22,6 +22,16 @@ test('package has no always-running server and lists only URL extraction runtime
 test('PWA app shell includes the local locale dictionaries', async () => {
   const worker = await readFile(new URL('../sw.js', import.meta.url), 'utf8');
   assert.match(worker, /'\.\/i18n\.js'/);
+  assert.match(worker, /'\.\/style\.css'/);
   assert.match(worker, /'\.\/pdf-import\.js'/);
   assert.match(worker, /'\.\/vendor\/pdf\.worker\.min\.mjs'/);
+});
+
+test('homepage loads the responsive redesign stylesheet from the project root', async () => {
+  const html = await readFile(new URL('../index.html', import.meta.url), 'utf8');
+  const stylesheet = await readFile(new URL('../style.css', import.meta.url), 'utf8');
+  assert.match(html, /href="\/style\.css"/);
+  assert.match(stylesheet, /\.onboarding \.gate-panel/);
+  assert.match(stylesheet, /\.story-card:hover/);
+  assert.match(stylesheet, /#audioPreview/);
 });

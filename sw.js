@@ -1,5 +1,5 @@
-const CACHE_NAME = 'hikma-shell-v5';
-const APP_SHELL = ['./index.html', './settings.js', './public-data.js', './api-client.js', './i18n.js', './pdf-import.js', './vendor/pdf.min.mjs', './vendor/pdf.worker.min.mjs', './restored-features.js', './manifest.webmanifest', './icon.svg', './voices.json', './test-sentences.json'];
+const CACHE_NAME = 'hikma-shell-v6';
+const APP_SHELL = ['./index.html', './style.css', './settings.js', './public-data.js', './api-client.js', './i18n.js', './pdf-import.js', './vendor/pdf.min.mjs', './vendor/pdf.worker.min.mjs', './restored-features.js', './manifest.webmanifest', './icon.svg', './voices.json', './test-sentences.json'];
 
 self.addEventListener('install', (event) => {
   event.waitUntil(caches.open(CACHE_NAME).then(async (cache) => {
