@@ -12,13 +12,17 @@ Hikma is deployed on Vercel as a static frontend with Vercel Functions in `/api`
 
 ## 2. Add the environment variables
 
-Copy `.env.example` to `.env.local` for local development and create the same keys in Vercel Project Settings > Environment Variables.
+For `npx vercel dev`, create `.env.local` in the repository root and add the variables you need. Create the same integration keys in Vercel Project Settings > Environment Variables.
 
-Required for a working local demo:
+Required for a local demo:
 
 - `APP_MODE=demo`
+
+Optional for a local demo (defaults to `DEMO-1234`):
+
 - `DEMO_ACTIVATION_CODE=DEMO-1234`
-- `VERCEL_ENV=development`
+
+Vercel CLI sets `VERCEL_ENV=development` during local development; it does not need to be added to `.env.local`.
 
 Required for real Supabase integration:
 
@@ -75,13 +79,13 @@ Anonymous sign-in and email upgrade are implemented. Library synchronization, ac
 
 ## 4. Local run
 
-Use a local static server, for example:
+Install dependencies with `npm install`, then start a local static preview:
 
 ```bash
-python -m http.server 8000
+npm run dev
 ```
 
-Then open http://localhost:8000. The app speaks in demo mode and uses local device speech until configured providers are available.
+Open http://localhost:4173. The preview serves the app and vendored PDF.js assets but does not execute `/api` routes. For the API functions too, run `npx vercel dev`; set `APP_MODE=demo` in `.env.local` for demo behavior. Vercel supplies `VERCEL_ENV` during local development, and no provider or Supabase keys are required for the demo.
 
 For optional workers, add worker URLs and keys in Vercel Project Settings > Environment Variables, then redeploy. Use only free/self-hosted services. `/api/health` reports configuration without returning URLs or keys. Speech chunks are cached in browser IndexedDB (50 MB cap) and private Storage, keyed by user/provider/voice/text/language/rate/pitch when storage is configured.
 

@@ -151,6 +151,7 @@ test('configured speech provider returns audio without exposing its secret key',
     }
     if (String(url).includes('/rest/v1/audio_cache')) {
       assert.equal(options.headers.Authorization, 'Bearer private-service-key');
+      if (options.method !== 'POST') return {ok: true, async json() { return []; }};
       const record = JSON.parse(options.body);
       assert.equal(record.user_id, '7b4e30b4-70e3-4d4a-8a91-c5afd62c65a6');
       assert.match(record.storage_key, /^7b4e30b4-70e3-4d4a-8a91-c5afd62c65a6\//);

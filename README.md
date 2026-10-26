@@ -15,11 +15,11 @@ The health endpoint reports integrations and a non-secret language recommendatio
 
 Deploy the repository to Vercel to run its `/api` functions and apply [vercel.json](vercel.json) security headers. A plain static server only serves the frontend and cannot execute those functions. For a static preview, run:
 
-```powershell
-py -m http.server 8000
+```bash
+npm run dev
 ```
 
-Then open `http://localhost:8000`. Static preview does not make the API routes available; API errors are announced in Arabic and local reading/speech remain available.
+Then open `http://localhost:4173`. Static preview does not make the API routes available; API errors are announced in Arabic and local reading/speech remain available. To run the Vercel Functions locally as well, use `npx vercel dev` with `APP_MODE=demo` in `.env.local` for a no-credentials demo.
 
 ## Installable app
 
