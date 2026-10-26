@@ -18,9 +18,11 @@ Required for a local demo:
 
 - `APP_MODE=demo`
 
-Optional for a local demo (defaults to `1234`):
+Optional for the server-side demo activation endpoint (defaults to `1234`):
 
 - `DEMO_ACTIVATION_CODE=1234`
+
+The browser onboarding gate is a frontend-only demo shortcut (`1234` or `admin`) and works with static servers such as `npx serve`. It does not protect content; do not use it for private data.
 
 Vercel CLI sets `VERCEL_ENV=development` during local development; it does not need to be added to `.env.local`.
 

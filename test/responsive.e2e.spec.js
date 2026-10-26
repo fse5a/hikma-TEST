@@ -192,14 +192,23 @@ test('PWA manifest and service worker are available', async ({page}) => {
   expect(cachedAssets).toContain('/vendor/pdf.worker.min.mjs');
 });
 
-test('activation posts to the backend and unlocks onboarding', async ({page}) => {
+test('frontend demo code unlocks onboarding without an activation API request', async ({page}) => {
   const calls = [];
   await mockApi(page, calls);
   await page.goto('/');
+  await page.locator('#penCode').fill('wrong');
+  const alertMessage = new Promise(resolve => page.once('dialog', async dialog => {
+    resolve(dialog.message());
+    await dialog.accept();
+  }));
+  await page.getByRole('button', {name: 'دخول'}).click();
+  await expect(alertMessage).resolves.toBe('Wrong Password');
+
   await page.locator('#penCode').fill('1234');
   await page.getByRole('button', {name: 'دخول'}).click();
-  await expect(page.getByRole('heading', {name: 'هل عمرك 16 سنة أو أكثر؟'})).toBeVisible();
-  expect(calls.some(call => call.path === '/api/activate' && call.body.code === '1234')).toBe(true);
+  await expect(page).toHaveURL(/\/index\.html$/);
+  await expect(page.locator('#onboarding')).toBeHidden();
+  expect(calls.some(call => call.path === '/api/activate')).toBe(false);
 });
 
 test('reader calls translation, diacritization, and speech APIs with honest demo status', async ({page}) => {
@@ -255,13 +264,15 @@ test('axe finds no serious or critical violations across R6 views and settings m
   }
 });
 
-test('unreachable API offers an explicit local demo without showing bottom navigation before activation', async ({page}) => {
+test('frontend demo login works when the API is unreachable', async ({page}) => {
   await page.route('**/api/**', route => route.abort());
   await page.goto('/');
   await expect(page.locator('.mobile-nav')).toBeHidden();
-  await expect(page.locator('[data-continue-demo]')).toBeVisible();
-  await page.locator('[data-continue-demo]').click();
-  await expect(page.getByRole('heading', {name: 'هل عمرك 16 سنة أو أكثر؟'})).toBeVisible();
+  await page.locator('#penCode').fill('admin');
+  await page.getByRole('button', {name: 'دخول'}).click();
+  await expect(page).toHaveURL(/\/index\.html$/);
+  await expect(page.locator('#onboarding')).toBeHidden();
+  await expect(page.locator('.shell')).toBeVisible();
 });
 
 test('phone header, modal navigation, accessibility placement, and touch targets', async ({page}) => {

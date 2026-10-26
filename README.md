@@ -6,8 +6,8 @@ Hikma is a static Vercel app with Vercel Functions under `/api`. The interface s
 
 - The library, reader, manual translation editor, settings, progress, and backups use browser storage.
 - Reading aloud uses the browser's Web Speech API. Recording/uploading a human voice uses browser media APIs and IndexedDB.
-- The frontend calls `/api/health`, `/api/activate`, `/api/translate`, `/api/diacritize`, and `/api/speech` through [api-client.js](api-client.js). Demo fallback is allowed only when health explicitly reports demo mode.
-- Local demo activation uses `1234` by default when `APP_MODE=demo` and Supabase is not configured. It does not create an account or protect content.
+- The frontend calls `/api/health`, `/api/translate`, `/api/diacritize`, and `/api/speech` through [api-client.js](api-client.js). Demo fallback is allowed only when health explicitly reports demo mode.
+- The local-only onboarding gate accepts `1234` or `admin` in the browser and does not call `/api/activate`. This is only a demo convenience, not authentication; anyone can inspect the code or change browser storage.
 
 ## API status
 

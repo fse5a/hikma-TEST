@@ -21,32 +21,6 @@
     } catch (error) {
       const status = document.querySelector('#voiceStatus');
       if (status) status.textContent = api.toFriendlyMessage(error);
-      if (!settings.activated && api.isNetworkError(error)) {
-        const continueButton = document.querySelector('[data-continue-demo]');
-        if (continueButton) continueButton.hidden = false;
-      }
-    }
-    const gateError = document.querySelector('#gateError');
-    if (gateError && window.hikmaBackendHealth?.mode === 'demo') {
-      gateError.textContent = 'الوضع التجريبي متاح الآن. رمز التفعيل الافتراضي: 1234.';
-    }
-  }
-
-  async function activate(code) {
-    const status = document.querySelector('#gateError');
-    if (status) status.textContent = 'جارٍ التحقق من رمز التفعيل...';
-    try {
-      const result = await api.activate(code);
-      settings.activated = true;
-      settings.activationDemo = result.mode === 'demo';
-      save();
-      renderGate();
-    } catch (error) {
-      if (status) status.textContent = api.toFriendlyMessage(error);
-      if (api.isNetworkError(error)) {
-        const continueButton = document.querySelector('[data-continue-demo]');
-        if (continueButton) continueButton.hidden = false;
-      }
     }
   }
   Object.assign(settings, {
@@ -574,7 +548,7 @@
     const heading = step === 'activate' ? 'أهلاً بيك في حكمة' : step === 'age' ? 'هل عمرك 16 سنة أو أكثر؟' : 'تحب نفعّل وضع المساعدة؟';
     let content;
     if (step === 'activate') {
-      content = `<p>أدخل الرمز التجريبي 1234. هذا الرمز لا ينشئ حسابًا ولا يحمي المحتوى.</p><label for="penCode">رمز التفعيل</label><input id="penCode" dir="ltr" autocomplete="off" inputmode="numeric" placeholder="1234"><p class="gate-error" id="gateError" role="alert"></p><div class="gate-actions"><button class="button primary" data-gate="verify">دخول</button><button class="button secondary" type="button" data-continue-demo hidden>Continue in local demo</button></div><p class="voice-note">التفعيل الحقيقي يحتاج إلى خدمة آمنة وحساب موثّق.</p>`;
+      content = `<p>Demo access only; this code does not protect the app or create an account.</p><form id="demoLoginForm"><label for="penCode">Demo code</label><input id="penCode" type="password" dir="ltr" autocomplete="current-password" placeholder="Enter demo code" required><div class="gate-actions"><button class="button primary" type="submit">دخول</button></div></form><p class="voice-note">Demo codes are visible in the frontend and are not real authentication.</p>`;
     } else if (step === 'age') {
       content = `<p>نضبط شكل القراءة والمكافآت على حسب العمر.</p><div class="gate-actions"><button class="button primary" data-age="u16">أقل من 16 سنة</button><button class="button secondary" data-age="o16">16 سنة أو أكثر</button></div>`;
     } else {
@@ -584,59 +558,22 @@
     syncResponsiveControls();
   }
 
-  gate.addEventListener('click', async event => {
-    const action = event.target.closest('[data-gate]');
-    const continueDemo = event.target.closest('[data-continue-demo]');
-    const qrAction = event.target.closest('[data-gate-qr]');
-    const ageChoice = event.target.closest('[data-age]');
-    const accessChoice = event.target.closest('[data-a11y]');
-    if (continueDemo) {
-      settings.activated = true;
-      settings.activationDemo = true;
-      settings.activationOffline = true;
-      save();
-      renderGate();
-    } else if (qrAction) {
-      if (!('BarcodeDetector' in window) || !navigator.mediaDevices?.getUserMedia) {
-        $('#gateError').textContent = 'مسح QR غير مدعوم في هذا المتصفح. أدخل كود التفعيل يدويًا.';
-        return;
-      }
-      let stream;
-      try {
-        const detector = new BarcodeDetector({formats: ['qr_code']});
-        stream = await navigator.mediaDevices.getUserMedia({video: {facingMode: 'environment'}});
-        const video = $('#activationCamera');
-        video.srcObject = stream;
-        video.hidden = false;
-        await video.play();
-        const scan = async () => {
-          const results = await detector.detect(video);
-          if (results.length) {
-            $('#penCode').value = results[0].rawValue.trim().toUpperCase();
-            video.pause();
-            video.srcObject = null;
-            video.hidden = true;
-            stream.getTracks().forEach(track => track.stop());
-            gate.querySelector('[data-gate="verify"]').click();
-            return;
-          }
-          if (!video.hidden) requestAnimationFrame(scan);
-        };
-        scan();
-      } catch {
-        stream?.getTracks().forEach(track => track.stop());
-        $('#gateError').textContent = 'تعذر فتح الكاميرا أو قراءة الرمز. أدخل كود التفعيل يدويًا.';
-      }
+  gate.addEventListener('submit', event => {
+    if (event.target.id !== 'demoLoginForm') return;
+    event.preventDefault();
+    const code = $('#penCode').value;
+    if (code !== '1234' && code !== 'admin') {
+      alert('Wrong Password');
       return;
     }
-    if (action) {
-      const code = $('#penCode').value.trim().toUpperCase();
-      if (!code) {
-        $('#gateError').textContent = 'اكتب رمز التفعيل أولًا. الرمز التجريبي الافتراضي هو 1234.';
-        return;
-      }
-      await activate(code);
-    } else if (ageChoice) {
+    Object.assign(settings, {activated: true, activationDemo: true, age: 'o16', a11y: false});
+    save();
+    window.location.href = '/index.html';
+  });
+  gate.addEventListener('click', event => {
+    const ageChoice = event.target.closest('[data-age]');
+    const accessChoice = event.target.closest('[data-a11y]');
+    if (ageChoice) {
       settings.age = ageChoice.dataset.age;
       save();
       renderGate();
@@ -646,9 +583,6 @@
       renderGate();
       if (settings.a11y) say('تم تفعيل وضع المساعدة.');
     }
-  });
-  gate.addEventListener('keydown', event => {
-    if (event.key === 'Enter' && event.target.id === 'penCode') gate.querySelector('[data-gate="verify"]').click();
   });
 
   document.querySelector('.mobile-nav').addEventListener('click', event => {
