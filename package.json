@@ -5,6 +5,7 @@
   "type": "module",
   "scripts": {
     "dev": "node test/server.js",
+    "dev:vercel": "APP_MODE=demo npx vercel dev --listen 3000",
     "test": "node --test test/api-client.test.js test/api-handlers.test.js test/database-security.test.js test/quota.test.js test/url-extractor.test.js test/quality-set.test.js test/settings.test.js test/static-assets.test.js",
     "lint": "node --check api-client.js && node --check i18n.js && node --check pdf-import.js && node --check settings.js && node --check public-data.js && node --check restored-features.js && node --check sw.js && node --check api/health.js && node --check api/activate.js && node --check api/diacritize.js && node --check api/translate.js && node --check api/speech.js && node --check api/_lib/response.js && node --check api/_lib/supabase-auth.js && node --check api/_lib/quota.js && node --check api/_lib/audio-cache.js && node --check api/_lib/url-extractor.js && node --check api/_lib/speech-provider.js && node --check api/auth/anonymous.js && node --check api/auth/refresh.js && node --check api/auth/upgrade.js && node --check \"api/import/url.js\" && node --check \"api/jobs/[id].js\" && node --check playwright.config.js && node --check test/server.js && node --check test/api-client.test.js && node --check test/api-handlers.test.js && node --check test/database-security.test.js && node --check test/quota.test.js && node --check test/url-extractor.test.js && node --check test/responsive.e2e.spec.js",
     "audit": "npm audit --audit-level=moderate",

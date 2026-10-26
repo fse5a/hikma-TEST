@@ -7,7 +7,7 @@ Hikma is a static Vercel app with Vercel Functions under `/api`. The interface s
 - The library, reader, manual translation editor, settings, progress, and backups use browser storage.
 - Reading aloud uses the browser's Web Speech API. Recording/uploading a human voice uses browser media APIs and IndexedDB.
 - The frontend calls `/api/health`, `/api/activate`, `/api/translate`, `/api/diacritize`, and `/api/speech` through [api-client.js](api-client.js). Demo fallback is allowed only when health explicitly reports demo mode.
-- Demo activation uses `DEMO-1234` by default. It does not create an account or protect content.
+- Local demo activation uses `1234` by default when `APP_MODE=demo` and Supabase is not configured. It does not create an account or protect content.
 
 ## API status
 
@@ -19,7 +19,7 @@ Deploy the repository to Vercel to run its `/api` functions and apply [vercel.js
 npm run dev
 ```
 
-Then open `http://localhost:4173`. Static preview does not make the API routes available; API errors are announced in Arabic and local reading/speech remain available. To run both static files and Vercel Functions locally in Codespaces, run `APP_MODE=demo npx vercel dev --listen 3000` from the repository root and forward port `3000`.
+Then open `http://localhost:4173`. Static preview does not make the API routes available; API errors are announced in Arabic and local reading/speech remain available. To run both static files and Vercel Functions locally in Codespaces, run `npm run dev:vercel` from the repository root and forward port `3000`. Enter `1234` at the demo activation screen.
 
 ## Installable app
 

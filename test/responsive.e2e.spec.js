@@ -196,10 +196,10 @@ test('activation posts to the backend and unlocks onboarding', async ({page}) =>
   const calls = [];
   await mockApi(page, calls);
   await page.goto('/');
-  await page.locator('#penCode').fill('DEMO-1234');
-  await page.getByRole('button', {name: 'التحقق من الرمز'}).click();
+  await page.locator('#penCode').fill('1234');
+  await page.getByRole('button', {name: 'دخول'}).click();
   await expect(page.getByRole('heading', {name: 'هل عمرك 16 سنة أو أكثر؟'})).toBeVisible();
-  expect(calls.some(call => call.path === '/api/activate' && call.body.code === 'DEMO-1234')).toBe(true);
+  expect(calls.some(call => call.path === '/api/activate' && call.body.code === '1234')).toBe(true);
 });
 
 test('reader calls translation, diacritization, and speech APIs with honest demo status', async ({page}) => {

@@ -28,7 +28,7 @@
     }
     const gateError = document.querySelector('#gateError');
     if (gateError && window.hikmaBackendHealth?.mode === 'demo') {
-      gateError.textContent = 'الوضع التجريبي متاح الآن. رمز التفعيل الافتراضي: DEMO-1234.';
+      gateError.textContent = 'الوضع التجريبي متاح الآن. رمز التفعيل الافتراضي: 1234.';
     }
   }
 
@@ -574,7 +574,7 @@
     const heading = step === 'activate' ? 'أهلاً بيك في حكمة' : step === 'age' ? 'هل عمرك 16 سنة أو أكثر؟' : 'تحب نفعّل وضع المساعدة؟';
     let content;
     if (step === 'activate') {
-      content = `<p>أدخل الرمز التجريبي DEMO-1234. هذا الرمز لا ينشئ حسابًا ولا يحمي المحتوى.</p><label for="penCode">رمز التفعيل</label><input id="penCode" dir="ltr" autocomplete="off" autocapitalize="characters" placeholder="DEMO-1234"><p class="gate-error" id="gateError" role="alert"></p><div class="gate-actions"><button class="button primary" data-gate="verify">التحقق من الرمز</button><button class="button secondary" type="button" data-continue-demo hidden>Continue in local demo</button></div><p class="voice-note">التفعيل الحقيقي يحتاج إلى خدمة آمنة وحساب موثّق.</p>`;
+      content = `<p>أدخل الرمز التجريبي 1234. هذا الرمز لا ينشئ حسابًا ولا يحمي المحتوى.</p><label for="penCode">رمز التفعيل</label><input id="penCode" dir="ltr" autocomplete="off" inputmode="numeric" placeholder="1234"><p class="gate-error" id="gateError" role="alert"></p><div class="gate-actions"><button class="button primary" data-gate="verify">دخول</button><button class="button secondary" type="button" data-continue-demo hidden>Continue in local demo</button></div><p class="voice-note">التفعيل الحقيقي يحتاج إلى خدمة آمنة وحساب موثّق.</p>`;
     } else if (step === 'age') {
       content = `<p>نضبط شكل القراءة والمكافآت على حسب العمر.</p><div class="gate-actions"><button class="button primary" data-age="u16">أقل من 16 سنة</button><button class="button secondary" data-age="o16">16 سنة أو أكثر</button></div>`;
     } else {
@@ -632,7 +632,7 @@
     if (action) {
       const code = $('#penCode').value.trim().toUpperCase();
       if (!code) {
-        $('#gateError').textContent = 'اكتب رمز التفعيل أولًا. الرمز التجريبي الافتراضي هو DEMO-1234.';
+        $('#gateError').textContent = 'اكتب رمز التفعيل أولًا. الرمز التجريبي الافتراضي هو 1234.';
         return;
       }
       await activate(code);

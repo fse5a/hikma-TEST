@@ -25,21 +25,25 @@ function responseRecorder() {
   };
 }
 
-test('demo activation accepts the configured demo code only', async () => {
+test('demo activation accepts the default demo code and rejects other codes', async () => {
   const previousAppMode = process.env.APP_MODE;
   const previousDemoMode = process.env.DEMO_MODE;
   const previousDemoCode = process.env.DEMO_ACTIVATION_CODE;
   const previousSupabaseUrl = process.env.SUPABASE_URL;
   process.env.APP_MODE = 'demo';
   process.env.DEMO_MODE = 'true';
-  process.env.DEMO_ACTIVATION_CODE = 'DEMO-1234';
+  delete process.env.DEMO_ACTIVATION_CODE;
   delete process.env.SUPABASE_URL;
   try {
     const response = responseRecorder();
-    await activate({method: 'POST', headers: {}, body: {code: 'DEMO-1234'}}, response);
+    await activate({method: 'POST', headers: {}, body: {code: '1234'}}, response);
     assert.equal(response.statusCode, 200);
     assert.equal(response.payload.mode, 'demo');
     assert.equal(response.payload.activation.status, 'demo');
+
+    const invalidResponse = responseRecorder();
+    await activate({method: 'POST', headers: {}, body: {code: 'wrong'}}, invalidResponse);
+    assert.equal(invalidResponse.statusCode, 401);
   } finally {
     if (previousAppMode === undefined) delete process.env.APP_MODE;
     else process.env.APP_MODE = previousAppMode;
@@ -232,7 +236,7 @@ test('production activation fails closed when Supabase is not configured', async
   delete process.env.SUPABASE_URL;
   try {
     const response = responseRecorder();
-    await activate({method: 'POST', headers: {}, body: {code: 'DEMO-1234'}}, response);
+    await activate({method: 'POST', headers: {}, body: {code: '1234'}}, response);
     assert.equal(response.statusCode, 503);
     assert.equal(response.payload.error.code, 'not_configured');
   } finally {
@@ -294,7 +298,7 @@ test('production activation does not accept the demo code when Supabase is prese
   process.env.SUPABASE_URL = 'https://project.example';
   try {
     const response = responseRecorder();
-    await activate({method: 'POST', headers: {}, body: {code: 'DEMO-1234'}}, response);
+    await activate({method: 'POST', headers: {}, body: {code: '1234'}}, response);
     assert.equal(response.statusCode, 503);
     assert.equal(response.payload.error.code, 'activation_unavailable');
   } finally {

@@ -35,7 +35,7 @@ test('503 is not demo success unless health explicitly reports demo mode', async
   };
 
   try {
-    await assert.rejects(api.activate('DEMO-1234'), error => {
+    await assert.rejects(api.activate('1234'), error => {
       assert.equal(error.code, 'not_configured');
       assert.match(error.message, /لم يتم التفعيل/);
       return true;
@@ -52,7 +52,7 @@ test('200 demo activation response is rejected when health reports production', 
     ? {ok: true, status: 200, async json() { return {ok: true, mode: 'production'}; }}
     : {ok: true, status: 200, async json() { return {ok: true, mode: 'demo'}; }};
   try {
-    await assert.rejects(api.activate('DEMO-1234'), error => {
+    await assert.rejects(api.activate('1234'), error => {
       assert.equal(error.code, 'not_configured');
       assert.match(error.message, /لم يتم التفعيل/);
       return true;

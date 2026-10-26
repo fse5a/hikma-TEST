@@ -13,7 +13,7 @@ export default async function handler(request, response) {
   }
 
   const provided = String(body.code).trim();
-  const demoCode = String(process.env.DEMO_ACTIVATION_CODE || 'DEMO-1234').trim();
+  const demoCode = String(process.env.DEMO_ACTIVATION_CODE || '1234').trim();
   const demoMode = process.env.APP_MODE === 'demo' || process.env.DEMO_MODE === 'true';
 
   if (demoMode && !process.env.SUPABASE_URL && provided === demoCode) {

@@ -39,7 +39,7 @@ export function validateRequired(body, requiredKeys) {
 export function getDemoStatus() {
   return {
     mode: process.env.APP_MODE === 'demo' || process.env.DEMO_MODE === 'true' ? 'demo' : 'production',
-    demoActivationCode: process.env.DEMO_ACTIVATION_CODE || 'DEMO-1234'
+    demoActivationCode: process.env.DEMO_ACTIVATION_CODE || '1234'
   };
 }
 

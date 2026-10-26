@@ -18,9 +18,9 @@ Required for a local demo:
 
 - `APP_MODE=demo`
 
-Optional for a local demo (defaults to `DEMO-1234`):
+Optional for a local demo (defaults to `1234`):
 
-- `DEMO_ACTIVATION_CODE=DEMO-1234`
+- `DEMO_ACTIVATION_CODE=1234`
 
 Vercel CLI sets `VERCEL_ENV=development` during local development; it does not need to be added to `.env.local`.
 
@@ -88,10 +88,10 @@ npm run dev
 Open http://localhost:4173. The preview serves the app and vendored PDF.js assets but does not execute `/api` routes. For both the static files and API functions, run this from the repository root in Codespaces:
 
 ```bash
-APP_MODE=demo npx vercel dev --listen 3000
+npm run dev:vercel
 ```
 
-Open or forward port `3000` in Codespaces. `npm run dev` is only a static preview on port `4173`; it does not run the `/api` functions. Vercel supplies `VERCEL_ENV` during local development, and no provider or Supabase keys are required for the demo.
+Open or forward port `3000` in Codespaces. Enter `1234` at the demo activation screen. `npm run dev` is only a static preview on port `4173`; it does not run the `/api` functions. `dev:vercel` sets `APP_MODE=demo` for this local command only; the deployed app remains fail-closed unless explicitly configured. Vercel supplies `VERCEL_ENV` during local development, and no provider or Supabase keys are required for the demo.
 
 For optional workers, add worker URLs and keys in Vercel Project Settings > Environment Variables, then redeploy. Use only free/self-hosted services. `/api/health` reports configuration without returning URLs or keys. Speech chunks are cached in browser IndexedDB (50 MB cap) and private Storage, keyed by user/provider/voice/text/language/rate/pitch when storage is configured.
 
