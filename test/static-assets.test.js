@@ -35,3 +35,11 @@ test('homepage loads the responsive redesign stylesheet from the project root', 
   assert.match(stylesheet, /\.story-card:hover/);
   assert.match(stylesheet, /#audioPreview/);
 });
+
+test('Vercel uses root static files and has no catch-all rewrite overriding them', async () => {
+  const config = JSON.parse(await readFile(new URL('../vercel.json', import.meta.url), 'utf8'));
+  await readFile(new URL('../index.html', import.meta.url), 'utf8');
+  assert.equal(config.framework, null);
+  assert.equal(config.outputDirectory, undefined);
+  assert.equal(config.rewrites, undefined);
+});
