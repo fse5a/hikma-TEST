@@ -19,7 +19,7 @@ Deploy the repository to Vercel to run its `/api` functions and apply [vercel.js
 npm run dev
 ```
 
-Then open `http://localhost:4173`. Static preview does not make the API routes available; API errors are announced in Arabic and local reading/speech remain available. To run the Vercel Functions locally as well, use `npx vercel dev` with `APP_MODE=demo` in `.env.local` for a no-credentials demo.
+Then open `http://localhost:4173`. Static preview does not make the API routes available; API errors are announced in Arabic and local reading/speech remain available. To run both static files and Vercel Functions locally in Codespaces, run `APP_MODE=demo npx vercel dev --listen 3000` from the repository root and forward port `3000`.
 
 ## Installable app
 

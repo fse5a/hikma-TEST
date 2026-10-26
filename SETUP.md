@@ -7,8 +7,8 @@ Hikma is deployed on Vercel as a static frontend with Vercel Functions in `/api`
 1. Push this repo to GitHub.
 2. Open Vercel and import the repository as a new project.
 3. Use the same project and same domain for every environment.
-4. Keep the app as a static build with the repository root as the output directory and no custom build step if you only use the frontend shell.
-5. Ensure `/api` is included in the deployment so Vercel functions are active.
+4. Set the Root Directory to the repository root, use the **Other** framework preset, and leave the Build Command and Output Directory unset. The root `index.html` is served as the static home page, and Vercel automatically discovers functions in the root `api/` directory.
+5. Do not set a custom Development Command for this project; `vercel.json` disables one so `vercel dev` can serve static files and API functions itself.
 
 ## 2. Add the environment variables
 
@@ -85,7 +85,13 @@ Install dependencies with `npm install`, then start a local static preview:
 npm run dev
 ```
 
-Open http://localhost:4173. The preview serves the app and vendored PDF.js assets but does not execute `/api` routes. For the API functions too, run `npx vercel dev`; set `APP_MODE=demo` in `.env.local` for demo behavior. Vercel supplies `VERCEL_ENV` during local development, and no provider or Supabase keys are required for the demo.
+Open http://localhost:4173. The preview serves the app and vendored PDF.js assets but does not execute `/api` routes. For both the static files and API functions, run this from the repository root in Codespaces:
+
+```bash
+APP_MODE=demo npx vercel dev --listen 3000
+```
+
+Open or forward port `3000` in Codespaces. `npm run dev` is only a static preview on port `4173`; it does not run the `/api` functions. Vercel supplies `VERCEL_ENV` during local development, and no provider or Supabase keys are required for the demo.
 
 For optional workers, add worker URLs and keys in Vercel Project Settings > Environment Variables, then redeploy. Use only free/self-hosted services. `/api/health` reports configuration without returning URLs or keys. Speech chunks are cached in browser IndexedDB (50 MB cap) and private Storage, keyed by user/provider/voice/text/language/rate/pitch when storage is configured.
 
