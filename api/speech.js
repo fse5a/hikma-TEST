@@ -1,5 +1,5 @@
 import {sendError, parseJsonBody, validateRequired, getRequestId, sendJson} from '../server/lib/response.js';
-import {createSpeechProvider} from '../server/lib/speech-provider.js';
+import {createSpeechProvider, createGoogleSpeechProvider} from '../server/lib/speech-provider.js';
 import {resolveSupabaseUser} from '../server/lib/supabase-auth.js';
 import {enforceApiQuota} from '../server/lib/quota.js';
 import {loadPrivateAudio, storePrivateAudio} from '../server/lib/audio-cache.js';
@@ -28,11 +28,11 @@ export default async function handler(request, response) {
     return sendError(response, 'invalid_voice_settings', 'Rate must be 0.5-2 and pitch must be -6 to 6 semitones.', requestId, 400);
   }
 
-  const user = await resolveSupabaseUser(request, response, requestId, {providerConfigured: Boolean(process.env.SPEECH_WORKER_URL)});
+  const provider = createSpeechProvider() || createGoogleSpeechProvider();
+  const user = await resolveSupabaseUser(request, response, requestId, {providerConfigured: Boolean(provider)});
   if (!user) return;
-  if (process.env.SPEECH_WORKER_URL && !await enforceApiQuota(request, response, requestId, user.userId, 'speech')) return;
+  if (provider && !await enforceApiQuota(request, response, requestId, user.userId, 'speech')) return;
 
-  const provider = createSpeechProvider();
   if (provider) {
     const identity = {userId: user.userId, provider: provider.name, voice, language, text, rate, pitch};
     try {

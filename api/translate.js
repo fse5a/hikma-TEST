@@ -1,6 +1,7 @@
 import {sendError, parseJsonBody, validateRequired, getRequestId, sendJson} from '../server/lib/response.js';
 import {resolveSupabaseUser} from '../server/lib/supabase-auth.js';
 import {enforceApiQuota} from '../server/lib/quota.js';
+import {createTranslationProvider} from '../server/lib/translation-provider.js';
 
 export default async function handler(request, response) {
   const requestId = getRequestId(request);
@@ -18,9 +19,11 @@ export default async function handler(request, response) {
   const text = String(body.text || '');
   if (!text.trim() || text.length > 20000) return sendError(response, 'invalid_text', 'Text must be between 1 and 20000 characters.', requestId, 400);
   if (!['ar', 'en', 'fr', 'de', 'es', 'zh'].includes(targetLanguage)) return sendError(response, 'invalid_language', 'Target language is not supported.', requestId, 400);
-  const user = await resolveSupabaseUser(request, response, requestId, {providerConfigured: Boolean(process.env.TRANSLATION_WORKER_URL)});
+  const provider = process.env.TRANSLATION_WORKER_URL ? null : createTranslationProvider();
+  const translationConfigured = Boolean(process.env.TRANSLATION_WORKER_URL || provider);
+  const user = await resolveSupabaseUser(request, response, requestId, {providerConfigured: translationConfigured});
   if (!user) return;
-  if (process.env.TRANSLATION_WORKER_URL && !await enforceApiQuota(request, response, requestId, user.userId, 'translation')) return;
+  if (translationConfigured && !await enforceApiQuota(request, response, requestId, user.userId, 'translation')) return;
 
   if (process.env.TRANSLATION_WORKER_URL) {
     try {
@@ -46,6 +49,15 @@ export default async function handler(request, response) {
       } finally {
         clearTimeout(timeoutId);
       }
+    } catch {
+      return sendError(response, 'translation_provider_failed', 'Translation service is temporarily unavailable.', requestId, 502);
+    }
+  }
+
+  if (provider) {
+    try {
+      const result = await provider.translate({text, targetLanguage});
+      return sendJson(response, 200, {ok: true, requestId, mode: 'configured', targetLanguage, provider: result.provider, translatedText: result.translatedText});
     } catch {
       return sendError(response, 'translation_provider_failed', 'Translation service is temporarily unavailable.', requestId, 502);
     }
