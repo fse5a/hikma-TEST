@@ -148,6 +148,41 @@
     }
   }
 
+  Object.assign(dictionaries.en, {
+    'مسح': 'Scan', 'مسح كتاب أو رمز QR': 'Scan a book or QR code', 'تشغيل الكاميرا': 'Start camera',
+    'الكاميرا تعمل': 'Camera on', 'التقاط صفحة وقراءتها': 'Capture and read a page',
+    'وجّه الكاميرا نحو رمز QR لفتح قصته، أو التقط صفحة كتاب لتحويلها إلى نص يُقرأ ويُترجم ويُحفظ في مكتبتك. الصور لا تغادر جهازك.': 'Point the camera at a QR code to open its story, or capture a book page to turn it into text you can read, translate and save. Photos never leave your device.',
+    'راجع النص الممسوح، ثم احفظه ليصبح في مكتبتك وتقرأه أو تترجمه.': 'Review the scanned text, then save it to your library to read or translate.',
+    'اضغط تشغيل الكاميرا للبدء.': 'Tap Start camera to begin.',
+    'وجّه الكاميرا نحو رمز QR أو صفحة كتاب.': 'Point the camera at a QR code or a book page.',
+    'جارٍ قراءة النص من الصفحة (قد يستغرق ثوانٍ)...': 'Reading text from the page (may take a few seconds)...',
+    'تم قراءة الرمز؛ جارٍ جلب الصفحة...': 'Code read; fetching the page...'
+  });
+  Object.assign(dictionaries.fr, {
+    'مسح': 'Scanner', 'مسح كتاب أو رمز QR': 'Scanner un livre ou un QR', 'تشغيل الكاميرا': 'Activer la caméra',
+    'الكاميرا تعمل': 'Caméra active', 'التقاط صفحة وقراءتها': 'Capturer et lire une page',
+    'اضغط تشغيل الكاميرا للبدء.': 'Appuyez sur Activer la caméra.',
+    'جارٍ قراءة النص من الصفحة (قد يستغرق ثوانٍ)...': 'Lecture du texte (quelques secondes)...'
+  });
+  Object.assign(dictionaries.de, {
+    'مسح': 'Scannen', 'مسح كتاب أو رمز QR': 'Buch oder QR-Code scannen', 'تشغيل الكاميرا': 'Kamera starten',
+    'الكاميرا تعمل': 'Kamera läuft', 'التقاط صفحة وقراءتها': 'Seite aufnehmen und lesen',
+    'اضغط تشغيل الكاميرا للبدء.': 'Tippe auf Kamera starten.',
+    'جارٍ قراءة النص من الصفحة (قد يستغرق ثوانٍ)...': 'Text wird gelesen (dauert einige Sekunden)...'
+  });
+  Object.assign(dictionaries.es, {
+    'مسح': 'Escanear', 'مسح كتاب أو رمز QR': 'Escanear libro o QR', 'تشغيل الكاميرا': 'Activar cámara',
+    'الكاميرا تعمل': 'Cámara activa', 'التقاط صفحة وقراءتها': 'Capturar y leer página',
+    'اضغط تشغيل الكاميرا للبدء.': 'Pulsa Activar cámara.',
+    'جارٍ قراءة النص من الصفحة (قد يستغرق ثوانٍ)...': 'Leyendo el texto (puede tardar unos segundos)...'
+  });
+  Object.assign(dictionaries.zh, {
+    'مسح': '扫描', 'مسح كتاب أو رمز QR': '扫描书籍或二维码', 'تشغيل الكاميرا': '开启摄像头',
+    'الكاميرا تعمل': '摄像头已开启', 'التقاط صفحة وقراءتها': '拍摄并朗读页面',
+    'اضغط تشغيل الكاميرا للبدء.': '点击开启摄像头开始。',
+    'جارٍ قراءة النص من الصفحة (قد يستغرق ثوانٍ)...': '正在识别页面文字（可能需要几秒钟）...'
+  });
+
   function translateTree(root = document.body) {
     if (!root) return;
     const dictionary = mapFor(activeLanguage);

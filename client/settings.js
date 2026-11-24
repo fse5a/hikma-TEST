@@ -10,7 +10,7 @@
     highContrast: false,
     dyslexiaFont: false,
     reducedMotion: false,
-    voiceGuidance: true,
+    voiceGuidance: false,
     simpleMode: false,
     haptics: false,
     highlightStyle: 'yellow',

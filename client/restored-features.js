@@ -35,7 +35,6 @@
     theme: settings.theme === 'dark' || (!Object.prototype.hasOwnProperty.call(settings, 'theme') && (settings.skin === 'cat' || window.matchMedia?.('(prefers-color-scheme: dark)').matches)) ? 'dark' : 'light'
   });
   window.HikmaI18n.setLanguage(settings.uiLanguage);
-  settings.voiceSource = 'device';
   state.activity = {...{completed: 0, opened: 0, recent: [], days: []}, ...(state.activity || {})};
   state.stories = state.stories.map(item => {
     const translationLang = item.translationLang || (item.lang === 'ar' ? 'en' : 'ar');
@@ -168,7 +167,7 @@
   settingsOverlay.querySelector('#resetApp').closest('.feature-setting-block').before(backupBlock);
   const voiceSourceField = document.createElement('div');
   voiceSourceField.className = 'field';
-  voiceSourceField.innerHTML = '<label for="voiceSource">مصدر الصوت</label><select id="voiceSource"><option value="device">صوت الجهاز (جودة أقل)</option></select><p class="voice-note">هذه نسخة ثابتة؛ لا ترسل النصوص إلى خدمة صوت سحابية.</p>';
+  voiceSourceField.innerHTML = '<label for="voiceSource">مصدر الصوت</label><select id="voiceSource"><option value="device">صوت الجهاز (جودة أقل)</option></select><p class="voice-note">الصوت السحابي الطبيعي يتاح تلقائيًا عند تهيئة الخدمة الخلفية.</p>';
   document.querySelector('#settingsOverlay .dialog-body').prepend(voiceSourceField);
   const clearSpeechCacheButton = document.createElement('button');
   clearSpeechCacheButton.className = 'button secondary';
@@ -859,7 +858,7 @@
   document.addEventListener('pointerdown', announceFirstTouch, {once: true});
   document.addEventListener('keydown', announceFirstTouch, {once: true});
   function announceFirstTouch() {
-    if (settings.firstHint || !('speechSynthesis' in window)) return;
+    if (!settings.a11y || settings.firstHint || !('speechSynthesis' in window)) return;
     settings.firstHint = true;
     save();
     say('مرحبًا، زر إمكانية الوصول في أسفل الشاشة. اضغطه لتكبير النص وتشغيل المساعدة الصوتية.');
@@ -993,9 +992,14 @@
     } catch (error) {
       voiceSourceField.querySelector('.voice-note').textContent = `تعذر تحميل voices.json أو test-sentences.json: ${error.message}`;
     }
-    settings.voiceSource = 'device';
-    select.value = 'device';
+    const speechConfigured = window.hikmaBackendHealth?.integrations?.speech === 'configured';
+    if (speechConfigured && !select.querySelector('option[value="cloud"]')) {
+      select.add(new Option('صوت طبيعي عصبي (سحابي)', 'cloud'));
+    }
+    if (!select.querySelector(`option[value="${settings.voiceSource}"]`)) settings.voiceSource = 'device';
+    select.value = settings.voiceSource;
     save();
+    updateCloudControls();
   }
 
   function addStaticQualityPreview(cases) {
@@ -1048,7 +1052,7 @@
         ? 'قراءة بصوت الجهاز (جودة أقل)'
         : settings.voiceSource.startsWith('friend:')
           ? 'قراءة بصوت الصديق المصرّح به'
-          : 'قراءة بصوت Azure الطبيعي';
+          : 'قراءة بالصوت الطبيعي (جودة أعلى)';
     }
     if (!cloudStatusState.message) cloudStatusState.message = 'جارٍ التحقق من الخدمات الخلفية. الترجمة اليدوية وصوت الجهاز متاحان دائمًا.';
     cloudStatus(cloudStatusState.message, cloudStatusState.isError);

@@ -1,0 +1,184 @@
+// Hikma scanner: QR codes (open a story/link) and book pages (photo -> text).
+// Everything starts only from an explicit button tap; the camera stops on close.
+(() => {
+  const TESSERACT_URL = 'https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js';
+  let stream = null;
+  let scanTimer = null;
+  let tesseractLoading = null;
+
+  const $ = selector => document.querySelector(selector);
+
+  function buildOverlay() {
+    if ($('#scanOverlay')) return;
+    const overlay = document.createElement('div');
+    overlay.className = 'overlay';
+    overlay.id = 'scanOverlay';
+    overlay.innerHTML = `<section class="dialog narrow" role="dialog" aria-modal="true" aria-labelledby="scanTitle">
+      <header class="dialog-head"><h2 id="scanTitle">مسح كتاب أو رمز QR</h2><button class="icon-button close" data-close="scanOverlay" aria-label="إغلاق">×</button></header>
+      <div class="dialog-body">
+        <video id="scanVideo" playsinline muted style="width:100%;border-radius:12px;background:#000;max-height:300px"></video>
+        <p class="status" id="scanStatus" role="status"></p>
+        <div class="modal-actions" style="flex-wrap:wrap">
+          <button class="button primary" id="scanStart" type="button">تشغيل الكاميرا</button>
+          <button class="button secondary" id="scanCapture" type="button" disabled>التقاط صفحة وقراءتها</button>
+          <button class="button secondary" type="button" data-close="scanOverlay">إلغاء</button>
+        </div>
+        <p class="voice-note">وجّه الكاميرا نحو رمز QR لفتح قصته، أو التقط صفحة كتاب لتحويلها إلى نص يُقرأ ويُترجم ويُحفظ في مكتبتك. الصور لا تغادر جهازك.</p>
+      </div>
+    </section>`;
+    document.body.appendChild(overlay);
+    $('#scanStart').addEventListener('click', startCamera);
+    $('#scanCapture').addEventListener('click', capturePage);
+    overlay.addEventListener('click', event => {
+      if (event.target === overlay || event.target.closest('[data-close]')) stopCamera();
+    });
+  }
+
+  function buildButton() {
+    const actions = document.querySelector('.top-actions');
+    if (!actions || $('#scanOpen')) return;
+    const button = document.createElement('button');
+    button.className = 'button secondary';
+    button.id = 'scanOpen';
+    button.type = 'button';
+    button.innerHTML = '<span aria-hidden="true">📷</span> مسح';
+    button.setAttribute('aria-label', 'مسح كتاب أو رمز QR');
+    button.addEventListener('click', () => { buildOverlay(); openModal('scanOverlay'); scanStatus('اضغط تشغيل الكاميرا للبدء.'); });
+    actions.insertBefore(button, actions.firstChild);
+  }
+
+  function scanStatus(message, isError = false) {
+    const status = $('#scanStatus');
+    if (!status) return;
+    status.textContent = message;
+    status.classList.toggle('error', isError);
+  }
+
+  async function startCamera() {
+    if (!navigator.mediaDevices?.getUserMedia) {
+      scanStatus('المتصفح لا يدعم الكاميرا هنا. أضف النص يدويًا من زر قصة جديدة.', true);
+      return;
+    }
+    try {
+      stream = await navigator.mediaDevices.getUserMedia({video: {facingMode: 'environment'}, audio: false});
+    } catch {
+      scanStatus('تعذر فتح الكاميرا. اسمح للمتصفح باستخدامها ثم حاول مجددًا.', true);
+      return;
+    }
+    const video = $('#scanVideo');
+    video.srcObject = stream;
+    await video.play().catch(() => {});
+    $('#scanCapture').disabled = false;
+    $('#scanStart').textContent = 'الكاميرا تعمل';
+    scanStatus('وجّه الكاميرا نحو رمز QR أو صفحة كتاب.');
+    startQrLoop();
+  }
+
+  function stopCamera() {
+    if (scanTimer) { clearInterval(scanTimer); scanTimer = null; }
+    if (stream) { stream.getTracks().forEach(track => track.stop()); stream = null; }
+    const video = $('#scanVideo');
+    if (video) video.srcObject = null;
+    const start = $('#scanStart');
+    if (start) start.textContent = 'تشغيل الكاميرا';
+    const capture = $('#scanCapture');
+    if (capture) capture.disabled = true;
+  }
+
+  function startQrLoop() {
+    if (!('BarcodeDetector' in window)) {
+      scanStatus('مسح QR غير مدعوم في هذا المتصفح؛ يمكنك التقاط صفحة كتاب فقط.');
+      return;
+    }
+    const detector = new BarcodeDetector({formats: ['qr_code']});
+    const video = $('#scanVideo');
+    scanTimer = setInterval(async () => {
+      if (!stream || video.readyState < 2) return;
+      try {
+        const codes = await detector.detect(video);
+        if (codes.length) handleQr(codes[0].rawValue || '');
+      } catch {}
+    }, 700);
+  }
+
+  async function handleQr(value) {
+    const text = String(value).trim();
+    if (!text) return;
+    clearInterval(scanTimer); scanTimer = null;
+    const story = (state.stories || []).find(item => item.id === text);
+    closeModal('scanOverlay');
+    stopCamera();
+    if (story) {
+      document.querySelector(`[data-open="${story.id}"]`)?.click();
+      return;
+    }
+    if (/^https?:\/\//i.test(text)) {
+      scanStatus('');
+      toast('تم قراءة الرمز؛ جارٍ جلب الصفحة...');
+      try {
+        const result = await HikmaApi.importUrl(text);
+        const preview = result.preview || {};
+        if (preview.text && preview.text.trim()) {
+          openAddForm(preview.title || 'صفحة ممسوحة', preview.text.trim());
+        } else {
+          toast('لم يتمكن الخادم من استخراج النص؛ انسخه يدويًا من الصفحة.');
+        }
+      } catch (error) {
+        toast(HikmaApi.toFriendlyMessage(error));
+      }
+      return;
+    }
+    toast('الرمز لا يشير إلى قصة أو رابط.');
+  }
+
+  function loadTesseract() {
+    if (window.Tesseract) return Promise.resolve(window.Tesseract);
+    tesseractLoading ||= new Promise((resolve, reject) => {
+      const script = document.createElement('script');
+      script.src = TESSERACT_URL;
+      script.onload = () => resolve(window.Tesseract);
+      script.onerror = () => reject(new Error('تعذر تحميل قارئ النص من الإنترنت.'));
+      document.head.appendChild(script);
+    });
+    return tesseractLoading;
+  }
+
+  async function capturePage() {
+    const video = $('#scanVideo');
+    if (!stream || !video || video.readyState < 2) return;
+    const canvas = document.createElement('canvas');
+    canvas.width = video.videoWidth;
+    canvas.height = video.videoHeight;
+    canvas.getContext('2d').drawImage(video, 0, 0);
+    scanStatus('جارٍ قراءة النص من الصفحة (قد يستغرق ثوانٍ)...');
+    try {
+      const Tesseract = await loadTesseract();
+      const result = await Tesseract.recognize(canvas.toDataURL('image/png'), 'ara+eng');
+      const text = String(result?.data?.text || '').replace(/\s+\n/g, '\n').trim();
+      if (text.length < 10) {
+        scanStatus('لم يُقرأ نص واضح. قرّب الكاميرا وحسّن الإضاءة ثم أعد الالتقاط.', true);
+        return;
+      }
+      closeModal('scanOverlay');
+      stopCamera();
+      openAddForm('', text);
+    } catch (error) {
+      scanStatus(error.message || 'تعذرت قراءة الصفحة.', true);
+    }
+  }
+
+  function openAddForm(title, text) {
+    buildOverlay();
+    $('#storyTitle').value = title || '';
+    $('#storyText').value = text || '';
+    $('#storyTranslation').value = '';
+    openModal('addOverlay');
+    $('#formStatus').textContent = 'راجع النص الممسوح، ثم احفظه ليصبح في مكتبتك وتقرأه أو تترجمه.';
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', buildButton);
+  } else {
+    buildButton();
+  }
+})();

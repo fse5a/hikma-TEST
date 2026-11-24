@@ -109,5 +109,6 @@ document.addEventListener('click',e=>{const open=e.target.closest('[data-open]')
 document.addEventListener('keydown',e=>{if(e.key==='Escape')document.querySelectorAll('.overlay.open').forEach(el=>closeModal(el.id))});if(window.speechSynthesis)speechSynthesis.addEventListener('voiceschanged',populateVoices);renderLibrary();save();
 </script>
 <script src="restored-features.js"></script>
+<script src="scanner.js"></script>
 </body>
 </html>
