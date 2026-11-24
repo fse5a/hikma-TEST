@@ -561,8 +561,8 @@
   gate.addEventListener('submit', event => {
     if (event.target.id !== 'demoLoginForm') return;
     event.preventDefault();
-    const code = $('#penCode').value;
-    if (code !== '1234' && code !== 'admin') {
+    const code = $('#penCode').value.trim().toLowerCase();
+    if (code !== '1234' && code !== 'admin' && code !== 'demo-1234') {
       alert('Wrong Password');
       return;
     }
