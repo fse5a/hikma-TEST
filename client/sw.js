@@ -1,4 +1,4 @@
-const CACHE_NAME = 'hikma-shell-v7';
+const CACHE_NAME = 'hikma-shell-v8';
 const APP_SHELL = ['./index.html', './style.css', './settings.js', './public-data.js', './api-client.js', './i18n.js', './pdf-import.js', './vendor/pdf.min.mjs', './vendor/pdf.worker.min.mjs', './restored-features.js', './scanner.js', './manifest.webmanifest', './icon.svg', './voices.json', './test-sentences.json'];
 
 self.addEventListener('install', (event) => {
