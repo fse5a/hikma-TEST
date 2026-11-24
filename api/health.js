@@ -1,4 +1,5 @@
 import {sendJson, getRequestId, makeRequestId} from '../server/lib/response.js';
+import {createEdgeSpeechProvider} from '../server/lib/edge-provider.js';
 
 function integrationStatus(name, value) {
   if (!value) return 'missing';
@@ -26,7 +27,7 @@ export default async function handler(request, response) {
     auth: integrationStatus('auth', process.env.SUPABASE_URL && process.env.SUPABASE_ANON_KEY),
     ai: integrationStatus('ai', process.env.AI_API_KEY || process.env.AI_PROVIDER),
     translation: integrationStatus('translation', process.env.TRANSLATION_WORKER_URL || process.env.OPENAI_API_KEY || process.env.GEMINI_API_KEY),
-    speech: integrationStatus('speech', process.env.SPEECH_WORKER_URL || (process.env.SPEECH_PROVIDER === 'google' && process.env.GOOGLE_TTS_API_KEY) || (process.env.SPEECH_PROVIDER === 'gemini' && process.env.GEMINI_API_KEY)),
+    speech: integrationStatus('speech', process.env.SPEECH_WORKER_URL || (process.env.SPEECH_PROVIDER === 'google' && process.env.GOOGLE_TTS_API_KEY) || (process.env.SPEECH_PROVIDER === 'gemini' && process.env.GEMINI_API_KEY) || (createEdgeSpeechProvider() ? 'edge' : null)),
     quotas: integrationStatus('quotas', process.env.SUPABASE_URL && process.env.SUPABASE_SERVICE_ROLE_KEY),
     privateAudioStorage: integrationStatus('private-audio-storage', process.env.SUPABASE_URL && process.env.SUPABASE_SERVICE_ROLE_KEY),
     diacritization: integrationStatus('diacritization', process.env.DIACRITIZATION_WORKER_URL),
@@ -56,7 +57,7 @@ export default async function handler(request, response) {
     },
     integrations,
     providers: {
-      speech: (process.env.SPEECH_PROVIDER === 'google' && process.env.GOOGLE_TTS_API_KEY) || (process.env.SPEECH_PROVIDER === 'gemini' && process.env.GEMINI_API_KEY) ? process.env.SPEECH_PROVIDER : (process.env.SPEECH_WORKER_URL ? 'worker' : 'device'),
+      speech: (process.env.SPEECH_PROVIDER === 'google' && process.env.GOOGLE_TTS_API_KEY) || (process.env.SPEECH_PROVIDER === 'gemini' && process.env.GEMINI_API_KEY) ? process.env.SPEECH_PROVIDER : (process.env.SPEECH_WORKER_URL ? 'worker' : (createEdgeSpeechProvider() ? 'edge' : 'device')),
       diacritization: process.env.DIACRITIZATION_WORKER_URL ? 'worker' : 'none',
       translation: process.env.TRANSLATION_WORKER_URL ? 'worker' : (process.env.OPENAI_API_KEY ? 'openai' : (process.env.GEMINI_API_KEY ? 'gemini' : 'none'))
     },

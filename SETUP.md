@@ -101,11 +101,13 @@ For optional workers, add worker URLs and keys in Vercel Project Settings > Envi
 
 Two providers are built into the functions; configure either one instead of hosting a worker:
 
-- Neural speech: set `SPEECH_PROVIDER=google` and `GOOGLE_TTS_API_KEY` (Google Cloud Text-to-Speech API key). Arabic defaults to the neural voice `ar-XA-Neural2-B`; each language maps to a neural voice and explicit voice names are accepted only for the requested language. Speech still requires Supabase auth and quota when configured, and generated audio is cached as before.
+- Neural speech: set `SPEECH_PROVIDER=google` and `GOOGLE_TTS_API_KEY` (Google Cloud Text-to-Speech API key). Arabic defaults to the WaveNet voice `ar-XA-Wavenet-B` (Google has no Arabic Neural2 voice); each language maps to a natural voice and explicit voice names are accepted only for the requested language. Speech still requires Supabase auth and quota when configured, and generated audio is cached as before.
 - Contextual translation: set `OPENAI_API_KEY` (any OpenAI-compatible chat API; optional `OPENAI_BASE_URL`, default `https://api.openai.com/v1`, and `OPENAI_MODEL`, default `gpt-4o-mini`), or use a free Google AI Studio key: set `GEMINI_API_KEY` (optional `GEMINI_MODEL`, default `gemini-2.5-flash-lite`). Translation is instructed to be natural and contextual rather than literal, with a child-appropriate tone. `TRANSLATION_WORKER_URL` takes precedence when both are set.
 - Free neural speech via AI Studio: set `SPEECH_PROVIDER=gemini` with the same `GEMINI_API_KEY` (optional `GEMINI_TTS_MODEL`, default `gemini-2.5-flash-preview-tts`, and `GEMINI_TTS_VOICE`, default `Kore`; voices are multilingual and Arabic is supported). The free tier caps TTS at a small number of calls per day, so the device voice stays the default and the app falls back to it when the cap is reached.
 
-When neither is configured the app keeps working in demo mode with the device voice and manual translation.
+- Edge neural voices (no key, no signup): on Vercel, when no other speech provider is configured, the app automatically uses Microsoft Edge's read-aloud neural voices. Arabic defaults to the Egyptian voice `ar-EG-SalmaNeural` (male alternative: `ar-EG-ShakirNeural`); other languages map to their own neural voices. This needs no API key and works without Supabase (no login, quota, or server cache in that case; the browser's per-story IndexedDB cache still avoids repeat calls). Control it with `EDGE_TTS=on`/`EDGE_TTS=off`, or force it with `SPEECH_PROVIDER=edge`. IMPORTANT: this is an unofficial, undocumented endpoint intended for DEMO AND TESTING ONLY. Before any commercial sale or public launch, swap it for an official provider (Azure Speech F0 free tier, 500K neural chars/month, or Google Cloud TTS WaveNet free tier, 4M chars/month) by setting the variables above; the code path is already in place.
+
+When none of these is configured the app keeps working in demo mode with the device voice and manual translation.
 
 ## 4c. Book and QR scanner
 

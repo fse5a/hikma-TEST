@@ -102,3 +102,32 @@ test('gemini speech provider requires the gemini flag and key', async () => {
   assert.equal(createGeminiSpeechProvider({GEMINI_API_KEY: 'k'}), null);
   assert.equal(createGeminiSpeechProvider({SPEECH_PROVIDER: 'gemini'}), null);
 });
+
+import {createEdgeSpeechProvider, __edgeInternals} from '../server/lib/edge-provider.js';
+
+test('edge speech provider is disabled unless explicitly selected or on Vercel without keys', () => {
+  assert.equal(createEdgeSpeechProvider({}), null);
+  assert.equal(createEdgeSpeechProvider({EDGE_TTS: 'off', VERCEL: '1'}), null);
+  assert.equal(createEdgeSpeechProvider({SPEECH_PROVIDER: 'google', VERCEL: '1'}), null);
+  assert.equal(createEdgeSpeechProvider({GOOGLE_TTS_API_KEY: 'k', VERCEL: '1'}), null);
+  assert.equal(createEdgeSpeechProvider({GEMINI_API_KEY: 'k', VERCEL: '1'}), null);
+  assert.equal(createEdgeSpeechProvider({SPEECH_WORKER_URL: 'https://x', VERCEL: '1'}), null);
+  assert.equal(createEdgeSpeechProvider({VERCEL: '1'})?.name, 'edge');
+  assert.equal(createEdgeSpeechProvider({EDGE_TTS: 'on'})?.name, 'edge');
+  assert.equal(createEdgeSpeechProvider({SPEECH_PROVIDER: 'edge'})?.name, 'edge');
+});
+
+test('edge speech provider maps Arabic to the Egyptian neural voice by default', () => {
+  const {resolveVoice} = __edgeInternals;
+  assert.equal(resolveVoice(undefined, 'ar'), 'ar-EG-SalmaNeural');
+  assert.equal(resolveVoice('device', 'ar'), 'ar-EG-SalmaNeural');
+  assert.equal(resolveVoice('neural-ar', 'ar'), 'ar-EG-SalmaNeural');
+  assert.equal(resolveVoice('ar-EG-ShakirNeural', 'ar'), 'ar-EG-ShakirNeural');
+  assert.equal(resolveVoice('en-US-Neural2-J', 'ar'), 'ar-EG-SalmaNeural');
+  assert.equal(resolveVoice(undefined, 'en'), 'en-US-AvaNeural');
+});
+
+test('edge Sec-MS-GEC v2 token matches the reference test vector', () => {
+  const token = __edgeInternals.generateSecMsGec(1791888000 * 1000);
+  assert.equal(token, '492D7694A183A45E-56E821F95D4579C5B7C7E33DC7303FF379EC36D510213555BBBB9EB17EF15876');
+});

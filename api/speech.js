@@ -1,6 +1,7 @@
 import {sendError, parseJsonBody, validateRequired, getRequestId, sendJson} from '../server/lib/response.js';
 import {createSpeechProvider, createGoogleSpeechProvider} from '../server/lib/speech-provider.js';
 import {createGeminiSpeechProvider} from '../server/lib/gemini-provider.js';
+import {createEdgeSpeechProvider} from '../server/lib/edge-provider.js';
 import {resolveSupabaseUser} from '../server/lib/supabase-auth.js';
 import {enforceApiQuota} from '../server/lib/quota.js';
 import {loadPrivateAudio, storePrivateAudio} from '../server/lib/audio-cache.js';
@@ -29,18 +30,36 @@ export default async function handler(request, response) {
     return sendError(response, 'invalid_voice_settings', 'Rate must be 0.5-2 and pitch must be -6 to 6 semitones.', requestId, 400);
   }
 
-  const provider = createSpeechProvider() || createGoogleSpeechProvider() || createGeminiSpeechProvider();
+  const provider = createSpeechProvider() || createGoogleSpeechProvider() || createGeminiSpeechProvider() || createEdgeSpeechProvider();
+  const supabaseConfigured = Boolean(process.env.SUPABASE_URL && process.env.SUPABASE_ANON_KEY);
+  const cacheConfigured = Boolean(process.env.SUPABASE_URL && process.env.SUPABASE_SERVICE_ROLE_KEY);
+
+  // Keyless path: a free provider (Edge demo voice) with no Supabase configured.
+  // No auth, quota, or server cache is possible; the client-side per-story
+  // cache in restored-features.js keeps repeat plays offline.
+  if (provider && !supabaseConfigured) {
+    let result;
+    try {
+      result = await provider.synthesize({text, language, voice, rate, pitch});
+    } catch {
+      return sendError(response, 'speech_provider_failed', 'Speech service is temporarily unavailable.', requestId, 502);
+    }
+    return sendJson(response, 200, {ok: true, requestId, mode: 'configured', cached: false, ...result});
+  }
+
   const user = await resolveSupabaseUser(request, response, requestId, {providerConfigured: Boolean(provider)});
   if (!user) return;
   if (provider && !await enforceApiQuota(request, response, requestId, user.userId, 'speech')) return;
 
   if (provider) {
     const identity = {userId: user.userId, provider: provider.name, voice, language, text, rate, pitch};
-    try {
-      const cached = await loadPrivateAudio(identity);
-      if (cached) return sendJson(response, 200, {ok: true, requestId, mode: 'configured', provider: provider.name, cached: true, ...cached});
-    } catch {
-      return sendError(response, 'audio_storage_failed', 'Private audio cache is unavailable.', requestId, 503);
+    if (cacheConfigured) {
+      try {
+        const cached = await loadPrivateAudio(identity);
+        if (cached) return sendJson(response, 200, {ok: true, requestId, mode: 'configured', provider: provider.name, cached: true, ...cached});
+      } catch {
+        return sendError(response, 'audio_storage_failed', 'Private audio cache is unavailable.', requestId, 503);
+      }
     }
     let result;
     try {
@@ -48,12 +67,15 @@ export default async function handler(request, response) {
     } catch {
       return sendError(response, 'speech_provider_failed', 'Speech service is temporarily unavailable.', requestId, 502);
     }
-    try {
-      await storePrivateAudio({...identity, provider: result.provider, audioBase64: result.audioBase64, contentType: result.contentType});
-    } catch {
-      return sendError(response, 'audio_storage_failed', 'Private audio storage is unavailable; the generated audio was not returned.', requestId, 503);
+    if (cacheConfigured) {
+      try {
+        await storePrivateAudio({...identity, provider: result.provider, audioBase64: result.audioBase64, contentType: result.contentType});
+      } catch {
+        return sendError(response, 'audio_storage_failed', 'Private audio storage is unavailable; the generated audio was not returned.', requestId, 503);
+      }
+      return sendJson(response, 200, {ok: true, requestId, mode: 'configured', cached: true, ...result});
     }
-    return sendJson(response, 200, {ok: true, requestId, mode: 'configured', cached: true, ...result});
+    return sendJson(response, 200, {ok: true, requestId, mode: 'configured', cached: false, ...result});
   }
 
   return sendJson(response, 200, {
