@@ -5,6 +5,7 @@
   let stream = null;
   let scanTimer = null;
   let tesseractLoading = null;
+  let scannedPages = [];
 
   const $ = selector => document.querySelector(selector);
 
@@ -21,6 +22,8 @@
         <div class="modal-actions" style="flex-wrap:wrap">
           <button class="button primary" id="scanStart" type="button">تشغيل الكاميرا</button>
           <button class="button secondary" id="scanCapture" type="button" disabled>التقاط صفحة وقراءتها</button>
+          <button class="button secondary" id="scanUndo" type="button" hidden>حذف آخر صفحة</button>
+          <button class="button primary" id="scanFinish" type="button" hidden>إنهاء ومراجعة النص (0)</button>
           <button class="button secondary" type="button" data-close="scanOverlay">إلغاء</button>
         </div>
         <p class="voice-note">وجّه الكاميرا نحو رمز QR لفتح قصته، أو التقط صفحة كتاب لتحويلها إلى نص يُقرأ ويُترجم ويُحفظ في مكتبتك. الصور لا تغادر جهازك.</p>
@@ -29,8 +32,14 @@
     document.body.appendChild(overlay);
     $('#scanStart').addEventListener('click', startCamera);
     $('#scanCapture').addEventListener('click', capturePage);
+    $('#scanUndo').addEventListener('click', () => {
+      scannedPages.pop();
+      updatePageButtons();
+      scanStatus(scannedPages.length ? `عندك ${scannedPages.length} صفحة محفوظة. التقط التالية أو اضغط إنهاء.` : 'وجّه الكاميرا نحو رمز QR أو صفحة كتاب.');
+    });
+    $('#scanFinish').addEventListener('click', finishScanning);
     overlay.addEventListener('click', event => {
-      if (event.target === overlay || event.target.closest('[data-close]')) stopCamera();
+      if (event.target === overlay || event.target.closest('[data-close]')) { stopCamera(); resetPages(); }
     });
   }
 
@@ -143,6 +152,28 @@
     return tesseractLoading;
   }
 
+  function updatePageButtons() {
+    const count = scannedPages.length;
+    const finish = $('#scanFinish');
+    const undo = $('#scanUndo');
+    if (finish) { finish.hidden = !count; finish.textContent = `إنهاء ومراجعة النص (${count})`; }
+    if (undo) undo.hidden = !count;
+  }
+
+  function resetPages() {
+    scannedPages = [];
+    updatePageButtons();
+  }
+
+  function finishScanning() {
+    if (!scannedPages.length) return;
+    const text = scannedPages.join('\n\n');
+    closeModal('scanOverlay');
+    stopCamera();
+    resetPages();
+    openAddForm('', text);
+  }
+
   async function capturePage() {
     const video = $('#scanVideo');
     if (!stream || !video || video.readyState < 2) return;
@@ -159,12 +190,26 @@
         scanStatus('لم يُقرأ نص واضح. قرّب الكاميرا وحسّن الإضاءة ثم أعد الالتقاط.', true);
         return;
       }
-      closeModal('scanOverlay');
-      stopCamera();
-      openAddForm('', text);
+      scannedPages.push(text);
+      updatePageButtons();
+      scanStatus(`أُضيفت الصفحة ${scannedPages.length}. التقط صفحة أخرى من نفس الكتاب، أو اضغط «إنهاء ومراجعة النص».`);
     } catch (error) {
       scanStatus(error.message || 'تعذرت قراءة الصفحة.', true);
     }
+  }
+
+  function buildAppendField() {
+    if ($('#appendToStory')) return $('#appendToStory').closest('.field');
+    const form = $('#storyForm');
+    if (!form) return null;
+    const field = document.createElement('div');
+    field.className = 'field';
+    field.hidden = true;
+    field.innerHTML = '<label for="appendToStory">إضافة الصفحات إلى قصة موجودة (اختياري)</label><select id="appendToStory"><option value="">قصة جديدة</option></select>';
+    form.insertBefore(field, form.firstChild);
+    // opening the form for a brand-new story hides the append choice again
+    $('#addOpen')?.addEventListener('click', () => { field.hidden = true; $('#appendToStory').value = ''; });
+    return field;
   }
 
   function openAddForm(title, text) {
@@ -172,8 +217,15 @@
     $('#storyTitle').value = title || '';
     $('#storyText').value = text || '';
     $('#storyTranslation').value = '';
+    const field = buildAppendField();
+    const select = $('#appendToStory');
+    if (field && select) {
+      select.innerHTML = '<option value="">قصة جديدة</option>' + (state.stories || [])
+        .map(item => `<option value="${item.id}">${item.title || 'قصة بدون عنوان'}</option>`).join('');
+      field.hidden = !(state.stories || []).length;
+    }
     openModal('addOverlay');
-    $('#formStatus').textContent = 'راجع النص الممسوح، ثم احفظه ليصبح في مكتبتك وتقرأه أو تترجمه.';
+    $('#formStatus').textContent = 'راجع النص الممسوح، ثم احفظه كقصة جديدة أو أضفه لقصة موجودة؛ بعدها يمكنك قراءته أو ترجمته.';
   }
 
   globalThis.HikmaScanner = {loadTesseract};
