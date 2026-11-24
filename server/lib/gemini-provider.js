@@ -29,7 +29,7 @@ function wavFromPcm(base64Pcm) {
 export function createGeminiTranslationProvider(environment = process.env, fetchImpl = fetch) {
   const apiKey = environment.GEMINI_API_KEY;
   if (!apiKey) return null;
-  const model = String(environment.GEMINI_MODEL || 'gemini-2.5-flash-lite');
+  const model = String(environment.GEMINI_MODEL || 'gemini-3.5-flash-lite');
 
   return {
     name: 'gemini',
@@ -77,7 +77,7 @@ export function createGeminiSpeechProvider(environment = process.env, fetchImpl 
           method: 'POST',
           headers: {'Content-Type': 'application/json'},
           body: JSON.stringify({
-            contents: [{parts: [{text}]}],
+            contents: [{parts: [{text: `Read aloud the following text exactly as written, with no additions:\n\n${text}`}]}],
             generationConfig: {
               responseModalities: ['AUDIO'],
               speechConfig: {voiceConfig: {prebuiltVoiceConfig: {voiceName}}}
