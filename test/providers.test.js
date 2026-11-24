@@ -63,3 +63,42 @@ test('translation provider rejects invalid upstream payloads', async () => {
   const provider = createTranslationProvider({OPENAI_API_KEY: 'k'}, async () => ({ok: true, json: async () => ({choices: []})}));
   await assert.rejects(() => provider.translate({text: 'hello', targetLanguage: 'ar'}));
 });
+
+test('gemini translation provider is disabled without API key', async () => {
+  const {createGeminiTranslationProvider} = await import('../server/lib/gemini-provider.js');
+  assert.equal(createGeminiTranslationProvider({}), null);
+});
+
+test('gemini translation provider requests contextual translation and reads candidates', async () => {
+  const {createGeminiTranslationProvider} = await import('../server/lib/gemini-provider.js');
+  const calls = [];
+  const provider = createGeminiTranslationProvider({GEMINI_API_KEY: 'k'}, async (url, options) => {
+    calls.push({url, body: JSON.parse(options.body)});
+    return {ok: true, json: async () => ({candidates: [{content: {parts: [{text: 'نجمة صغيرة شجاعة'}]}}]})};
+  });
+  const result = await provider.translate({text: 'a brave little star', targetLanguage: 'ar'});
+  assert.equal(result.translatedText, 'نجمة صغيرة شجاعة');
+  assert.match(calls[0].body.contents[0].parts[0].text, /naturally and contextually/);
+  assert.ok(calls[0].url.includes('key=k'));
+});
+
+test('gemini speech provider wraps raw PCM into a WAV header', async () => {
+  const {createGeminiSpeechProvider} = await import('../server/lib/gemini-provider.js');
+  const pcm = Buffer.alloc(100, 1);
+  const provider = createGeminiSpeechProvider({SPEECH_PROVIDER: 'gemini', GEMINI_API_KEY: 'k'}, async () => ({
+    ok: true,
+    json: async () => ({candidates: [{content: {parts: [{inlineData: {data: pcm.toString('base64')}}]}}]})
+  }));
+  const result = await provider.synthesize({text: 'مرحبا', language: 'ar', voice: 'neural-ar'});
+  assert.equal(result.contentType, 'audio/wav');
+  const wav = Buffer.from(result.audioBase64, 'base64');
+  assert.equal(wav.subarray(0, 4).toString('ascii'), 'RIFF');
+  assert.equal(wav.length, 144);
+});
+
+test('gemini speech provider requires the gemini flag and key', async () => {
+  const {createGeminiSpeechProvider} = await import('../server/lib/gemini-provider.js');
+  assert.equal(createGeminiSpeechProvider({}), null);
+  assert.equal(createGeminiSpeechProvider({GEMINI_API_KEY: 'k'}), null);
+  assert.equal(createGeminiSpeechProvider({SPEECH_PROVIDER: 'gemini'}), null);
+});

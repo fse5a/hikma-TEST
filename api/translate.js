@@ -2,6 +2,7 @@ import {sendError, parseJsonBody, validateRequired, getRequestId, sendJson} from
 import {resolveSupabaseUser} from '../server/lib/supabase-auth.js';
 import {enforceApiQuota} from '../server/lib/quota.js';
 import {createTranslationProvider} from '../server/lib/translation-provider.js';
+import {createGeminiTranslationProvider} from '../server/lib/gemini-provider.js';
 
 export default async function handler(request, response) {
   const requestId = getRequestId(request);
@@ -19,7 +20,7 @@ export default async function handler(request, response) {
   const text = String(body.text || '');
   if (!text.trim() || text.length > 20000) return sendError(response, 'invalid_text', 'Text must be between 1 and 20000 characters.', requestId, 400);
   if (!['ar', 'en', 'fr', 'de', 'es', 'zh'].includes(targetLanguage)) return sendError(response, 'invalid_language', 'Target language is not supported.', requestId, 400);
-  const provider = process.env.TRANSLATION_WORKER_URL ? null : createTranslationProvider();
+  const provider = process.env.TRANSLATION_WORKER_URL ? null : (createTranslationProvider() || createGeminiTranslationProvider());
   const translationConfigured = Boolean(process.env.TRANSLATION_WORKER_URL || provider);
   const user = await resolveSupabaseUser(request, response, requestId, {providerConfigured: translationConfigured});
   if (!user) return;

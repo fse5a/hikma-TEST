@@ -791,6 +791,10 @@
   document.addEventListener('input', event => {
     if (['readerRate', 'globalRate'].includes(event.target.id) && activeAudio) activeAudio.playbackRate = SPEECH_SETTINGS.clampRate(event.target.value);
   });
+
+  document.addEventListener('click', event => {
+    if (settings.haptics && event.target.closest('button') && navigator.vibrate) navigator.vibrate(12);
+  });
   document.addEventListener('change', event => {
     if (!['readerPitch', 'globalPitch'].includes(event.target.id)) return;
     if (settings.voiceSource === 'device' && speaking) {
@@ -1417,9 +1421,27 @@
     if (!storyForm || storyForm.querySelector('#staticOcrImage')) return;
     const tools = document.createElement('div');
     tools.className = 'field';
-    tools.innerHTML = '<section id="urlImportTools"><h3>استيراد قصة من رابط</h3><p class="data-note">Only add content you are allowed to read. It stays private to you.</p><label for="storyUrl">رابط القصة</label><input id="storyUrl" type="url" inputmode="url" placeholder="https://example.org/story"><button class="button secondary" id="previewUrlStory" type="button">معاينة القصة</button><div id="urlPreviewPanel" hidden><label for="urlPreviewTitle">العنوان</label><input id="urlPreviewTitle" type="text"><label for="urlPreviewText">راجع النص واحذف الفقرات غير المطلوبة</label><textarea id="urlPreviewText" maxlength="100000"></textarea><p id="urlPreviewMeta" class="data-note"></p><button class="button primary" id="saveUrlStory" type="button">إضافة وبدء القراءة</button></div><button class="button secondary" id="copySendToHikma" type="button">نسخ علامة Send to Hikma</button><button class="button secondary" id="pasteSendToHikma" type="button">لصق النص المستخرج</button><p id="urlImportStatus" class="status" role="status" aria-live="polite"></p></section><div class="divider"></div><label for="staticOcrImage">استخراج نص من صورة على هذا الجهاز</label><button class="button secondary" id="staticOcrButton" type="button">اختيار صورة صفحة</button><input id="staticOcrImage" type="file" accept="image/*" hidden><p class="status" id="staticOcrStatus" role="status" aria-live="polite">OCR يعتمد على دعم المتصفح.</p>';
+    tools.innerHTML = '<section id="urlImportTools"><h3>استيراد قصة من رابط</h3><p class="data-note">Only add content you are allowed to read. It stays private to you.</p><label for="storyUrl">رابط القصة</label><input id="storyUrl" type="url" inputmode="url" placeholder="https://example.org/story"><button class="button secondary" id="previewUrlStory" type="button">معاينة القصة</button><div id="urlPreviewPanel" hidden><label for="urlPreviewTitle">العنوان</label><input id="urlPreviewTitle" type="text"><label for="urlPreviewText">راجع النص واحذف الفقرات غير المطلوبة</label><textarea id="urlPreviewText" maxlength="100000"></textarea><p id="urlPreviewMeta" class="data-note"></p><button class="button primary" id="saveUrlStory" type="button">إضافة وبدء القراءة</button></div><button class="button secondary" id="copySendToHikma" type="button">نسخ علامة Send to Hikma</button><button class="button secondary" id="translateDraftButton" type="button">ترجمة النص تلقائيًا</button><button class="button secondary" id="pasteSendToHikma" type="button">لصق النص المستخرج</button><p id="urlImportStatus" class="status" role="status" aria-live="polite"></p></section><div class="divider"></div><label for="staticOcrImage">استخراج نص من صورة على هذا الجهاز</label><button class="button secondary" id="staticOcrButton" type="button">اختيار صورة صفحة</button><input id="staticOcrImage" type="file" accept="image/*" hidden><p class="status" id="staticOcrStatus" role="status" aria-live="polite">قراءة النص من الصورة تتم على جهازك وتعمل في كل المتصفحات.</p>';
     storyForm.prepend(tools);
     const urlStatus = tools.querySelector('#urlImportStatus');
+    tools.querySelector('#translateDraftButton').addEventListener('click', async () => {
+      const sourceText = document.querySelector('#storyText').value.trim();
+      if (!sourceText) return urlStatus.textContent = 'اكتب أو امسح نص القصة أولًا.';
+      const target = /[\u0600-\u06FF]/.test(sourceText) ? 'en' : 'ar';
+      urlStatus.textContent = 'جارٍ الترجمة بالسياق...';
+      try {
+        const result = await api.translate(sourceText, target);
+        const translated = String(result.translatedText || '').trim();
+        if (result.mode === 'demo' || !translated || translated === sourceText) {
+          urlStatus.textContent = 'الترجمة السحابية غير مهيأة بعد؛ أضف مفتاح الترجمة أو اكتب الترجمة يدويًا.';
+          return;
+        }
+        document.querySelector('#storyTranslation').value = translated;
+        urlStatus.textContent = 'تمت الترجمة بالسياق. راجعها قبل الحفظ.';
+      } catch (error) {
+        urlStatus.textContent = api.toFriendlyMessage(error);
+      }
+    });
     const previewPanel = tools.querySelector('#urlPreviewPanel');
     const bookmarklet = `javascript:(()=>{const r=document.querySelector('article')||document.querySelector('main')||document.body;const p=[...r.querySelectorAll('p')].map(x=>x.innerText.trim()).filter(Boolean);navigator.clipboard.writeText(JSON.stringify({title:document.title,text:p.join('\\n\\n')})).then(()=>alert('Story copied for Hikma.')).catch(()=>alert('Copy the story text manually.'));})();`;
     tools.querySelector('#copySendToHikma').addEventListener('click', async () => {
@@ -1481,22 +1503,17 @@
     });
     const status = tools.querySelector('#staticOcrStatus');
     tools.querySelector('#staticOcrButton').addEventListener('click', () => {
-      if (!('TextDetector' in window)) {
-        status.textContent = 'استخراج النص غير مدعوم في هذا المتصفح. الصق نص القصة يدويًا.';
-        return;
-      }
       tools.querySelector('#staticOcrImage').click();
     });
     tools.querySelector('#staticOcrImage').addEventListener('change', async event => {
       const image = event.target.files?.[0];
       if (!image) return;
       try {
-        const detector = new TextDetector();
-        const bitmap = await createImageBitmap(image);
-        const results = await detector.detect(bitmap);
-        bitmap.close();
-        const text = results.map(result => result.rawValue).filter(Boolean).join('\n');
-        if (!text.trim()) throw new Error('لم يُعثر على نص واضح في الصورة.');
+        status.textContent = 'جارٍ قراءة النص من الصورة (أول مرة تحمّل قارئ النص)...';
+        const Tesseract = await globalThis.HikmaScanner.loadTesseract();
+        const result = await Tesseract.recognize(URL.createObjectURL(image), 'ara+eng');
+        const text = String(result?.data?.text || '').trim();
+        if (!text) throw new Error('لم يُعثر على نص واضح في الصورة.');
         const storyText = document.querySelector('#storyText');
         storyText.value = [storyText.value, text].filter(Boolean).join('\n\n');
         status.textContent = 'تم استخراج النص محليًا. راجعه وصحح الأخطاء قبل الحفظ.';

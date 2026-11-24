@@ -176,6 +176,8 @@
     $('#formStatus').textContent = 'راجع النص الممسوح، ثم احفظه ليصبح في مكتبتك وتقرأه أو تترجمه.';
   }
 
+  globalThis.HikmaScanner = {loadTesseract};
+
   if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', buildButton);
   } else {

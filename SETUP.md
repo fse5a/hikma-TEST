@@ -102,7 +102,8 @@ For optional workers, add worker URLs and keys in Vercel Project Settings > Envi
 Two providers are built into the functions; configure either one instead of hosting a worker:
 
 - Neural speech: set `SPEECH_PROVIDER=google` and `GOOGLE_TTS_API_KEY` (Google Cloud Text-to-Speech API key). Arabic defaults to the neural voice `ar-XA-Neural2-B`; each language maps to a neural voice and explicit voice names are accepted only for the requested language. Speech still requires Supabase auth and quota when configured, and generated audio is cached as before.
-- Contextual translation: set `OPENAI_API_KEY` (any OpenAI-compatible chat API; optional `OPENAI_BASE_URL`, default `https://api.openai.com/v1`, and `OPENAI_MODEL`, default `gpt-4o-mini`). Translation is instructed to be natural and contextual rather than literal, with a child-appropriate tone. `TRANSLATION_WORKER_URL` takes precedence when both are set.
+- Contextual translation: set `OPENAI_API_KEY` (any OpenAI-compatible chat API; optional `OPENAI_BASE_URL`, default `https://api.openai.com/v1`, and `OPENAI_MODEL`, default `gpt-4o-mini`), or use a free Google AI Studio key: set `GEMINI_API_KEY` (optional `GEMINI_MODEL`, default `gemini-2.5-flash-lite`). Translation is instructed to be natural and contextual rather than literal, with a child-appropriate tone. `TRANSLATION_WORKER_URL` takes precedence when both are set.
+- Free neural speech via AI Studio: set `SPEECH_PROVIDER=gemini` with the same `GEMINI_API_KEY` (optional `GEMINI_TTS_MODEL`, default `gemini-2.5-flash-preview-tts`, and `GEMINI_TTS_VOICE`, default `Kore`; voices are multilingual and Arabic is supported). The free tier caps TTS at a small number of calls per day, so the device voice stays the default and the app falls back to it when the cap is reached.
 
 When neither is configured the app keeps working in demo mode with the device voice and manual translation.
 

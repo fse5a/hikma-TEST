@@ -25,8 +25,8 @@ export default async function handler(request, response) {
     supabase: integrationStatus('supabase', process.env.SUPABASE_URL || process.env.NEXT_PUBLIC_SUPABASE_URL),
     auth: integrationStatus('auth', process.env.SUPABASE_URL && process.env.SUPABASE_ANON_KEY),
     ai: integrationStatus('ai', process.env.AI_API_KEY || process.env.AI_PROVIDER),
-    translation: integrationStatus('translation', process.env.TRANSLATION_WORKER_URL || process.env.OPENAI_API_KEY),
-    speech: integrationStatus('speech', process.env.SPEECH_WORKER_URL || (process.env.SPEECH_PROVIDER === 'google' && process.env.GOOGLE_TTS_API_KEY)),
+    translation: integrationStatus('translation', process.env.TRANSLATION_WORKER_URL || process.env.OPENAI_API_KEY || process.env.GEMINI_API_KEY),
+    speech: integrationStatus('speech', process.env.SPEECH_WORKER_URL || (process.env.SPEECH_PROVIDER === 'google' && process.env.GOOGLE_TTS_API_KEY) || (process.env.SPEECH_PROVIDER === 'gemini' && process.env.GEMINI_API_KEY)),
     quotas: integrationStatus('quotas', process.env.SUPABASE_URL && process.env.SUPABASE_SERVICE_ROLE_KEY),
     privateAudioStorage: integrationStatus('private-audio-storage', process.env.SUPABASE_URL && process.env.SUPABASE_SERVICE_ROLE_KEY),
     diacritization: integrationStatus('diacritization', process.env.DIACRITIZATION_WORKER_URL),
@@ -56,15 +56,15 @@ export default async function handler(request, response) {
     },
     integrations,
     providers: {
-      speech: process.env.SPEECH_PROVIDER === 'google' && process.env.GOOGLE_TTS_API_KEY ? 'google' : (process.env.SPEECH_WORKER_URL ? 'worker' : 'device'),
+      speech: (process.env.SPEECH_PROVIDER === 'google' && process.env.GOOGLE_TTS_API_KEY) || (process.env.SPEECH_PROVIDER === 'gemini' && process.env.GEMINI_API_KEY) ? process.env.SPEECH_PROVIDER : (process.env.SPEECH_WORKER_URL ? 'worker' : 'device'),
       diacritization: process.env.DIACRITIZATION_WORKER_URL ? 'worker' : 'none',
-      translation: process.env.TRANSLATION_WORKER_URL ? 'worker' : (process.env.OPENAI_API_KEY ? 'openai' : 'none')
+      translation: process.env.TRANSLATION_WORKER_URL ? 'worker' : (process.env.OPENAI_API_KEY ? 'openai' : (process.env.GEMINI_API_KEY ? 'gemini' : 'none'))
     },
     warnings: process.env.SUPABASE_URL ? [] : ['Supabase is not configured; the app is running in demo mode.'],
     features: {
       activation: 'demo-mode',
       sync: process.env.ENABLE_SUPABASE_SYNC === 'true' ? 'enabled' : 'demo-only',
-      voiceSynthesis: (process.env.SPEECH_WORKER_URL || (process.env.SPEECH_PROVIDER === 'google' && process.env.GOOGLE_TTS_API_KEY)) ? 'provider-enabled' : 'device-only',
+      voiceSynthesis: (process.env.SPEECH_WORKER_URL || (process.env.SPEECH_PROVIDER === 'google' && process.env.GOOGLE_TTS_API_KEY) || (process.env.SPEECH_PROVIDER === 'gemini' && process.env.GEMINI_API_KEY)) ? 'provider-enabled' : 'device-only',
       diacritization: process.env.DIACRITIZATION_WORKER_URL ? 'provider-enabled' : 'original-text-fallback'
     }
   };
