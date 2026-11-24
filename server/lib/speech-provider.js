@@ -39,7 +39,8 @@ export function createSpeechProvider(environment = process.env, fetchImpl = fetc
 }
 const GOOGLE_LANGUAGE_CODES = {ar: 'ar-XA', en: 'en-US', fr: 'fr-FR', de: 'de-DE', es: 'es-ES', zh: 'cmn-CN'};
 const GOOGLE_DEFAULT_VOICES = {
-  ar: 'ar-XA-Neural2-B',
+  // Google has no Arabic Neural2 voices; WaveNet is the natural Arabic tier with 4M free chars/month.
+  ar: 'ar-XA-Wavenet-B',
   en: 'en-US-Neural2-J',
   fr: 'fr-FR-Neural2-B',
   de: 'de-DE-Neural2-B',

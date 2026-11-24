@@ -9,7 +9,7 @@ test('google speech provider is disabled without key or flag', () => {
   assert.equal(createGoogleSpeechProvider({GOOGLE_TTS_API_KEY: 'k'}), null);
 });
 
-test('google speech provider maps generic neural voice to Arabic Neural2 voice', async () => {
+test('google speech provider maps generic neural voice to the Arabic WaveNet voice (Google has no Arabic Neural2)', async () => {
   const calls = [];
   const fakeFetch = async (url, options) => {
     calls.push({url, body: JSON.parse(options.body)});
@@ -19,7 +19,7 @@ test('google speech provider maps generic neural voice to Arabic Neural2 voice',
   const result = await provider.synthesize({text: 'مرحبا', language: 'ar', voice: 'neural-ar', rate: 1, pitch: 0});
   assert.equal(result.provider, 'google');
   assert.equal(result.contentType, 'audio/mpeg');
-  assert.equal(calls[0].body.voice.name, 'ar-XA-Neural2-B');
+  assert.equal(calls[0].body.voice.name, 'ar-XA-Wavenet-B');
   assert.equal(calls[0].body.voice.languageCode, 'ar-XA');
   assert.ok(calls[0].url.includes('key=test-key'));
 });
@@ -32,7 +32,7 @@ test('google speech provider rejects cross-language explicit voices', async () =
   };
   const provider = createGoogleSpeechProvider({SPEECH_PROVIDER: 'google', GOOGLE_TTS_API_KEY: 'k'}, fakeFetch);
   await provider.synthesize({text: 'hi', language: 'ar', voice: 'en-US-Neural2-J', rate: 1, pitch: 0});
-  assert.equal(calls[0].voice.name, 'ar-XA-Neural2-B');
+  assert.equal(calls[0].voice.name, 'ar-XA-Wavenet-B');
 });
 
 test('google speech provider throws on upstream failure', async () => {
