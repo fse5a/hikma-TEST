@@ -97,6 +97,19 @@ Open or forward port `3000` in Codespaces. Enter `1234` at the demo activation s
 
 For optional workers, add worker URLs and keys in Vercel Project Settings > Environment Variables, then redeploy. Use only free/self-hosted services. `/api/health` reports configuration without returning URLs or keys. Speech chunks are cached in browser IndexedDB (50 MB cap) and private Storage, keyed by user/provider/voice/text/language/rate/pitch when storage is configured.
 
+## 4b. Built-in providers (no separate worker needed)
+
+Two providers are built into the functions; configure either one instead of hosting a worker:
+
+- Neural speech: set `SPEECH_PROVIDER=google` and `GOOGLE_TTS_API_KEY` (Google Cloud Text-to-Speech API key). Arabic defaults to the neural voice `ar-XA-Neural2-B`; each language maps to a neural voice and explicit voice names are accepted only for the requested language. Speech still requires Supabase auth and quota when configured, and generated audio is cached as before.
+- Contextual translation: set `OPENAI_API_KEY` (any OpenAI-compatible chat API; optional `OPENAI_BASE_URL`, default `https://api.openai.com/v1`, and `OPENAI_MODEL`, default `gpt-4o-mini`). Translation is instructed to be natural and contextual rather than literal, with a child-appropriate tone. `TRANSLATION_WORKER_URL` takes precedence when both are set.
+
+When neither is configured the app keeps working in demo mode with the device voice and manual translation.
+
+## 4c. Book and QR scanner
+
+The camera scanner starts only from an explicit tap. QR codes open a saved story or import a linked page through `/api/import/url`. Page capture runs OCR in the browser (Tesseract.js loaded from a CDN on first use) and routes the text into the add-story form for review; photos never leave the device. Browsers without `BarcodeDetector` or camera access show a fallback message.
+
 ## 5. Health route
 
 Check whether the deployment is configured by opening:

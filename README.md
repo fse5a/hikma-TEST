@@ -2,6 +2,14 @@
 
 Hikma is a static Vercel app with Vercel Functions under `/api`. The interface supports Arabic, English, French, German, Spanish, and Chinese, detects the first-load locale, and keeps bundled-story translations local. Stories, settings, and user recordings stay in the browser. Optional worker adapters are not configured production services.
 
+## Project structure
+
+- `client/` - the whole frontend: markup, styles, PWA shell, and browser modules. `scripts/build.js` copies it to `dist/`, which Vercel serves (`outputDirectory`).
+- `api/` - thin Vercel Functions entry points only.
+- `server/lib/` - shared backend modules (responses, auth, quotas, URL extraction, speech and translation providers, audio cache).
+- `db/migrations/` - Supabase schema, seed data, RLS policies, and quota RPCs.
+- `test/` - Node test suite (`npm test`) and Playwright specs.
+
 ## What works locally
 
 - The library, reader, manual translation editor, settings, progress, and backups use browser storage.
