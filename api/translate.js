@@ -22,9 +22,14 @@ export default async function handler(request, response) {
   if (!['ar', 'en', 'fr', 'de', 'es', 'zh'].includes(targetLanguage)) return sendError(response, 'invalid_language', 'Target language is not supported.', requestId, 400);
   const provider = process.env.TRANSLATION_WORKER_URL ? null : (createTranslationProvider() || createGeminiTranslationProvider());
   const translationConfigured = Boolean(process.env.TRANSLATION_WORKER_URL || provider);
-  const user = await resolveSupabaseUser(request, response, requestId, {providerConfigured: translationConfigured});
-  if (!user) return;
-  if (translationConfigured && !await enforceApiQuota(request, response, requestId, user.userId, 'translation')) return;
+  // Keyless path: a provider is configured but Supabase is not, so auth and
+  // quota cannot run; translate anonymously (same approach as /api/speech).
+  const supabaseConfigured = Boolean(process.env.SUPABASE_URL && process.env.SUPABASE_ANON_KEY);
+  if (!translationConfigured || supabaseConfigured) {
+    const user = await resolveSupabaseUser(request, response, requestId, {providerConfigured: translationConfigured});
+    if (!user) return;
+    if (translationConfigured && !await enforceApiQuota(request, response, requestId, user.userId, 'translation')) return;
+  }
 
   if (process.env.TRANSLATION_WORKER_URL) {
     try {

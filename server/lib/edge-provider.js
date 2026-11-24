@@ -419,8 +419,8 @@ export function createEdgeSpeechProvider(environment = process.env) {
   if (String(environment.EDGE_TTS || '').toLowerCase() === 'off') return null;
   const flag = String(environment.SPEECH_PROVIDER || '').toLowerCase();
   if (flag === 'edge') return {name: 'edge', synthesize: synthesizeEdge};
-  if (flag) return null; // another provider explicitly selected
-  if (environment.SPEECH_WORKER_URL || environment.GOOGLE_TTS_API_KEY || environment.GEMINI_API_KEY) return null;
+  if (flag) return null; // another provider explicitly selected (google and gemini speech only activate via SPEECH_PROVIDER)
+  if (environment.SPEECH_WORKER_URL) return null;
   // Keyless default on Vercel only, so local runs and tests stay offline.
   if (environment.VERCEL === '1' || environment.EDGE_TTS === 'on') return {name: 'edge', synthesize: synthesizeEdge};
   return null;

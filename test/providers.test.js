@@ -109,8 +109,11 @@ test('edge speech provider is disabled unless explicitly selected or on Vercel w
   assert.equal(createEdgeSpeechProvider({}), null);
   assert.equal(createEdgeSpeechProvider({EDGE_TTS: 'off', VERCEL: '1'}), null);
   assert.equal(createEdgeSpeechProvider({SPEECH_PROVIDER: 'google', VERCEL: '1'}), null);
-  assert.equal(createEdgeSpeechProvider({GOOGLE_TTS_API_KEY: 'k', VERCEL: '1'}), null);
-  assert.equal(createEdgeSpeechProvider({GEMINI_API_KEY: 'k', VERCEL: '1'}), null);
+  // A stored key alone does not activate google/gemini speech: SPEECH_PROVIDER selects them.
+  assert.equal(createEdgeSpeechProvider({GOOGLE_TTS_API_KEY: 'k', VERCEL: '1'})?.name, 'edge');
+  assert.equal(createEdgeSpeechProvider({GEMINI_API_KEY: 'k', VERCEL: '1'})?.name, 'edge');
+  assert.equal(createEdgeSpeechProvider({SPEECH_PROVIDER: 'gemini', GEMINI_API_KEY: 'k', VERCEL: '1'}), null);
+  assert.equal(createEdgeSpeechProvider({SPEECH_PROVIDER: 'google', GOOGLE_TTS_API_KEY: 'k', VERCEL: '1'}), null);
   assert.equal(createEdgeSpeechProvider({SPEECH_WORKER_URL: 'https://x', VERCEL: '1'}), null);
   assert.equal(createEdgeSpeechProvider({VERCEL: '1'})?.name, 'edge');
   assert.equal(createEdgeSpeechProvider({EDGE_TTS: 'on'})?.name, 'edge');
