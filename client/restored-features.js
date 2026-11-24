@@ -50,8 +50,8 @@
   };
   const palettes = {
     hikma: {
-      light: {paper: '#f5f3eb', surface: '#fffefa', ink: '#183b3b', muted: '#52615f', line: '#dce3db', green: '#176b5c', dark: '#105447', mint: '#dcece1'},
-      dark: {paper: '#101f20', surface: '#182c2d', ink: '#e8f4ef', muted: '#aec5bd', line: '#355150', green: '#63b9a1', dark: '#3d806e', mint: '#244443'}
+      light: {paper: '#f4f1e8', surface: '#fffdf6', ink: '#152238', muted: '#5b6b8c', line: '#e0d9c4', green: '#c99a3f', dark: '#8a6d1a', mint: '#efe7cf'},
+      dark: {paper: '#0a1424', surface: '#101d33', ink: '#eef3fb', muted: '#93a5c4', line: '#22314d', green: '#e7bd72', dark: '#c99a3f', mint: '#16273f'}
     },
     cat: {
       light: {paper: '#f4f0ff', surface: '#fff', ink: '#28204b', muted: '#625b7e', line: '#ded8ef', green: '#7255c7', dark: '#5739a0', mint: '#e9e2fa'},
@@ -366,6 +366,7 @@
   }, true);
 
       function applySkin() {
+    if (settings.age === 'u16' && !settings.skinPicked) settings.skin = 'cat';
     const skin = skins[settings.skin] || skins.hikma;
     const palette = palettes[settings.skin]?.[settings.theme] || palettes.hikma.light;
     const root = document.documentElement;
@@ -606,6 +607,7 @@
       setTheme(themeButton.dataset.themeChoice);
     } else if (skinButton) {
       settings.skin = skinButton.dataset.skin;
+      settings.skinPicked = true;
       save();
       applySkin();
       renderSettings();
