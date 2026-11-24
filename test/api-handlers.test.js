@@ -7,8 +7,8 @@ import anonymousSession from '../api/auth/anonymous.js';
 import upgradeAccount from '../api/auth/upgrade.js';
 import speech from '../api/speech.js';
 import translate from '../api/translate.js';
-import {resolveSupabaseUser} from '../api/_lib/supabase-auth.js';
-import {enforceApiQuota} from '../api/_lib/quota.js';
+import {resolveSupabaseUser} from '../server/lib/supabase-auth.js';
+import {enforceApiQuota} from '../server/lib/quota.js';
 
 function responseRecorder() {
   return {

@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 
-await import('../api-client.js');
+await import('../client/api-client.js');
 const api = globalThis.HikmaApi;
 
 test('friendly Arabic messaging handles network failures', () => {

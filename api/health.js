@@ -1,4 +1,4 @@
-import {sendJson, getRequestId, makeRequestId} from './_lib/response.js';
+import {sendJson, getRequestId, makeRequestId} from '../server/lib/response.js';
 
 function integrationStatus(name, value) {
   if (!value) return 'missing';

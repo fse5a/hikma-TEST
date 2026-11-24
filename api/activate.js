@@ -1,4 +1,4 @@
-import {sendError, parseJsonBody, validateRequired, getRequestId, sendJson} from './_lib/response.js';
+import {sendError, parseJsonBody, validateRequired, getRequestId, sendJson} from '../server/lib/response.js';
 
 export default async function handler(request, response) {
   const requestId = getRequestId(request);

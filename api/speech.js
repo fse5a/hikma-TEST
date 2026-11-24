@@ -1,8 +1,8 @@
-import {sendError, parseJsonBody, validateRequired, getRequestId, sendJson} from './_lib/response.js';
-import {createSpeechProvider} from './_lib/speech-provider.js';
-import {resolveSupabaseUser} from './_lib/supabase-auth.js';
-import {enforceApiQuota} from './_lib/quota.js';
-import {loadPrivateAudio, storePrivateAudio} from './_lib/audio-cache.js';
+import {sendError, parseJsonBody, validateRequired, getRequestId, sendJson} from '../server/lib/response.js';
+import {createSpeechProvider} from '../server/lib/speech-provider.js';
+import {resolveSupabaseUser} from '../server/lib/supabase-auth.js';
+import {enforceApiQuota} from '../server/lib/quota.js';
+import {loadPrivateAudio, storePrivateAudio} from '../server/lib/audio-cache.js';
 
 export default async function handler(request, response) {
   const requestId = getRequestId(request);

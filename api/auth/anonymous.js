@@ -1,5 +1,5 @@
-import {sendError, getRequestId, sendJson} from '../_lib/response.js';
-import {enforceApiQuota} from '../_lib/quota.js';
+import {sendError, getRequestId, sendJson} from '../../server/lib/response.js';
+import {enforceApiQuota} from '../../server/lib/quota.js';
 
 export default async function handler(request, response) {
   const requestId = getRequestId(request);
