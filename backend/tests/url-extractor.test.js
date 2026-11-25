@@ -52,3 +52,18 @@ test('saved synthetic site fixtures extract story-only content, including embedd
     assert.doesNotMatch(result.text, /Home Topics Search|Daily menu|Archives Newsletter|Comunidad Cuenta|Loading the tale/);
   }
 });
+
+test('requestPinned connects to the pinned address on current Node (lookup with all:true)', async () => {
+  const {createServer} = await import('node:http');
+  const {requestPinned} = await import('../lib/url-extractor.js');
+  const server = createServer((request, response) => response.end('hello'));
+  await new Promise(resolve => server.listen(0, '127.0.0.1', resolve));
+  try {
+    const url = new URL(`http://pinned.test:${server.address().port}/`);
+    const result = await requestPinned(url, {address: '127.0.0.1', family: 4}, {timeoutMs: 3000, maxBytes: 1000});
+    assert.equal(result.status, 200);
+    assert.equal(result.body.toString(), 'hello');
+  } finally {
+    server.close();
+  }
+});

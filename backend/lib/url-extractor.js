@@ -79,7 +79,7 @@ function validateUrl(value) {
 }
 
 // بيتصل بالعنوان المثبّت مع حد للحجم والمهلة
-async function requestPinned(url, address, {timeoutMs, maxBytes, requestImpl} = {}) {
+export async function requestPinned(url, address, {timeoutMs, maxBytes, requestImpl} = {}) {
   if (requestImpl) return requestImpl(url, {address, timeoutMs, maxBytes});
   const doRequest = url.protocol === 'https:' ? httpsRequest : httpRequest;
   return new Promise((resolve, reject) => {
@@ -96,8 +96,10 @@ async function requestPinned(url, address, {timeoutMs, maxBytes, requestImpl} = 
         'Accept-Encoding': 'identity',
         Host: url.host
       },
-      lookup(_hostname, _options, callback) {
-        callback(null, address.address, address.family);
+      // Node 20+ بيطلب العناوين كقايمة (all: true)، فلازم نرد بالشكل ده وإلا الطلب بيفشل
+      lookup(_hostname, options, callback) {
+        if (options && options.all) callback(null, [{address: address.address, family: address.family}]);
+        else callback(null, address.address, address.family);
       }
     }, response => {
       const chunks = [];
