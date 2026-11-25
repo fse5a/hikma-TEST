@@ -2,7 +2,7 @@ import {createServer} from 'node:http';
 import {readFile, stat} from 'node:fs/promises';
 import {extname, resolve, sep} from 'node:path';
 
-const root = resolve('client');
+const roots = [resolve('frontend'), resolve('design')];
 const types = {
   '.css': 'text/css; charset=utf-8',
   '.html': 'text/html; charset=utf-8',
@@ -17,9 +17,13 @@ createServer(async (request, response) => {
   try {
     const pathname = decodeURIComponent(new URL(request.url, 'http://localhost').pathname);
     const relativePath = pathname === '/' ? 'index.html' : pathname.slice(1);
-    let filePath = resolve(root, relativePath);
-    if (filePath !== root && !filePath.startsWith(`${root}${sep}`)) throw new Error('invalid path');
-    if (!(await stat(filePath)).isFile()) throw new Error('not a file');
+    let filePath = null;
+    for (const root of roots) {
+      const candidate = resolve(root, relativePath);
+      if (candidate !== root && !candidate.startsWith(`${root}${sep}`)) throw new Error('invalid path');
+      try { if ((await stat(candidate)).isFile()) { filePath = candidate; break; } } catch {}
+    }
+    if (!filePath) throw new Error('not a file');
     response.writeHead(200, {'Content-Type': types[extname(filePath)] || 'application/octet-stream'});
     response.end(await readFile(filePath));
   } catch {

@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {createGoogleSpeechProvider} from '../server/lib/speech-provider.js';
-import {createTranslationProvider} from '../server/lib/translation-provider.js';
+import {createGoogleSpeechProvider} from '../lib/speech-provider.js';
+import {createTranslationProvider} from '../lib/translation-provider.js';
 
 test('google speech provider is disabled without key or flag', () => {
   assert.equal(createGoogleSpeechProvider({}), null);
@@ -65,12 +65,12 @@ test('translation provider rejects invalid upstream payloads', async () => {
 });
 
 test('gemini translation provider is disabled without API key', async () => {
-  const {createGeminiTranslationProvider} = await import('../server/lib/gemini-provider.js');
+  const {createGeminiTranslationProvider} = await import('../lib/gemini-provider.js');
   assert.equal(createGeminiTranslationProvider({}), null);
 });
 
 test('gemini translation provider requests contextual translation and reads candidates', async () => {
-  const {createGeminiTranslationProvider} = await import('../server/lib/gemini-provider.js');
+  const {createGeminiTranslationProvider} = await import('../lib/gemini-provider.js');
   const calls = [];
   const provider = createGeminiTranslationProvider({GEMINI_API_KEY: 'k'}, async (url, options) => {
     calls.push({url, body: JSON.parse(options.body)});
@@ -83,7 +83,7 @@ test('gemini translation provider requests contextual translation and reads cand
 });
 
 test('gemini speech provider wraps raw PCM into a WAV header', async () => {
-  const {createGeminiSpeechProvider} = await import('../server/lib/gemini-provider.js');
+  const {createGeminiSpeechProvider} = await import('../lib/gemini-provider.js');
   const pcm = Buffer.alloc(100, 1);
   const provider = createGeminiSpeechProvider({SPEECH_PROVIDER: 'gemini', GEMINI_API_KEY: 'k'}, async () => ({
     ok: true,
@@ -97,13 +97,13 @@ test('gemini speech provider wraps raw PCM into a WAV header', async () => {
 });
 
 test('gemini speech provider requires the gemini flag and key', async () => {
-  const {createGeminiSpeechProvider} = await import('../server/lib/gemini-provider.js');
+  const {createGeminiSpeechProvider} = await import('../lib/gemini-provider.js');
   assert.equal(createGeminiSpeechProvider({}), null);
   assert.equal(createGeminiSpeechProvider({GEMINI_API_KEY: 'k'}), null);
   assert.equal(createGeminiSpeechProvider({SPEECH_PROVIDER: 'gemini'}), null);
 });
 
-import {createEdgeSpeechProvider, __edgeInternals} from '../server/lib/edge-provider.js';
+import {createEdgeSpeechProvider, __edgeInternals} from '../lib/edge-provider.js';
 
 test('edge speech provider is disabled unless explicitly selected or on Vercel without keys', () => {
   assert.equal(createEdgeSpeechProvider({}), null);

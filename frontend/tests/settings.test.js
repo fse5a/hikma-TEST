@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import '../client/settings.js';
+import '../settings.js';
 
 const settings = globalThis.HikmaSettings;
 

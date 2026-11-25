@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {readFile} from 'node:fs/promises';
-import {assertRobotsAllowed, extractArticle, fetchPublicResource, isPublicAddress, resolvePublicAddress} from '../server/lib/url-extractor.js';
+import {assertRobotsAllowed, extractArticle, fetchPublicResource, isPublicAddress, resolvePublicAddress} from '../lib/url-extractor.js';
 
 test('URL SSRF address policy rejects loopback, private, link-local, and metadata ranges', async () => {
   for (const address of ['127.0.0.1', '10.1.2.3', '192.168.1.2', '169.254.169.254', '::1', 'fd00::1', 'fe80::1']) {

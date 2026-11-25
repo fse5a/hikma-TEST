@@ -1,14 +1,14 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import activate from '../api/activate.js';
-import diacritize from '../api/diacritize.js';
-import health from '../api/health.js';
-import anonymousSession from '../api/auth/anonymous.js';
-import upgradeAccount from '../api/auth/upgrade.js';
-import speech from '../api/speech.js';
-import translate from '../api/translate.js';
-import {resolveSupabaseUser} from '../server/lib/supabase-auth.js';
-import {enforceApiQuota} from '../server/lib/quota.js';
+import activate from '../handlers/activate.js';
+import diacritize from '../handlers/diacritize.js';
+import health from '../handlers/health.js';
+import anonymousSession from '../handlers/auth/anonymous.js';
+import upgradeAccount from '../handlers/auth/upgrade.js';
+import speech from '../handlers/speech.js';
+import translate from '../handlers/translate.js';
+import {resolveSupabaseUser} from '../lib/supabase-auth.js';
+import {enforceApiQuota} from '../lib/quota.js';
 
 function responseRecorder() {
   return {

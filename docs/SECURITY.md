@@ -2,7 +2,7 @@
 
 ## Current protections
 
-- Vercel responses use the headers and Content Security Policy in [vercel.json](vercel.json). The policy allows inline scripts and styles because the current single-page frontend contains inline code; it is not a strict nonce-based CSP.
+- Vercel responses use the headers and Content Security Policy in [vercel.json](../vercel.json). The policy allows inline scripts and styles because the current single-page frontend contains inline code; it is not a strict nonce-based CSP.
 - API handlers validate required fields and HTTP methods and return JSON errors with request IDs.
 - The browser bundle contains no provider or service-role secrets. Public JSON files contain metadata only.
 - CI runs `npm audit --audit-level=moderate`.

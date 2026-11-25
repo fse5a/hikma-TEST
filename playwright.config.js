@@ -1,7 +1,7 @@
 import {defineConfig, devices} from '@playwright/test';
 
 export default defineConfig({
-  testDir: './test',
+  testDir: './frontend/tests',
   testMatch: '**/*.e2e.spec.js',
   timeout: 180_000,
   fullyParallel: false,
@@ -13,7 +13,7 @@ export default defineConfig({
     headless: true
   },
   webServer: {
-    command: 'node test/server.js',
+    command: 'node scripts/dev-server.js',
     url: 'http://127.0.0.1:4173',
     reuseExistingServer: !process.env.CI,
     timeout: 30_000

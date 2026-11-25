@@ -1,6 +1,8 @@
-// Copies the static frontend from client/ to dist/ for Vercel's outputDirectory.
+// Assembles the deployable static site: frontend/ (pages, scripts, PWA shell) plus design/ (stylesheet, icon)
+// are flattened into dist/, which Vercel serves (outputDirectory).
 import {cpSync, rmSync} from 'node:fs';
 
 rmSync('dist', {recursive: true, force: true});
-cpSync('client', 'dist', {recursive: true});
-console.log('Built dist/ from client/.');
+cpSync('frontend', 'dist', {recursive: true, filter: source => !source.includes('/tests')});
+cpSync('design', 'dist', {recursive: true, filter: source => !source.endsWith('.md')});
+console.log('Built dist/ from frontend/ and design/.');

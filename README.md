@@ -1,48 +1,28 @@
-# Hikma Reading App
+# Hikma (حِكمة) reading app
 
-Hikma is a static Vercel app with Vercel Functions under `/api`. The interface supports Arabic, English, French, German, Spanish, and Chinese, detects the first-load locale, and keeps bundled-story translations local. Stories, settings, and user recordings stay in the browser. Optional worker adapters are not configured production services.
+A reading library for children and adults (Arabic first, 6 UI languages). Static frontend plus Vercel Functions, Supabase for data. Live: https://hekma-pearl.vercel.app
 
-## Project structure
+## Repository map (one folder per concern)
 
-- `client/` - the whole frontend: markup, styles, PWA shell, and browser modules. `scripts/build.js` copies it to `dist/`, which Vercel serves (`outputDirectory`).
-- `api/` - thin Vercel Functions entry points only.
-- `server/lib/` - shared backend modules (responses, auth, quotas, URL extraction, speech and translation providers, audio cache).
-- `db/migrations/` - Supabase schema, seed data, RLS policies, and quota RPCs.
-- `test/` - Node test suite (`npm test`) and Playwright specs.
+| Folder | What is inside | Who reviews it |
+| --- | --- | --- |
+| [`backend/`](backend/README.md) | API logic: request handlers, auth, quotas, speech/translation providers, URL import. Tests included. | Backend developer |
+| [`frontend/`](frontend/README.md) | Pages, scripts, PWA service worker, i18n, scanner, PDF import. Tests included. | Frontend developer |
+| [`database/`](database/README.md) | Supabase SQL migrations, seed, row-level security. Tests included. | Database / security reviewer |
+| [`iot/`](iot/README.md) | Smart pen / device part (reserved, no firmware yet). | Hardware developer |
+| [`design/`](design/README.md) | Stylesheet, icon, skins and palettes (owl, cat, robot; light and dark). | Designer |
+| [`docs/`](docs/) | Security notes, setup, assumptions, licenses, accessibility testing, [audit](docs/AUDIT.md). | Everyone |
+| `api/` | Vercel requires functions here. One-line files that re-export `backend/handlers/*`. No logic. | Nobody (do not edit) |
+| `scripts/` | `build.js` (frontend + design into `dist/`), `dev-server.js`. | |
 
-## What works locally
-
-- The library, reader, manual translation editor, settings, progress, and backups use browser storage.
-- Reading aloud uses the browser's Web Speech API. Recording/uploading a human voice uses browser media APIs and IndexedDB.
-- The frontend calls `/api/health`, `/api/translate`, `/api/diacritize`, and `/api/speech` through [api-client.js](api-client.js). Demo fallback is allowed only when health explicitly reports demo mode.
-- The local-only onboarding gate accepts `1234` or `admin` in the browser and does not call `/api/activate`. This is only a demo convenience, not authentication; anyone can inspect the code or change browser storage.
-
-## API status
-
-The health endpoint reports integrations and a non-secret language recommendation. Anonymous Supabase sessions and optional email upgrade are implemented when Auth is configured. Activation accepts the demo code only in demo mode; production activation fails closed. Bundled stories have local Arabic, English, French, German, Spanish, and Chinese text. Dynamic translation, speech, and diacritization support optional HTTPS workers; without them, translation stays manual, device speech is used, and original text is preserved. Generated audio is cached in IndexedDB and private Supabase Storage when configured. Provider calls use atomic per-IP and per-user minute/hour/day/month quotas. URL import uses DNS-pinned fetching, robots checks, Readability, and an embedded-JSON fallback. Text-layer PDFs are parsed locally in PDF.js without uploading the original file; scanned-page OCR, library sync, signed book QR, admin, custom licensed skins, parent PIN, account deletion, and monthly alerts remain unimplemented. Migrations `003`-`005` define policies, but have not been applied to a live Supabase project here.
-
-Deploy the repository to Vercel to run its `/api` functions and apply [vercel.json](vercel.json) security headers. A plain static server only serves the frontend and cannot execute those functions. For a static preview, run:
+## Commands
 
 ```bash
-npm run dev
+npm test        # backend + database + frontend unit tests
+npm run lint    # syntax check of every source file
+npm run build   # creates dist/ (what Vercel serves)
+npm run dev     # static preview at http://localhost:4173
+npm run test:e2e   # Playwright layout and accessibility checks
 ```
 
-Then open `http://localhost:4173`. Static preview does not make the API routes available; API errors are announced in Arabic and local reading/speech remain available. To run both static files and Vercel Functions locally in Codespaces, run `npm run dev:vercel` from the repository root and forward port `3000`. Enter `1234` at the demo activation screen.
-
-## Installable app
-
-The app includes [manifest.webmanifest](manifest.webmanifest) and [sw.js](sw.js). Serve it over HTTPS or localhost; browsers do not install PWAs from `file://` URLs. Offline support covers the cached app shell, not API responses or all dynamic content.
-
-## Security and setup
-
-See [SECURITY.md](SECURITY.md) for implemented protections and production gaps. Do not add provider secrets to frontend files. Vercel headers are configured in `vercel.json`; the CSP currently permits inline scripts/styles to support the existing page.
-
-## Checks
-
-```powershell
-npm test
-npm run lint
-npm run test:e2e
-```
-
-The Playwright suite checks layout at 320, 360, 390, 412, 600, 768, 1024, 1280, and 1920 CSS pixels, plus 740x360 and 844x390 landscape viewports; it checks 200% text, touch targets, dialogs, and keyboard-resized fields. CI uploads viewport screenshots and runs axe-core on the principal views/settings matrix. Automated checks do not replace TalkBack, VoiceOver, or NVDA testing; see [ACCESSIBILITY-TESTING.md](ACCESSIBILITY-TESTING.md).
+Secrets never go in this repo. Copy `.env.example` to `.env.local` locally; production values live in Vercel Project Settings.

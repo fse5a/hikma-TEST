@@ -2,7 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import {readFile} from 'node:fs/promises';
 
-const migrationUrl = new URL('../db/migrations/003_rls_policies.sql', import.meta.url);
+const migrationUrl = new URL('../migrations/003_rls_policies.sql', import.meta.url);
 
 test('database migration has owner policies and protects parent-owned rows', async () => {
   const sql = await readFile(migrationUrl, 'utf8');
@@ -21,7 +21,7 @@ test('database migration has owner policies and protects parent-owned rows', asy
 });
 
 test('ownership migration adds user foreign keys and a private audio bucket', async () => {
-  const sql = await readFile(new URL('../db/migrations/004_user_ownership_storage.sql', import.meta.url), 'utf8');
+  const sql = await readFile(new URL('../migrations/004_user_ownership_storage.sql', import.meta.url), 'utf8');
   for (const table of ['library_items', 'audio_cache', 'reading_progress', 'pronunciation_entries', 'jobs', 'usage_quota']) {
     assert.match(sql, new RegExp(`${table} add constraint ${table}_user_auth_fk foreign key \\(user_id\\) references auth\\.users`, 'i'));
   }
@@ -30,7 +30,7 @@ test('ownership migration adds user foreign keys and a private audio bucket', as
 });
 
 test('quota migration restricts event access and RPC execution to service role', async () => {
-  const sql = await readFile(new URL('../db/migrations/005_api_quotas.sql', import.meta.url), 'utf8');
+  const sql = await readFile(new URL('../migrations/005_api_quotas.sql', import.meta.url), 'utf8');
   assert.match(sql, /create table if not exists public\.api_rate_events/i);
   assert.match(sql, /alter table public\.api_rate_events enable row level security/i);
   assert.match(sql, /revoke all on function public\.consume_api_quota[\s\S]+from public, anon, authenticated/i);

@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {enforceApiQuota} from '../server/lib/quota.js';
+import {enforceApiQuota} from '../lib/quota.js';
 
 function recorder() {
   return {statusCode: 0, payload: null, status(code) { this.statusCode = code; return this; }, json(payload) { this.payload = payload; return this; }};
