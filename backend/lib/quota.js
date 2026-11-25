@@ -4,7 +4,7 @@
 import {createHmac} from 'node:crypto';
 import {sendError} from './response.js';
 
-// مسؤول عن فحص الحصة وتسجيل الطلب، ورفضه (429) لو تعدّى الحد
+// ده بتاع فحص الحصة وتسجيل الطلب، ورفضه لو تعدّى الحد
 export async function enforceApiQuota(request, response, requestId, userId, metric) {
   const supabaseUrl = String(process.env.SUPABASE_URL || '').replace(/\/$/, '');
   const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;

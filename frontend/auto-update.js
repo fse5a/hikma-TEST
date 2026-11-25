@@ -8,7 +8,7 @@
   let reloading = false;
   let banner = null;
 
-  // مسؤول عن معرفة هل المستخدم مشغول (نافذة مفتوحة أو قراءة أو كتابة) فلا نقطع عليه
+  // ده بتاع معرفة هل اليوزر مشغول فلا نقطع عليه
   // Busy means the user is in the middle of something: a dialog is open, reading is active, or text is being typed.
   function isBusy() {
     if (document.querySelector('.overlay.open')) return true;
@@ -25,7 +25,7 @@
     location.reload();
   }
 
-  // مسؤول عن شريط «تحديث جديد، اضغط للتحديث»
+  // ده بتاع شريط «تحديث جديد، اضغط للتحديث»
   // Small banner: shown only when an update is ready but the user is busy.
   function showBanner() {
     if (banner) return;

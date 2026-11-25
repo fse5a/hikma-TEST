@@ -1,5 +1,5 @@
 // ============================================================
-// نقطة استيراد قصة من رابط (بعد التحقق والحصة).
+// نقطة استيراد قصة من رابط.
 // ============================================================
 import {sendError, parseJsonBody, validateRequired, getRequestId, sendJson} from '../../lib/response.js';
 import {resolveSupabaseUser} from '../../lib/supabase-auth.js';

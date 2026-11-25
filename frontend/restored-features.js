@@ -12,7 +12,7 @@
   const detectedUiLanguage = settings.uiLanguage || window.HikmaI18n.detectLanguage();
   const autoUiLanguage = settings.uiLanguageAuto ?? !settings.uiLanguage;
 
-  // بيفحص حالة الخادم وتحديث رسالة الخدمات السحابية
+  // بيفحص حالة السيرفر وتحديث رسالة الخدمات السحابية
   async function refreshBackendHealth() {
     try {
       const health = await api.health();
@@ -31,7 +31,7 @@
       if (status) status.textContent = api.toFriendlyMessage(error);
     }
   }
-  // مسؤول عن ضبط القيم الافتراضية للإعدادات (السكن، الثيم، لغة الواجهة)
+  // ده بتاع ضبط القيم الافتراضية للإعدادات
   Object.assign(settings, {
     activated: settings.activated === true,
     uiLanguage: detectedUiLanguage,
@@ -44,7 +44,7 @@
     theme: settings.theme === 'dark' || (!Object.prototype.hasOwnProperty.call(settings, 'theme') && (settings.skin === 'cat' || window.matchMedia?.('(prefers-color-scheme: dark)').matches)) ? 'dark' : 'light'
   });
   window.HikmaI18n.setLanguage(settings.uiLanguage);
-  // مسؤول عن تجهيز سجل النشاط (القصص المكتملة والأيام المتتالية)
+  // ده بتاع تجهيز سجل النشاط
   state.activity = {...{completed: 0, opened: 0, recent: [], days: []}, ...(state.activity || {})};
   state.stories = state.stories.map(item => {
     const translationLang = item.translationLang || (item.lang === 'ar' ? 'en' : 'ar');
@@ -82,7 +82,7 @@
   gate.id = 'onboarding';
   gate.className = 'onboarding';
   document.body.insertBefore(gate, shell);
-  // مسؤول عن لوحة الإحصائيات (قصص مكتملة، أيام متتالية، المفضلة)
+  // ده بتاع لوحة الإحصائيات
   const dashboard = document.createElement('section');
   dashboard.id = 'readingDashboard';
   dashboard.className = 'reading-dashboard';
@@ -90,7 +90,7 @@
 
   document.querySelector('.topbar').appendChild(helperButton);
 
-  // مسؤول عن بناء نافذة إعدادات التطبيق (المظهر، اللغة، إمكانية الوصول، الحساب)
+  // ده بتاع بناء نافذة إعدادات التطبيق
   const settingsOverlay = document.createElement('div');
   settingsOverlay.id = 'appSettingsOverlay';
   settingsOverlay.className = 'overlay';
@@ -134,12 +134,12 @@
   offlineBlock.className = 'feature-setting-block';
   offlineBlock.innerHTML = '<h3>العمل دون اتصال</h3><p class="voice-note" id="offlineInfo">جارٍ حساب المحتوى المحفوظ على هذا الجهاز...</p>';
   settingsOverlay.querySelector('#resetApp').closest('.feature-setting-block').before(offlineBlock);
-  // مسؤول عن خيار مصدر الصوت (الجهاز أو السحابة)
+  // ده بتاع خيار مصدر الصوت
   const voiceSourceField = document.createElement('div');
   voiceSourceField.className = 'field';
   voiceSourceField.innerHTML = '<label for="voiceSource">مصدر الصوت</label><select id="voiceSource"><option value="device">صوت الجهاز (جودة أقل)</option></select><p class="voice-note">الصوت السحابي الطبيعي يتاح تلقائيًا عند تهيئة الخدمة الخلفية.</p>';
   document.querySelector('#settingsOverlay .dialog-body').prepend(voiceSourceField);
-  // مسؤول عن زر مسح الصوت المحفوظ على الجهاز
+  // ده بتاع زر مسح الصوت المحفوظ على الجهاز
   const clearSpeechCacheButton = document.createElement('button');
   clearSpeechCacheButton.className = 'button secondary';
   clearSpeechCacheButton.id = 'clearSpeechCache';
@@ -264,7 +264,7 @@
     dashboard.innerHTML = `<div class="dashboard-stat"><strong>${completed}</strong><span>قصص مكتملة</span></div><div class="dashboard-stat"><strong>${streak}</strong><span>أيام متتالية</span></div><div class="dashboard-stat"><strong>${favoriteCount}</strong><span>قصص مفضلة</span></div><div class="dashboard-continue"><span>${latest ? `آخر قراءة: ${esc(latest.title)}` : 'ابدأ أول حكاية لك'}</span>${latest ? `<button class="button secondary" data-open="${esc(latest.id)}">متابعة القراءة</button>` : '<span>اختر حكاية من مكتبتك</span>'}</div>`;
   }
 
-  // مسؤول عن تسجيل يوم القراءة للأيام المتتالية
+  // ده بتاع تسجيل يوم القراءة للأيام المتتالية
   function markReadingDay() {
     const days = new Set(state.activity.days || []);
     days.add(new Date().toISOString().slice(0, 10));
@@ -282,7 +282,7 @@
     renderDashboard();
   }
 
-  // بيحسّن بطاقات المكتبة (مفضلة، تقدم، ترتيب)
+  // بيحسّن بطاقات المكتبة
   function enhanceLibrary() {
     const library = document.querySelector('#library');
     const filter = document.querySelector('#filter');
@@ -335,7 +335,7 @@
     enhanceLibrary();
     renderDashboard();
   };
-  // مسؤول عن تحديث المكتبة عند تغيير الفلتر
+  // ده بتاع تحديث المكتبة عند تغيير الفلتر
   document.querySelector('#filter').addEventListener('change', () => window.renderLibrary());
   // زر المفضلة والنقر على بطاقات المكتبة
   document.addEventListener('click', event => {
@@ -423,7 +423,7 @@
     $('#a11yHighlightStyle').value = settings.highlightStyle || 'yellow';
   }
 
-  // مسؤول عن فتح نافذة الإعدادات
+  // ده بتاع فتح نافذة الإعدادات
   function openAppSettings() {
     renderSettings();
     updateOfflineUI();
@@ -539,7 +539,7 @@
   // ============================================================
   // القسم 7: بوابة الدخول والتهيئة الأولى (العمر، إمكانية الوصول، كود الدخول)
   // ============================================================
-  // مسؤول عن رسم شاشات البوابة (الكود ثم العمر ثم إمكانية الوصول ثم السكن)
+  // ده بتاع رسم شاشات البوابة
   function renderGate() {
     const step = !settings.activated ? 'activate' : !settings.age ? 'age' : settings.a11y === null ? 'access' : null;
     const ready = !step;
@@ -564,7 +564,7 @@
     syncResponsiveControls();
   }
 
-  // بيتأكد من كود الدخول التجريبي (للعرض فقط وليس حماية حقيقية)
+  // بيتأكد من كود الدخول التجريبي
   gate.addEventListener('submit', event => {
     if (event.target.id !== 'demoLoginForm') return;
     event.preventDefault();
@@ -593,7 +593,7 @@
     }
   });
 
-  // مسؤول عن أزرار الشريط السفلي في الموبايل (المكتبة، إضافة، الصوت، الإعدادات)
+  // ده بتاع أزرار الشريط السفلي في الموبايل
   document.querySelector('.mobile-nav').addEventListener('click', event => {
     const button = event.target.closest('[data-target]');
     if (!button) return;
@@ -604,7 +604,7 @@
     else if (target === 'appSettingsOverlay') openAppSettings();
   });
 
-  // أزرار نافذة الإعدادات (تصدير، استيراد، إعادة ضبط، مسح)
+  // أزرار نافذة الإعدادات
   settingsOverlay.addEventListener('click', event => {
     if (event.target.closest('#exportLibrary')) {
       downloadBackup();
@@ -656,7 +656,7 @@
   let audioTimes = [];
   let pendingAudioLine = null;
   let completionHandled = false;
-  // مسؤول عن واجهة التحكم في القارئ لباقي الملفات
+  // ده بتاع واجهة التحكم في القارئ لباقي الملفات
   window.hikmaReader = {
     get story() { return story; },
     get lines() { return lines; },
@@ -691,12 +691,12 @@
     } catch {}
   }
 
-  // مسؤول عن تغيير حالة الصفحة أثناء القراءة (مثل حركة البومة)
+  // ده بتاع تغيير حالة الصفحة أثناء القراءة
   function setReadingState(active) {
     document.body.classList.toggle('hikma-reading', !!active);
   }
 
-  // مسؤول عن الاحتفال بنهاية القصة (نجوم ونغمة)
+  // ده بتاع الاحتفال بنهاية القصة
   function celebrateStory() {
     document.body.classList.remove('hikma-celebrate');
     void document.body.offsetWidth;
@@ -721,7 +721,7 @@
   // بيحتفل عند إنهاء قصة
   window.addEventListener('hikma:finished', celebrateStory);
 
-  // مسؤول عن إيقاف الصوت الجاري
+  // ده بتاع إيقاف الصوت الجاري
   function stopAudio() {
     setReadingState(false);
     if (activeAudio) {
@@ -735,7 +735,7 @@
     pendingAudioLine = null;
   }
 
-  // مسؤول عن تشغيل التسجيل البشري المحفوظ
+  // ده بتاع تشغيل التسجيل البشري المحفوظ
   async function playRecordedStory(blobOverride = null) {
     if (!story) return;
     stopSpeech();
@@ -861,7 +861,7 @@
     }
   });
 
-  // اختصارات لوحة المفاتيح في القارئ (مسطرة المسافة والأسهم)
+  // اختصارات لوحة المفاتيح في القارئ
   document.addEventListener('keydown', event => {
     if (!document.querySelector('#readerOverlay.open') || event.target.matches('input,textarea,select,[contenteditable=true]')) return;
     if (event.code === 'Space') {
@@ -876,7 +876,7 @@
     }
   });
 
-  // مسؤول عن اكتشاف نهاية القصة وتسجيل الإنجاز
+  // ده بتاع اكتشاف نهاية القصة وتسجيل الإنجاز
   new MutationObserver(() => {
     const message = document.querySelector('#readerMessage');
     if (!message || !message.textContent.includes('وصلت لنهاية القصة')) {
@@ -910,7 +910,7 @@
       applySkin();
     });
   });
-  // بينطق اسم الزر عند التركيز عليه (للتوجيه الصوتي)
+  // بينطق اسم الزر عند التركيز عليه
   document.addEventListener('focusin', event => {
     if ((!settings.a11y && settings.voiceGuidance === false) || !event.target.matches('button,input,textarea,select,a')) return;
     if (document.querySelector('#readerOverlay.open') && speaking) return;
@@ -985,7 +985,7 @@
   document.addEventListener('click', event => {
     if (event.target.closest('#settingsOpen')) dialogReturnFocus = event.target.closest('#settingsOpen');
   }, true);
-  // بيحصر زر Tab داخل النافذة المفتوحة (للوصول بلوحة المفاتيح)
+  // بيحصر زر Tab داخل النافذة المفتوحة
   document.addEventListener('keydown', event => {
     const dialog = document.querySelector('.overlay.open [role="dialog"]');
     if (!dialog || event.key !== 'Tab') return;
@@ -1046,7 +1046,7 @@
     }
   }
 
-  // مسؤول عن تحميل قوائم الأصوات وجمل الاختبار
+  // ده بتاع تحميل قوائم الأصوات وجمل الاختبار
   async function loadStaticData() {
     updateCloudControls();
     loadVoiceChoices();
@@ -1109,7 +1109,7 @@
       speechSynthesis.speak(utterance);
     });
   }
-  // بيغيّر مصدر الصوت (الجهاز أو السحابة)
+  // بيغيّر مصدر الصوت
   document.querySelector('#voiceSource').addEventListener('change', event => {
     settings.voiceSource = event.target.value;
     settings.voiceSourcePinned = true;
@@ -1117,7 +1117,7 @@
     updateCloudControls();
   });
 
-  // مسؤول عن رسالة حالة الخدمات السحابية
+  // ده بتاع رسالة حالة الخدمات السحابية
   function cloudStatus(message, isError = false) {
     cloudStatusState = {message, isError};
     const status = document.querySelector('#cloudStatus');
@@ -1200,7 +1200,7 @@
   // ============================================================
   // القسم 12: الترجمة والتشكيل
   // ============================================================
-  // مسؤول عن ترجمة القصة (يدوي أو ذكي من الخادم) وحفظ الترجمة
+  // ده بتاع ترجمة القصة وحفظ الترجمة
   async function translateStory(to) {
     if (!story || !window.HikmaI18n.languages.includes(to)) return;
     if (to === story.lang) {
@@ -1252,7 +1252,7 @@
     if (targetLanguage === story.lang) return story.text;
     return story.translations?.[targetLanguage] || (story.translationLang === targetLanguage ? story.translation : '');
   }
-  // مسؤول عن اختيار النص المعروض (المشكّل أو العادي)
+  // ده بتاع اختيار النص المعروض
   window.hikmaGetReaderText = targetLanguage => {
     const originalText = originalReaderText(targetLanguage);
     const cached = story?.diacritics?.[targetLanguage];
@@ -1283,7 +1283,7 @@
     return `speech-${[...new Uint8Array(bytes)].map(byte => byte.toString(16).padStart(2, '0')).join('')}`;
   }
 
-  // بيحوّل الصوت المستلم من الخادم لملف يمكن تشغيله
+  // بيحوّل الصوت المستلم من السيرفر لملف يمكن تشغيله
   function audioBlobFromBase64(audioBase64, contentType) {
     const binary = atob(audioBase64);
     const bytes = new Uint8Array(binary.length);
@@ -1422,7 +1422,7 @@
   // ============================================================
   // القسم 14: الضغط على كلمة لمعرفة معناها
   // ============================================================
-  // بيشوف أي كلمة ضغط عليها المستخدم
+  // بيشوف أي كلمة ضغط عليها اليوزر
   function wordAtPoint(lineSpan, event) {
     const line = lines[Number(lineSpan.dataset.line)];
     if (!line) return null;
@@ -1458,7 +1458,7 @@
     return {word: word.trim(), start, lineIndex: Number(lineSpan.dataset.line)};
   }
 
-  // ذاكرة مؤقتة لمعاني الكلمات (تُحفظ في المتصفح)
+  // ذاكرة مؤقتة لمعاني الكلمات
   const wordCache = new Map();
   try {
     const stored = JSON.parse(localStorage.getItem('hikma-word-cache') || '{}');
@@ -1472,7 +1472,7 @@
     wordPop = null;
   }
 
-  // مسؤول عن عرض معنى الكلمة في فقاعة
+  // ده بتاع عرض معنى الكلمة في فقاعة
   async function showWordMeaning(hit, event) {
     dismissWordPop();
     const targetLang = lang === 'ar' ? 'en' : 'ar';
@@ -1724,7 +1724,7 @@
     }
   }
 
-  // مسؤول عن مراقبة نافذة القراءة وإعادة تحسينها كلما اتغيرت
+  // ده بتاع مراقبة نافذة القراءة وإعادة تحسينها كلما اتغيرت
   const readerObserver = new MutationObserver(enhanceReader);
   readerObserver.observe(document.querySelector('#readerContent'), {childList: true});
 

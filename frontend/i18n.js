@@ -117,7 +117,7 @@
     return languages.includes(code) ? code : 'en';
   }
 
-  // بيكتشف لغة المستخدم من المتصفح
+  // بيكتشف لغة اليوزر من المتصفح
   function detectLanguage(preferences = globalThis.navigator?.languages || [globalThis.navigator?.language]) {
     for (const preference of preferences || []) {
       const normalized = normalizeLanguage(preference);
@@ -126,7 +126,7 @@
     return 'ar';
   }
 
-  // مسؤول عن جلب قاموس لغة معينة
+  // ده بتاع جلب قاموس لغة معينة
   function mapFor(language) {
     return dictionaries[language] || {};
   }
@@ -144,7 +144,7 @@
     if (node.nodeValue !== nextValue) node.nodeValue = nextValue;
   }
 
-  // بيترجم خصائص العنصر (العنوان والوصف)
+  // بيترجم خصائص العنصر
   function translateAttributes(element, dictionary) {
     for (const attribute of ['aria-label', 'title', 'placeholder']) {
       const value = element.getAttribute(attribute);
@@ -192,7 +192,7 @@
     'جارٍ قراءة النص من الصفحة (قد يستغرق ثوانٍ)...': '正在识别页面文字（可能需要几秒钟）...'
   });
 
-  // مسؤول عن ترجمة الصفحة كلها
+  // ده بتاع ترجمة الصفحة كلها
   function translateTree(root = document.body) {
     if (!root) return;
     const dictionary = mapFor(activeLanguage);

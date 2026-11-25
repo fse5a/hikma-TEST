@@ -4,14 +4,14 @@
 (() => {
   const DEFAULT_TIMEOUT_MS = 12000;
 
-  // بيعرف رد الخادم التجريبي
+  // بيعرف رد السيرفر التجريبي
   function isDemoNotConfigured(payload) {
     const message = String(payload?.error?.message || '').toLowerCase();
     const code = String(payload?.error?.code || '').toLowerCase();
     return code.includes('not_configured') || code.includes('not-configured') || message.includes('not configured') || message.includes('not set up') || message.includes('not available');
   }
 
-  // بيحوّل أخطاء الخادم لرسائل عربية مفهومة
+  // بيحوّل أخطاء السيرفر لرسائل عربية واضحة
   function toFriendlyMessage(error) {
     const message = error && error.message ? String(error.message) : '';
     const lower = message.toLowerCase();
@@ -30,7 +30,7 @@
     return 'حدثت مشكلة أثناء الاتصال. جرّب مرة أخرى، أو استخدم الوضع التجريبي.';
   }
 
-  // بيرد بردود تجريبية لما الخادم في وضع العرض
+  // بيرد بردود تجريبية لما السيرفر في وضع العرض
   function demoResponseFor(path, details = {}) {
     const url = String(path || '');
     if (url.includes('/api/health')) {
@@ -89,7 +89,7 @@
     };
   }
 
-  // بيبعت أي طلب للخادم مع مهلة وإعادة تجربة ومعالجة الأخطاء
+  // بيبعت أي طلب للخادم مع مهلة وإعادة محاولة والتعامل مع الأخطاء
   async function request(path, options = {}) {
     const timeoutMs = Number(options.timeoutMs || DEFAULT_TIMEOUT_MS);
     const {timeoutMs: _timeout, ...fetchOptions} = options;
@@ -148,7 +148,7 @@
     return error;
   }
 
-  // مسؤول عن معرفة هل المسار هو فحص الصحة
+  // ده بتاع معرفة هل المسار هو فحص الصحة
   function isHealthPath(path) {
     return new URL(String(path), globalThis.location?.href || 'http://localhost').pathname.endsWith('/api/health');
   }
@@ -158,13 +158,13 @@
     try { return globalThis.sessionStorage || null; } catch { return null; }
   }
 
-  // بيحدد المسارات التي لا تحتاج جلسة دخول
+  // بيحدد المسارات اللي مش محتاجة جلسة دخول
   function isAuthExempt(path) {
     const pathname = new URL(String(path), globalThis.location?.href || 'http://localhost').pathname;
     return pathname === '/api/health' || pathname === '/api/activate' || pathname === '/api/auth/anonymous' || pathname === '/api/auth/refresh';
   }
 
-  // بيضيف رمز الدخول (Bearer) للطلب
+  // بيضيف رمز الدخول للطلب
   async function authorizationHeader(path) {
     if (isAuthExempt(path)) return '';
     const storage = sessionStorageSafe();

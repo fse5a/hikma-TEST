@@ -25,12 +25,12 @@ for (const [address, prefix] of [
   ['2001:db8::', 32], ['fc00::', 7], ['fe80::', 10], ['ff00::', 8]
 ]) blockedAddresses.addSubnet(address, prefix, 'ipv6');
 
-// مسؤول عن تحويل عنوان IPv4 لرقم
+// ده بتاع تحويل عنوان IPv4 لرقم
 function ipv4Number(address) {
   return address.split('.').reduce((value, octet) => ((value << 8) | Number(octet)) >>> 0, 0);
 }
 
-// بيشوف هل العنوان داخلي أو محجوز (محظور)
+// بيشوف هل العنوان داخلي أو محجوز
 function isBlockedIpv4(address) {
   const value = ipv4Number(address);
   return blockedIpv4Ranges.some(([network, prefix]) => {
@@ -48,7 +48,7 @@ export function isPublicAddress(address) {
   return !blockedAddresses.check(address, 'ipv6');
 }
 
-// مسؤول عن تحويل اسم الموقع لعنوان عام آمن فقط
+// ده بتاع تحويل اسم الموقع لعنوان عام آمن فقط
 export async function resolvePublicAddress(hostname, lookupImpl = dnsLookup) {
   let addresses;
   if (isIP(hostname)) addresses = [{address: hostname, family: isIP(hostname)}];
@@ -69,7 +69,7 @@ export async function resolvePublicAddress(hostname, lookupImpl = dnsLookup) {
   return addresses[0];
 }
 
-// مسؤول عن التحقق من الرابط (https فقط وبدون بيانات دخول)
+// ده بتاع التحقق من الرابط
 function validateUrl(value) {
   const url = value instanceof URL ? new URL(value) : new URL(String(value));
   if (!['http:', 'https:'].includes(url.protocol) || url.username || url.password) throw new Error('Only public HTTP/HTTPS URLs are allowed.');

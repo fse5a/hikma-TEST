@@ -4,13 +4,13 @@
 import {sendJson, getRequestId, makeRequestId} from '../lib/response.js';
 import {createEdgeSpeechProvider} from '../lib/edge-provider.js';
 
-// بيوصف حالة خدمة (مفعّلة/ناقصة) بدون كشف مفاتيح
+// بيوصف حالة خدمة من غير كشف مفاتيح
 function integrationStatus(name, value) {
   if (!value) return 'missing';
   return value === 'demo' ? 'demo-mode' : 'configured';
 }
 
-// مسؤول عن اقتراح لغة من هيدر المتصفح
+// ده بتاع اقتراح لغة من هيدر المتصفح
 function recommendedLanguage(request) {
   const country = String(request?.headers?.['x-vercel-ip-country'] || '').toUpperCase();
   const countryLanguages = {SA: 'ar', EG: 'ar', AE: 'ar', QA: 'ar', KW: 'ar', BH: 'ar', OM: 'ar', FR: 'fr', DE: 'de', ES: 'es', CN: 'zh'};

@@ -4,9 +4,9 @@
 // القسم الأول: الإعدادات الأساسية والبيانات الأولية (القصص الجاهزة)
 // ============================================================
 const SPEECH_SETTINGS=window.HikmaSettings;
-// مفتاح تخزين المكتبة في المتصفح (localStorage)
+// مفتاح تخزين المكتبة في المتصفح
 const KEY='hikma-library-v2';
-// القصص الجاهزة التي تظهر لأول مرة (بالعربي والإنجليزي)
+// القصص الجاهزة اللي تظهر لأول مرة
 const SEED=[
 {id:'seed-1',title:'حكمة والأرنب الصغير',lang:'ar',text:'في ليلة هادئة، خرجت البومة حكمة تبحث عن نجمة صغيرة. قابلت أرنبًا حزينًا لأنه أضاع جزرته. ساعدته حكمة في البحث بين الأشجار. وجدا الجزرة تحت ورقة كبيرة. ضحك الأرنب وشكرها كثيرًا. ثم عادا معًا والنجوم تلمع فوقهما.',translation:'On a quiet night, Hikma the owl went out looking for a little star. She met a sad rabbit who had lost his carrot. Hikma helped him search among the trees. They found the carrot under a big leaf. The rabbit laughed and thanked her. Then they went back together as the stars twinkled above them.',translations:{fr:'Par une nuit calme, la chouette Hikma partit à la recherche d’une petite étoile. Elle rencontra un lapin triste qui avait perdu sa carotte. Hikma l’aida à chercher parmi les arbres. Ils trouvèrent la carotte sous une grande feuille. Le lapin rit et la remercia. Puis ils rentrèrent ensemble sous les étoiles.',de:'In einer stillen Nacht machte sich die Eule Hikma auf die Suche nach einem kleinen Stern. Sie traf ein trauriges Kaninchen, das seine Karotte verloren hatte. Hikma half ihm, zwischen den Bäumen zu suchen. Sie fanden die Karotte unter einem großen Blatt. Das Kaninchen lachte und dankte ihr. Dann gingen sie gemeinsam unter den funkelnden Sternen zurück.',es:'En una noche tranquila, la lechuza Hikma salió a buscar una estrella pequeña. Encontró a un conejo triste que había perdido su zanahoria. Hikma le ayudó a buscar entre los árboles. Encontraron la zanahoria debajo de una hoja grande. El conejo se rio y le dio las gracias. Después volvieron juntos bajo las estrellas.',zh:'一个宁静的夜晚，猫头鹰希克玛出门寻找一颗小星星。她遇见一只伤心的兔子，因为它弄丢了胡萝卜。希克玛帮它在树林里寻找。他们在一片大叶子下面找到了胡萝卜。兔子笑了起来，连声道谢。随后他们一起回家，星星在头顶闪烁。'},icon:'🌙'},
 {id:'seed-2',title:'Hikma’s Night Story',lang:'en',text:'Hikma the owl loves to read at night. One evening, she found a tiny book under a big tree. The book told a story about a brave little star. Hikma read it aloud to all her forest friends. They clapped their wings and asked for one more story.',translation:'تحب البومة حكمة القراءة في الليل. في مساء أحد الأيام وجدت كتابًا صغيرًا تحت شجرة كبيرة. حكى الكتاب قصة عن نجمة صغيرة شجاعة. قرأت حكمة القصة بصوت عالٍ لأصدقائها في الغابة. صفقوا بأجنحتهم وطلبوا قصة أخرى.',translations:{ar:'تحب البومة حكمة القراءة في الليل. في مساء أحد الأيام، وجدت كتابًا صغيرًا تحت شجرة كبيرة. حكى الكتاب قصة عن نجمة صغيرة شجاعة. قرأته حكمة بصوت عالٍ لأصدقائها في الغابة. صفقوا بأجنحتهم وطلبوا قصة أخرى.',fr:'La chouette Hikma aime lire la nuit. Un soir, elle trouva un tout petit livre sous un grand arbre. Le livre racontait l’histoire d’une petite étoile courageuse. Hikma le lut à voix haute à tous ses amis de la forêt. Ils battirent des ailes et demandèrent une autre histoire.',de:'Die Eule Hikma liest gern in der Nacht. Eines Abends fand sie ein winziges Buch unter einem großen Baum. Das Buch erzählte von einem mutigen kleinen Stern. Hikma las es all ihren Freunden im Wald vor. Sie klatschten mit den Flügeln und baten um noch eine Geschichte.',es:'A la lechuza Hikma le encanta leer de noche. Una tarde encontró un libro diminuto bajo un árbol grande. El libro contaba la historia de una estrella pequeña y valiente. Hikma lo leyó en voz alta a todos sus amigos del bosque. Ellos aplaudieron con las alas y pidieron otra historia.',zh:'猫头鹰希克玛喜欢在夜晚读书。一天晚上，她在一棵大树下发现了一本小书。书里讲述了一颗勇敢的小星星。希克玛把故事读给森林里的朋友们听。他们拍动翅膀鼓掌，还请求她再讲一个故事。'},icon:'⭐'}];
@@ -15,7 +15,7 @@ const $=s=>document.querySelector(s);const esc=s=>String(s).replace(/[&<>"']/g,c
 const split=t=>(t.match(/[^.!؟?\n]+[.!؟?]*/g)||[]).map(s=>s.trim()).filter(Boolean);const arabic=t=>/[\u0600-\u06FF]/.test(t);
 // الحالة العامة للتطبيق: القصص والإعدادات
 let state={stories:SEED.map(s=>({...s,progress:0})),settings:{...SPEECH_SETTINGS.defaults,arVoice:'',enVoice:''}};
-// تحميل المكتبة والإعدادات المحفوظة من المتصفح (وترحيل النسخة القديمة)
+// تحميل المكتبة والإعدادات المحفوظة من المتصفح
 try{
 	const saved=JSON.parse(localStorage.getItem(KEY)||'null');
 	if(saved){
@@ -36,7 +36,7 @@ let story=null,lines=[],lineIndex=0,lang='ar',speaking=false,token=0,mediaRecord
 function save(){try{localStorage.setItem(KEY,JSON.stringify(state))}catch{toast('تعذر الحفظ في هذا المتصفح')}}
 // بيحفظ مكان وصول القارئ في القصة
 function saveProgress(){if(!story)return;story.progressByLang=story.progressByLang||{};story.progressByLang[lang]=lineIndex;story.progress=lineIndex;save()}
-// مسؤول عن إظهار رسالة صغيرة مؤقتة للمستخدم
+// ده بتاع إظهار رسالة صغيرة مؤقتة للمستخدم
 function toast(text){const el=$('#toast');el.textContent=text;el.classList.add('show');clearTimeout(toastTimer);toastTimer=setTimeout(()=>el.classList.remove('show'),2400)}
 // ============================================================
 // القسم الثاني: المكتبة (عرض القصص والبحث والفلترة)
@@ -50,13 +50,13 @@ function closeModal(id){$('#'+id).classList.remove('open');if(!document.querySel
 // ============================================================
 // القسم الثالث: القارئ (تقسيم الجمل، الأصوات، التشغيل والإيقاف)
 // ============================================================
-// مسؤول عن تقسيم نص القصة لجمل
+// ده بتاع تقسيم نص القصة لجمل
 function sentences(text){return split(text).length?split(text):[text.trim()]}
 // بيختار صوت الجهاز المناسب للغة
 function voiceFor(language){const name=language==='ar'?state.settings.arVoice:language==='en'?state.settings.enVoice:'';const voices=speechSynthesis.getVoices();return voices.find(v=>v.name===name)||voices.find(v=>v.lang.toLowerCase().startsWith(language))||null}
-// بيجيب نص القصة باللغة المطلوبة (الأصلي أو المترجم أو المشكّل)
+// بيجيب نص القصة باللغة المطلوبة
 function currentText(){if(window.hikmaGetReaderText)return window.hikmaGetReaderText(lang);if(lang===story.lang)return story.text;return story.translations?.[lang]||(story.translation?story.translation:'')}
-// بيبني شكل نافذة القراءة (العنوان، الجمل، الأزرار)
+// بيبني شكل نافذة القراءة
 function readerMarkup(){lines=sentences(currentText());lineIndex=Math.min(lineIndex,lines.length-1);const hasTranslation=true;return `<div class="reader-grid"><div class="reader-main"><h1 class="reader-title">${esc(story.title)}</h1><div class="reader-details"><span>${story.lang==='ar'?'حكاية عربية':'English story'}</span><span>·</span><span id="counter"></span></div><div class="reading-text" id="readingText" lang="${lang}" dir="${lang==='ar'?'rtl':'ltr'}"></div><div class="reader-controls"><button class="round-control" data-step="-1" aria-label="الجملة السابقة">‹</button><button class="play-control" id="playPause" aria-label="تشغيل القراءة"><span id="playIcon">▶</span></button><button class="round-control" data-step="1" aria-label="الجملة التالية">›</button></div><div class="reader-foot"><span id="readerMessage">استمع أو اضغط على أي جملة للبدء.</span><span>${Number(state.settings.rate).toFixed(2)}×</span></div></div><aside class="voice-panel"><h3>الصوت والقراءة</h3>${hasTranslation?`<div class="field"><label for="readLang">لغة القراءة</label><select id="readLang"><option value="${story.lang}">${story.lang==='ar'?'الأصل':'Original'}</option><option value="ar">العربية</option><option value="en">English</option></select></div>`:''}<div class="field"><label for="readerRate">سرعة القراءة <output id="readerRateText">${Number(state.settings.rate).toFixed(2)}×</output></label><input id="readerRate" type="range" min="0.72" max="1.15" step="0.01" value="${state.settings.rate}"><div class="range-label"><span>هادئة</span><span>أسرع</span></div></div><div class="field"><label for="readerPitch">طبقة الصوت <output id="readerPitchText">${Number(state.settings.pitch).toFixed(2)}</output></label><input id="readerPitch" type="range" min="0.8" max="1.2" step="0.01" value="${state.settings.pitch}"><div class="range-label"><span>أخفض</span><span>أعلى</span></div></div><button class="button secondary" id="recordOpen">${story.audio?'🎙️ إدارة الصوت البشري':'🎙️ إضافة صوت بشري'}</button><p class="voice-note">${story.audio?'استمع للتسجيل الأصلي أو استبدله.':'لصوت طبيعي بالكامل، أضف تسجيلًا بشريًا لهذه القصة.'}</p><button class="button secondary" id="recordPlay" ${story.audio?'':'hidden'}>▶ استمع للتسجيل</button><div class="divider"></div><button class="button secondary" id="voiceSettingsOpen">اختيار صوت الجهاز ←</button></aside></div>`}
 // بيرسم جمل القصة وتمييز الجملة والكلمة الحالية
 function renderLines(wordOffset=-1){const box=$('#readingText');if(!box)return;box.innerHTML=lines.map((s,i)=>{let content=esc(s);if(i===lineIndex&&wordOffset>=0){const start=s.slice(0,wordOffset).search(/\S/);if(start>=0){const absoluteStart=wordOffset+start;const rest=s.slice(absoluteStart);const match=rest.match(/^\S+/);if(match)content=`${esc(s.slice(0,absoluteStart))}<mark class="active-word">${esc(match[0])}</mark>${esc(s.slice(absoluteStart+match[0].length))}`}}return `<span data-line="${i}" class="${i===lineIndex?'active':''}">${content} </span>`}).join('');$('#counter').textContent=`${lineIndex+1} / ${lines.length}`;box.querySelector('.active')?.scrollIntoView({block:'nearest',behavior:'smooth'})}
@@ -74,9 +74,9 @@ function toggleSpeech(){if(speaking){stopSpeech();saveProgress();$('#playPause')
 function step(delta){stopSpeech();lineIndex=Math.max(0,Math.min(lines.length-1,lineIndex+delta));renderLines();saveProgress()}
 // بيفتح قصة من المكتبة في القارئ
 function chooseStory(id){story=state.stories.find(s=>s.id===id);if(!story)return;lang=story.lang;lines=sentences(story.text);lineIndex=Math.min(story.progressByLang?.[lang]??story.progress??0,lines.length-1);renderReader();openModal('readerOverlay')}
-// بيوقّف القراءة وحفظ التقدم لما المستخدم يخرج من الصفحة
+// بيوقّف القراءة وحفظ التقدم لما اليوزر يخرج من الصفحة
 document.addEventListener('visibilitychange',()=>{if(document.hidden&&story){window.hikmaReader?.stop?.();stopSpeech();saveProgress();$('#readerMessage')&&($('#readerMessage').textContent='توقفت القراءة عند بداية الجملة الحالية.')}});
-// مسؤول عن أزرار التحكم في الإشعارات وشاشة القفل (تشغيل/إيقاف/التالي/السابق)
+// ده بتاع أزرار التحكم في الإشعارات وشاشة القفل
 if('mediaSession'in navigator){try{navigator.mediaSession.setActionHandler('play',()=>{if(!speaking)startSpeech()});navigator.mediaSession.setActionHandler('pause',()=>{if(speaking)toggleSpeech()});navigator.mediaSession.setActionHandler('previoustrack',()=>step(-1));navigator.mediaSession.setActionHandler('nexttrack',()=>step(1))}catch{}}
 // ============================================================
 // القسم الرابع: إعدادات الصوت وتسجيل صوت بشري
@@ -97,22 +97,22 @@ async function openRecording(){pendingBlob=null;$('#audioFile').value='';$('#rec
 $('#audioFile').addEventListener('change',e=>{const file=e.target.files?.[0];if(!file)return;pendingBlob=file;$('#recordStatus').textContent=`تم اختيار ${file.name}`;if(audioUrl)URL.revokeObjectURL(audioUrl);audioUrl=URL.createObjectURL(file);$('#audioPreview').src=audioUrl;$('#audioPreview').hidden=false});
 // هنا: زر تسجيل الصوت من الميكروفون
 $('#recordButton').addEventListener('click',async()=>{if(mediaRecorder?.state==='recording'){mediaRecorder.stop();return}try{const stream=await navigator.mediaDevices.getUserMedia({audio:true});chunks=[];mediaRecorder=new MediaRecorder(stream);mediaRecorder.ondataavailable=e=>{if(e.data.size)chunks.push(e.data)};mediaRecorder.onstop=()=>{stream.getTracks().forEach(t=>t.stop());pendingBlob=new Blob(chunks,{type:mediaRecorder.mimeType||'audio/webm'});$('#recordButton').textContent='● ابدأ التسجيل';$('#recordStatus').textContent='اكتمل التسجيل. استمع إليه قبل الحفظ.';if(audioUrl)URL.revokeObjectURL(audioUrl);audioUrl=URL.createObjectURL(pendingBlob);$('#audioPreview').src=audioUrl;$('#audioPreview').hidden=false};mediaRecorder.start();$('#recordButton').textContent='■ إيقاف التسجيل';$('#recordStatus').textContent='التسجيل جارٍ...'}catch{$('#recordStatus').textContent='تعذر فتح الميكروفون. اسمح للمتصفح باستخدامه ثم حاول مجددًا.'}});
-// مسؤول عن زر حفظ التسجيل
+// ده بتاع زر حفظ التسجيل
 $('#saveAudio').addEventListener('click',async()=>{if(!pendingBlob){$('#recordStatus').textContent='اختر ملفًا أو سجّل صوتًا أولًا.';return}try{await saveAudio(story.id,pendingBlob);closeModal('recordOverlay');renderReader();toast('تم حفظ التسجيل على هذا الجهاز')}catch{$('#recordStatus').textContent='تعذر حفظ الصوت على هذا الجهاز.'}});
 // بيشغّل التسجيل البشري المحفوظ
 async function playRecorded(){const blob=await getAudio(story.id).catch(()=>null);if(!blob){toast('التسجيل غير متاح على هذا الجهاز');return}const url=URL.createObjectURL(blob),audio=new Audio(url);audio.onended=()=>URL.revokeObjectURL(url);audio.play().catch(()=>toast('تعذر تشغيل التسجيل'))}
 // ============================================================
 // القسم الخامس: ربط الأزرار والأحداث (إضافة قصة، بحث، سرعة، إمكانية الوصول)
 // ============================================================
-// مسؤول عن حفظ قصة جديدة من نموذج الإضافة
+// ده بتاع حفظ قصة جديدة من نموذج الإضافة
 $('#storyForm').addEventListener('submit',e=>{e.preventDefault();const text=$('#storyText').value.trim();if(!text){$('#formStatus').textContent='اكتب نص القصة أولًا.';return}const appendSel=$('#appendToStory');if(appendSel&&appendSel.value){const target=state.stories.find(s=>s.id===appendSel.value);if(target){target.text=target.text.trim()+'\n\n'+text;if(!target.title&&$('#storyTitle').value.trim())target.title=$('#storyTitle').value.trim();save();renderLibrary();e.target.reset();appendSel.value='';appendSel.closest('.field').hidden=true;closeModal('addOverlay');toast('أُضيفت الصفحات إلى «'+target.title+'»');return}}state.stories.unshift({id:'story-'+Date.now(),title:$('#storyTitle').value.trim()||'قصة جديدة',text,lang:arabic(text)?'ar':'en',translation:$('#storyTranslation').value.trim(),progress:0,icon:'📖'});save();renderLibrary();e.target.reset();closeModal('addOverlay');toast('أُضيفت القصة إلى مكتبتك')});
 // بيربط البحث والفلتر وأزرار فتح النوافذ
 $('#search').addEventListener('input',renderLibrary);$('#filter').addEventListener('change',renderLibrary);$('#addOpen').addEventListener('click',()=>openModal('addOverlay'));$('#voiceOpen').addEventListener('click',()=>{populateVoices();openModal('settingsOverlay')});$('#testVoice').addEventListener('click',previewVoice);
-// مسؤول عن ربط أزرار إعدادات الصوت (السرعة والنبرة)
+// ده بتاع ربط أزرار إعدادات الصوت
 $('#globalRate').addEventListener('input',e=>setRate(e.target.value));document.querySelectorAll('#settingsOverlay [data-rate]').forEach(b=>b.addEventListener('click',()=>setRate(Number(b.dataset.rate))));$('#globalPitch').addEventListener('input',e=>{state.settings.pitch=SPEECH_SETTINGS.clampPitch(e.target.value);$('#globalPitchText').value=`${state.settings.pitch} st`;e.target.setAttribute('aria-valuetext',`${state.settings.pitch} semitones`);const readerPitch=$('#readerPitch');if(readerPitch){readerPitch.value=state.settings.pitch;$('#readerPitchText').value=`${state.settings.pitch} st`;readerPitch.setAttribute('aria-valuetext',`${state.settings.pitch} semitones`)}save()});$('#voiceArabic').addEventListener('change',e=>{state.settings.arVoice=e.target.value;save()});$('#voiceEnglish').addEventListener('change',e=>{state.settings.enVoice=e.target.value;save()});
-// مسؤول عن زر إمكانية الوصول (تكبير الخط)
+// ده بتاع زر إمكانية الوصول
 $('#a11yToggle').addEventListener('click',()=>{state.settings.a11y=!state.settings.a11y;document.documentElement.style.fontSize=state.settings.a11y?'110%':'';$('#a11yToggle').setAttribute('aria-pressed',String(state.settings.a11y));$('#a11yToggle').setAttribute('aria-label',state.settings.a11y?'إيقاف تكبير الواجهة':'تكبير الواجهة');save();toast(state.settings.a11y?'تم تكبير الواجهة':'تم إيقاف تكبير الواجهة')});
-// النقر على بطاقة قصة (فتح/حذف/تسجيل/نسخ) من المكتبة
+// النقر على بطاقة قصة من المكتبة
 document.addEventListener('click',e=>{const open=e.target.closest('[data-open]');if(open){chooseStory(open.dataset.open);return}const del=e.target.closest('[data-delete]');if(del){const item=state.stories.find(s=>s.id===del.dataset.delete);if(confirm(`حذف «${item.title}» من المكتبة؟`)){state.stories=state.stories.filter(s=>s.id!==item.id);save();renderLibrary()}return}const close=e.target.closest('[data-close]');if(close){closeModal(close.dataset.close);return}if(e.target.classList.contains('overlay'))closeModal(e.target.id)});
 // زر Esc لإغلاق النوافذ
 document.addEventListener('keydown',e=>{if(e.key==='Escape')document.querySelectorAll('.overlay.open').forEach(el=>closeModal(el.id))});if(window.speechSynthesis)speechSynthesis.addEventListener('voiceschanged',populateVoices);renderLibrary();save();

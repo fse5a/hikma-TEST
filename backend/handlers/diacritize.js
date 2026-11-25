@@ -1,5 +1,5 @@
 // ============================================================
-// نقطة التشكيل (إضافة الحركات للنص العربي) مع رفض أي ناتج يغيّر الحروف.
+// نقطة التشكيل مع رفض أي ناتج يغيّر الحروف.
 // ============================================================
 import {sendError, parseJsonBody, validateRequired, getRequestId, sendJson} from '../lib/response.js';
 import {resolveSupabaseUser} from '../lib/supabase-auth.js';

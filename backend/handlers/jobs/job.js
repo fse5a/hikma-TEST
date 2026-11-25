@@ -1,5 +1,5 @@
 // ============================================================
-// نقطة قراءة حالة مهمة طويلة (/api/jobs/:id).
+// نقطة قراءة حالة مهمة طويلة.
 // ============================================================
 import {sendError, getRequestId, sendJson} from '../../lib/response.js';
 import {resolveSupabaseUser} from '../../lib/supabase-auth.js';

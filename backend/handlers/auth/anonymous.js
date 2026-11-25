@@ -1,5 +1,5 @@
 // ============================================================
-// إنشاء جلسة مجهولة (زائر) عبر Supabase.
+// إنشاء جلسة مجهولة عبر Supabase.
 // ============================================================
 import {sendError, getRequestId, sendJson} from '../../lib/response.js';
 import {enforceApiQuota} from '../../lib/quota.js';

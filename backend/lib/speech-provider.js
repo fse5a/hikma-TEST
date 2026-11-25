@@ -67,7 +67,7 @@ function resolveGoogleVoice(voice, language) {
 
 // Built-in Google Cloud Text-to-Speech provider with neural Arabic voices.
 // Enabled when SPEECH_PROVIDER=google and GOOGLE_TTS_API_KEY is set.
-// مسؤول عن مزود صوت Google
+// ده بتاع مزود صوت Google
 export function createGoogleSpeechProvider(environment = process.env, fetchImpl = fetch) {
   if (String(environment.SPEECH_PROVIDER || '').trim().toLowerCase() !== 'google') return null;
   const apiKey = environment.GOOGLE_TTS_API_KEY;

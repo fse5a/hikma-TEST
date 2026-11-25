@@ -3,7 +3,7 @@
 // ============================================================
 import {createHash} from 'node:crypto';
 
-// مسؤول عن حساب بصمة نصية
+// ده بتاع حساب بصمة نصية
 function digest(value) {
   return createHash('sha256').update(value).digest('hex');
 }
@@ -13,7 +13,7 @@ function cacheHash({provider, voice, language, text, rate, pitch}) {
   return digest(JSON.stringify([provider, voice, language, text, rate, pitch]));
 }
 
-// هيدرز الاتصال بـSupabase بصلاحية الخادم
+// هيدرز الاتصال بـSupabase بصلاحية السيرفر
 function serviceHeaders(serviceKey, extra = {}) {
   return {apikey: serviceKey, Authorization: `Bearer ${serviceKey}`, ...extra};
 }

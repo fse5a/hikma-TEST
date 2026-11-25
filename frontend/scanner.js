@@ -4,7 +4,7 @@
 // مسح الكتب: قراءة رمز QR وتصوير صفحة كتاب وتحويلها لنص (OCR). كل شيء يبدأ بضغطة من المستخدم.
 // ============================================================
 (() => {
-  // رابط مكتبة قراءة النص من الصور (مستضافة محليًا بدون إنترنت خارجي)
+  // رابط مكتبة قراءة النص من الصور
   const TESSERACT_URL = new URL('vendor/tesseract/tesseract.min.js', document.baseURI).href; // self-hosted, no third-party requests
   const TESSERACT_BASE = new URL('vendor/tesseract/', document.baseURI).href;
   // حالة الماسح: تيار الكاميرا ومؤقت المسح والصفحات الملتقطة
@@ -15,7 +15,7 @@
 
   const $ = selector => document.querySelector(selector);
 
-  // مسؤول عن بناء نافذة المسح (الكاميرا والأزرار)
+  // ده بتاع بناء نافذة المسح
   function buildOverlay() {
     if ($('#scanOverlay')) return;
     const overlay = document.createElement('div');
@@ -50,7 +50,7 @@
     });
   }
 
-  // زر المسح (الكاميرا) في الشريط العلوي
+  // زر المسح في الشريط العلوي
   function buildButton() {
     const actions = document.querySelector('.top-actions');
     if (!actions || $('#scanOpen')) return;
@@ -72,7 +72,7 @@
     status.classList.toggle('error', isError);
   }
 
-  // مسؤول عن تشغيل الكاميرا
+  // ده بتاع تشغيل الكاميرا
   async function startCamera() {
     if (!navigator.mediaDevices?.getUserMedia) {
       scanStatus('المتصفح لا يدعم الكاميرا هنا. أضف النص يدويًا من زر قصة جديدة.', true);
@@ -93,7 +93,7 @@
     startQrLoop();
   }
 
-  // مسؤول عن إيقاف الكاميرا وتفريغ المؤقتات
+  // ده بتاع إيقاف الكاميرا وتفريغ المؤقتات
   function stopCamera() {
     if (scanTimer) { clearInterval(scanTimer); scanTimer = null; }
     if (stream) { stream.getTracks().forEach(track => track.stop()); stream = null; }
@@ -153,7 +153,7 @@
     toast('الرمز لا يشير إلى قصة أو رابط.');
   }
 
-  // مسؤول عن تحميل قارئ النص (OCR) المحلي عند أول استخدام
+  // ده بتاع تحميل قارئ النص المحلي عند أول استخدام
   function loadTesseract() {
     tesseractLoading ||= new Promise((resolve, reject) => {
       const done = () => resolve({
@@ -174,7 +174,7 @@
     return tesseractLoading;
   }
 
-  // مسؤول عن تحديث أزرار الصفحات الملتقطة
+  // ده بتاع تحديث أزرار الصفحات الملتقطة
   function updatePageButtons() {
     const count = scannedPages.length;
     const finish = $('#scanFinish');
@@ -224,7 +224,7 @@
     }
   }
 
-  // مسؤول عن خيار إضافة النص لقصة موجودة
+  // ده بتاع خيار إضافة النص لقصة موجودة
   function buildAppendField() {
     if ($('#appendToStory')) return $('#appendToStory').closest('.field');
     const form = $('#storyForm');

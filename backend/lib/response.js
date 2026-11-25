@@ -39,13 +39,13 @@ export function parseJsonBody(req) {
   return req.body;
 }
 
-// مسؤول عن التحقق من وجود الحقول المطلوبة
+// ده بتاع التحقق من وجود الحقول المطلوبة
 export function validateRequired(body, requiredKeys) {
   const missing = requiredKeys.filter((key) => body[key] === undefined || body[key] === null || body[key] === '');
   return missing;
 }
 
-// بيشوف هل الخادم في وضع العرض التجريبي
+// بيشوف هل السيرفر في وضع العرض التجريبي
 export function getDemoStatus() {
   return {
     mode: process.env.APP_MODE === 'demo' || process.env.DEMO_MODE === 'true' ? 'demo' : 'production',
@@ -53,7 +53,7 @@ export function getDemoStatus() {
   };
 }
 
-// مسؤول عن تشفير قيمة (Hash) بدون كشفها
+// ده بتاع تشفير قيمة من غير ما نكشفها
 export function hashValue(value) {
   return createHash('sha256').update(String(value)).digest('hex');
 }
