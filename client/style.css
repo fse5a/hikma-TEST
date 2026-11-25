@@ -175,6 +175,8 @@ button:focus-visible, input:focus-visible, textarea:focus-visible, select:focus-
   color: var(--ink);
   font-size: 14px;
   font-weight: 700;
+  max-width: 100%;
+  text-overflow: ellipsis;
 }
 .filter option { color: #14213d; background: #fff; }
 
@@ -472,6 +474,13 @@ button:focus-visible, input:focus-visible, textarea:focus-visible, select:focus-
   box-shadow: 0 10px 26px #0003;
 }
 .a11y:hover { transform: scale(1.06); }
+.topbar .a11y {
+  position: static; width: 46px; min-width: 46px; height: 46px;
+  border-width: 2px; border-radius: 14px; box-shadow: none;
+  background: var(--surface); color: var(--ink);
+}
+.topbar .a11y span { font-size: 20px; }
+.topbar .a11y:hover { transform: none; border-color: var(--gold); }
 
 /* ---------- Desktop sidebar layout ---------- */
 @media (min-width: 1024px) {
@@ -522,4 +531,19 @@ button:focus-visible, input:focus-visible, textarea:focus-visible, select:focus-
   .dashboard-continue { grid-column: 1/-1; }
   .dialog, .dialog.narrow { max-height: calc(100dvh - env(safe-area-inset-top)); border-radius: 20px 20px 0 0; align-self: flex-end; }
   .overlay { align-items: flex-end; padding: 0; }
+  .overlay .dialog, .overlay .dialog.narrow { width: 100%; max-width: 100%; }
+  .overlay.open .dialog { min-height: min(100dvh, 100%); }
 }
+
+/* ---------- Settings sheet sections ---------- */
+.feature-settings { display: grid; gap: 14px; }
+.feature-setting-block { background: var(--surface); border: 1px solid var(--line); border-radius: 18px; padding: 16px; display: grid; gap: 10px; align-content: start; }
+.feature-setting-block h3 { margin: 0; font-size: 15px; }
+.feature-setting-row { display: flex; gap: 8px; flex-wrap: wrap; }
+.feature-setting-row .button { flex: 1 1 120px; justify-content: center; }
+.feature-setting-block label { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+.feature-setting-block input[type=range] { width: 100%; }
+.skin-choices { display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: 8px; }
+.skin-choice { display: flex; align-items: center; gap: 8px; padding: 10px 12px; border: 1px solid var(--line); border-radius: 14px; background: var(--paper); color: var(--ink); cursor: pointer; }
+.skin-choice[aria-pressed=true] { border-color: var(--gold); box-shadow: 0 0 0 2px var(--gold); }
+.skin-swatch { width: 18px; height: 18px; border-radius: 6px; background: var(--swatch, var(--green)); flex: none; }

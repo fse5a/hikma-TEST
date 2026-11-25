@@ -163,7 +163,7 @@
     }
 
     const health = await globalThis.HikmaApi.health();
-    if (health.mode === 'demo' && health.integrations?.supabase !== 'configured') return '';
+    if (health.integrations?.supabase !== 'configured') return '';
     if (session?.refresh_token) {
       try {
         const refreshed = await request('/api/auth/refresh', {method: 'POST', body: JSON.stringify({refresh_token: session.refresh_token})});
