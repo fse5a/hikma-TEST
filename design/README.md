@@ -5,3 +5,4 @@
 - Skins: `hikma` (owl, gold on navy/cream), `cat` (space cat, violet), `bot` (friendly robot, steel blue). Each has a light and a dark palette (the `palettes` object in `restored-features.js`).
 - Mobile header: brand on its own row, then a row of 44px icon buttons (SVG icons, not emoji, so they render the same on every phone).
 - `build.js` copies this folder into `dist/` next to the frontend files.
+- Fonts: self-hosted in `fonts/` (Cairo, Tajawal, OFL). `style.css` starts with their @font-face rules.

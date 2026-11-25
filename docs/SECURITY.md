@@ -2,7 +2,7 @@
 
 ## Current protections
 
-- Vercel responses use the headers and Content Security Policy in [vercel.json](../vercel.json). The policy allows inline scripts and styles because the current single-page frontend contains inline code; it is not a strict nonce-based CSP.
+- Vercel responses use the headers and Content Security Policy in [vercel.json](../vercel.json). Scripts must come from this origin (no inline scripts, no third-party hosts). Inline styles are still allowed.
 - API handlers validate required fields and HTTP methods and return JSON errors with request IDs.
 - The browser bundle contains no provider or service-role secrets. Public JSON files contain metadata only.
 - CI runs `npm audit --audit-level=moderate`.
@@ -16,7 +16,7 @@
 - Translation, diacritization, and speech use optional HTTPS workers; no provider is bundled or configured by default. URL import uses pinned public-IP fetches, redirect checks, robots checks, response bounds, and Readability extraction, but has only synthetic fixture coverage.
 - Generated speech is stored in browser IndexedDB and, when configured, private Supabase Storage under the verified user ID. Account-level deletion is not implemented.
 - PDF text parsing runs locally in a PDF.js worker and does not upload the original file. Scanned-page OCR is not currently bundled.
-- The CSP includes `unsafe-inline`; deployment headers should be reviewed before exposing sensitive or authenticated features.
+- The CSP keeps `style-src 'unsafe-inline'`; review before exposing sensitive or authenticated features.
 
 ## Before production use
 

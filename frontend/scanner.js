@@ -1,7 +1,8 @@
 // Hikma scanner: QR codes (open a story/link) and book pages (photo -> text).
 // Everything starts only from an explicit button tap; the camera stops on close.
 (() => {
-  const TESSERACT_URL = 'https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js';
+  const TESSERACT_URL = new URL('vendor/tesseract/tesseract.min.js', document.baseURI).href; // self-hosted, no third-party requests
+  const TESSERACT_BASE = new URL('vendor/tesseract/', document.baseURI).href;
   let stream = null;
   let scanTimer = null;
   let tesseractLoading = null;
@@ -141,12 +142,20 @@
   }
 
   function loadTesseract() {
-    if (window.Tesseract) return Promise.resolve(window.Tesseract);
     tesseractLoading ||= new Promise((resolve, reject) => {
+      const done = () => resolve({
+        recognize: (image, langs) => window.Tesseract.recognize(image, langs, {
+          workerPath: `${TESSERACT_BASE}worker.min.js`,
+          corePath: `${TESSERACT_BASE}core/`,
+          langPath: `${TESSERACT_BASE}lang`,
+          gzip: true
+        })
+      });
+      if (window.Tesseract) return done();
       const script = document.createElement('script');
       script.src = TESSERACT_URL;
-      script.onload = () => resolve(window.Tesseract);
-      script.onerror = () => reject(new Error('تعذر تحميل قارئ النص من الإنترنت.'));
+      script.onload = done;
+      script.onerror = () => { tesseractLoading = null; reject(new Error('تعذر تحميل قارئ النص.')); };
       document.head.appendChild(script);
     });
     return tesseractLoading;
