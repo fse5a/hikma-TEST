@@ -4,7 +4,7 @@
 const CACHE_NAME = 'hikma-shell-__BUILD_ID__';
 const APP_SHELL = ['./index.html', './style.css', './settings.js', './public-data.js', './api-client.js', './i18n.js', './pdf-import.js', './vendor/pdf.min.mjs', './vendor/pdf.worker.min.mjs', './app.js', './auto-update.js', './skins.js', './features-styles.js', './restored-features.js', './scanner.js', './manifest.webmanifest', './icon.svg', './voices.json', './test-sentences.json'];
 
-// مسؤول عن تخزين ملفات التطبيق أول مرة
+// بيخزّن ملفات التطبيق أول مرة
 self.addEventListener('install', (event) => {
   event.waitUntil(caches.open(CACHE_NAME).then(async (cache) => {
     await Promise.all(APP_SHELL.map(async (asset) => {
@@ -21,14 +21,14 @@ self.addEventListener('message', (event) => {
   if (event.data === 'SKIP_WAITING') self.skipWaiting();
 });
 
-// مسؤول عن حذف التخزين القديم
+// بيمسح التخزين القديم
 self.addEventListener('activate', (event) => {
   event.waitUntil(
     caches.keys().then((keys) => Promise.all(keys.filter((key) => key !== CACHE_NAME).map((key) => caches.delete(key)))).then(() => self.clients.claim())
   );
 });
 
-// مسؤول عن الرد على الطلبات: الشبكة أولًا للصفحات والسكربتات، ثم التخزين عند انقطاع الإنترنت
+// بيرد على الطلبات: الشبكة أولًا للصفحات والسكربتات، ثم التخزين عند انقطاع الإنترنت
 self.addEventListener('fetch', (event) => {
   const {request} = event;
   if (request.method !== 'GET') return;

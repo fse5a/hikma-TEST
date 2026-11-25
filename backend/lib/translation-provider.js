@@ -4,7 +4,7 @@
 
 const LANGUAGE_NAMES = {ar: 'Arabic', en: 'English', fr: 'French', de: 'German', es: 'Spanish', zh: 'Chinese (Simplified)'};
 
-// مسؤول عن مزود الترجمة عبر رابط Worker خارجي
+// خاص بمزود الترجمة عبر رابط Worker خارجي
 export function createTranslationProvider(environment = process.env, fetchImpl = fetch) {
   const apiKey = environment.OPENAI_API_KEY;
   if (!apiKey) return null;

@@ -30,7 +30,7 @@ function ipv4Number(address) {
   return address.split('.').reduce((value, octet) => ((value << 8) | Number(octet)) >>> 0, 0);
 }
 
-// مسؤول عن معرفة هل العنوان داخلي أو محجوز (محظور)
+// بيشوف هل العنوان داخلي أو محجوز (محظور)
 function isBlockedIpv4(address) {
   const value = ipv4Number(address);
   return blockedIpv4Ranges.some(([network, prefix]) => {
@@ -39,7 +39,7 @@ function isBlockedIpv4(address) {
   });
 }
 
-// مسؤول عن معرفة هل العنوان عام وآمن
+// بيشوف هل العنوان عام وآمن
 export function isPublicAddress(address) {
   const family = isIP(address);
   if (!family) return false;
@@ -78,7 +78,7 @@ function validateUrl(value) {
   return url;
 }
 
-// مسؤول عن الاتصال بالعنوان المثبّت مع حد للحجم والمهلة
+// بيتصل بالعنوان المثبّت مع حد للحجم والمهلة
 async function requestPinned(url, address, {timeoutMs, maxBytes, requestImpl} = {}) {
   if (requestImpl) return requestImpl(url, {address, timeoutMs, maxBytes});
   const doRequest = url.protocol === 'https:' ? httpsRequest : httpRequest;
@@ -123,7 +123,7 @@ async function requestPinned(url, address, {timeoutMs, maxBytes, requestImpl} = 
   });
 }
 
-// مسؤول عن جلب صفحة عامة مع متابعة التحويلات بأمان
+// بيجيب صفحة عامة مع متابعة التحويلات بأمان
 export async function fetchPublicResource(input, options = {}) {
   const lookupImpl = options.lookupImpl || dnsLookup;
   const requestImpl = options.requestImpl;
@@ -144,7 +144,7 @@ export async function fetchPublicResource(input, options = {}) {
   throw new Error('Too many URL redirects.');
 }
 
-// مسؤول عن احترام ملف robots.txt للموقع
+// بيحترم ملف robots.txt للموقع
 export async function assertRobotsAllowed(input, options = {}) {
   const url = validateUrl(input);
   const robotsUrl = new URL('/robots.txt', url.origin);
@@ -165,7 +165,7 @@ export async function assertRobotsAllowed(input, options = {}) {
   return true;
 }
 
-// مسؤول عن استخراج عنوان ونص المقال من HTML
+// بيستخرج عنوان ونص المقال من HTML
 export function extractArticle(html, sourceUrl) {
   const dom = new JSDOM(html, {url: sourceUrl});
   const document = dom.window.document;
@@ -189,7 +189,7 @@ export function extractArticle(html, sourceUrl) {
   return {title: String(sourceHeading || heading || article.title || document.title).slice(0, 240), language, text, paragraphs: paragraphs.length, wordCount: text.split(/\s+/).filter(Boolean).length, firstLines: text.split(/\n\n/).slice(0, 3), needsClientRender: false};
 }
 
-// مسؤول عن استخراج القصة من JSON داخل الصفحة
+// بيستخرج القصة من JSON داخل الصفحة
 function extractEmbeddedArticle(document) {
   const candidates = [];
   for (const element of document.querySelectorAll('script[type="application/ld+json"],script#__NEXT_DATA__')) {
@@ -216,7 +216,7 @@ function extractEmbeddedArticle(document) {
   return null;
 }
 
-// مسؤول عن المعاينة الكاملة لاستيراد رابط
+// المعاينة الكاملة لاستيراد رابط
 export async function importUrlPreview(input, options = {}) {
   const url = validateUrl(input);
   await assertRobotsAllowed(url, options);

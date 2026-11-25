@@ -20,19 +20,19 @@
     schemaVersion: 1
   });
 
-  // مسؤول عن حصر سرعة القراءة في الحد المسموح
+  // بيحصر سرعة القراءة في الحد المسموح
   function clampRate(value) {
     const rate = Number(value);
     return Number.isFinite(rate) ? Math.max(0.5, Math.min(2, rate)) : defaults.rate;
   }
 
-  // مسؤول عن حصر النبرة في الحد المسموح
+  // بيحصر النبرة في الحد المسموح
   function clampPitch(value) {
     const pitch = Number(value);
     return Number.isFinite(pitch) ? Math.max(-6, Math.min(6, pitch)) : defaults.pitch;
   }
 
-  // مسؤول عن تنظيف الإعدادات المحفوظة وإكمال الناقص
+  // بينضّف الإعدادات المحفوظة وإكمال الناقص
   function normalize(settings = {}) {
     const migrated = {...settings};
     if (migrated.schemaVersion !== defaults.schemaVersion) {

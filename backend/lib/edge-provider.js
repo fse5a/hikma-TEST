@@ -100,7 +100,7 @@ const sigma1 = x => (rotr(x, 17) ^ rotr(x, 19) ^ (x >>> 10)) >>> 0;
 const bigSigma0 = x => (rotr(x, 2) ^ rotr(x, 13) ^ rotr(x, 22)) >>> 0;
 const bigSigma1 = x => (rotr(x, 6) ^ rotr(x, 11) ^ rotr(x, 25)) >>> 0;
 
-// مسؤول عن جولات خوارزمية SHA-256 (لتوقيع الطلب)
+// هنا: جولات خوارزمية SHA-256 (لتوقيع الطلب)
 function sha256Rounds(state, words, firstRound = 0) {
   let [a, b, c, d, e, f, g, h] = state;
   const constants = firstRound === 14 ? SHA256_BLOCK_CONSTANTS : SHA256_ROUND_CONSTANTS;
@@ -115,7 +115,7 @@ function sha256Rounds(state, words, firstRound = 0) {
   return [a, b, c, d, e, f, g, h];
 }
 
-// مسؤول عن توسيع الكلمات في SHA-256
+// بيوسّع الكلمات في SHA-256
 function expandSha256Schedule(words, firstWord = 16) {
   for (let index = firstWord; index < 64; index++) {
     words[index] = (sigma1(words[index - 2]) + words[index - 7] + sigma0(words[index - 15]) + words[index - 16]) & MASK;
@@ -174,7 +174,7 @@ function sha256Digest(data) {
   return digest;
 }
 
-// مسؤول عن تحويل البيانات لكلمات 32 بت
+// بيحوّل البيانات لكلمات 32 بت
 function wordsLe4Even(data) {
   const paddedLength = Math.max(4, Math.ceil(data.length / 8) * 8);
   const padded = Buffer.alloc(paddedLength, 0);
@@ -247,7 +247,7 @@ function generateSecMsGec(now = Date.now()) {
 }
 
 // ---- Minimal WebSocket client (client-masked frames, RFC 6455) ----
-// مسؤول عن تغليف رسالة WebSocket
+// بيغلّف رسالة WebSocket
 function encodeFrame(opcode, payload) {
   const length = payload.length;
   let header;
@@ -316,12 +316,12 @@ class FrameParser {
   }
 }
 
-// مسؤول عن تأمين النص داخل SSML
+// بيأمّن النص داخل SSML
 function escapeXml(text) {
   return String(text).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
 }
 
-// مسؤول عن اختيار الصوت العصبي المناسب
+// بيختار الصوت العصبي المناسب
 function resolveVoice(voice, language) {
   const langCode = EDGE_LANGUAGE_CODES[language] || 'en-US';
   const fallback = EDGE_DEFAULT_VOICES[language] || EDGE_DEFAULT_VOICES.en;

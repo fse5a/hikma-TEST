@@ -3,30 +3,30 @@
 // ============================================================
 import {randomUUID, createHash} from 'node:crypto';
 
-// مسؤول عن توليد معرّف فريد لكل طلب
+// بيولّد معرّف فريد لكل طلب
 export function makeRequestId() {
   return randomUUID();
 }
 
-// مسؤول عن قراءة معرّف الطلب من الهيدر أو توليد جديد
+// بيقرا معرّف الطلب من الهيدر أو بيولّد واحد جديد
 export function getRequestId(req) {
   const header = req?.headers?.['x-request-id'] || req?.headers?.['X-Request-Id'];
   return Array.isArray(header) ? header[0] : (header || makeRequestId());
 }
 
-// مسؤول عن إرسال رد JSON
+// بيبعت رد JSON
 export function sendJson(res, statusCode, payload) {
   return res.status(statusCode).json(payload);
 }
 
-// مسؤول عن إرسال خطأ موحد برمز ورسالة
+// بيبعت خطأ موحد برمز ورسالة
 export function sendError(res, code, message, requestId, statusCode = 400) {
   return sendJson(res, statusCode, {
     error: { code, message, requestId: requestId || makeRequestId() }
   });
 }
 
-// مسؤول عن قراءة جسم الطلب كـJSON مع حد للحجم
+// بيقرا جسم الطلب كـJSON مع حد للحجم
 export function parseJsonBody(req) {
   if (!req || !req.body) return {};
   if (typeof req.body === 'string') {
@@ -45,7 +45,7 @@ export function validateRequired(body, requiredKeys) {
   return missing;
 }
 
-// مسؤول عن معرفة هل الخادم في وضع العرض التجريبي
+// بيشوف هل الخادم في وضع العرض التجريبي
 export function getDemoStatus() {
   return {
     mode: process.env.APP_MODE === 'demo' || process.env.DEMO_MODE === 'true' ? 'demo' : 'production',

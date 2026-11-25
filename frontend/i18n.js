@@ -111,13 +111,13 @@
   let activeLanguage = 'ar';
   let observer;
 
-  // مسؤول عن تحويل رمز اللغة لشكل موحد
+  // بيحوّل رمز اللغة لشكل موحد
   function normalizeLanguage(value) {
     const code = String(value || '').toLowerCase().split(/[-_]/)[0];
     return languages.includes(code) ? code : 'en';
   }
 
-  // مسؤول عن اكتشاف لغة المستخدم من المتصفح
+  // بيكتشف لغة المستخدم من المتصفح
   function detectLanguage(preferences = globalThis.navigator?.languages || [globalThis.navigator?.language]) {
     for (const preference of preferences || []) {
       const normalized = normalizeLanguage(preference);
@@ -131,7 +131,7 @@
     return dictionaries[language] || {};
   }
 
-  // مسؤول عن ترجمة نص عنصر واحد
+  // بيترجم نص عنصر واحد
   function translateNode(node, dictionary) {
     const parent = node.parentElement;
     if (!parent || parent.closest(skipSelector)) return;
@@ -144,7 +144,7 @@
     if (node.nodeValue !== nextValue) node.nodeValue = nextValue;
   }
 
-  // مسؤول عن ترجمة خصائص العنصر (العنوان والوصف)
+  // بيترجم خصائص العنصر (العنوان والوصف)
   function translateAttributes(element, dictionary) {
     for (const attribute of ['aria-label', 'title', 'placeholder']) {
       const value = element.getAttribute(attribute);
@@ -203,7 +203,7 @@
     root.querySelectorAll?.('*').forEach(element => translateAttributes(element, dictionary));
   }
 
-  // مسؤول عن تغيير لغة الواجهة
+  // بيغيّر لغة الواجهة
   function setLanguage(language) {
     activeLanguage = normalizeLanguage(language);
     const root = document.documentElement;
@@ -215,7 +215,7 @@
     return activeLanguage;
   }
 
-  // مسؤول عن ترجمة أي عنصر جديد يظهر بعد التحميل
+  // بيترجم أي عنصر جديد يظهر بعد التحميل
   function observeBody() {
     if (!document.body || observer) return;
     observer = new MutationObserver(records => {

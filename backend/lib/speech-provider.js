@@ -3,7 +3,7 @@ const AUDIO_TYPES = new Set(['audio/mpeg', 'audio/ogg', 'audio/wav', 'audio/webm
 // ============================================================
 // مزودات تحويل النص لصوت: مزود عام (Worker) ومزود Google.
 // ============================================================
-// مسؤول عن مزود الصوت العام عبر رابط Worker خارجي
+// مزود الصوت العام عبر رابط Worker خارجي
 export function createSpeechProvider(environment = process.env, fetchImpl = fetch) {
   if (!environment.SPEECH_WORKER_URL) return null;
   const providerName = String(environment.SPEECH_PROVIDER || 'worker').trim().toLowerCase();
@@ -52,7 +52,7 @@ const GOOGLE_DEFAULT_VOICES = {
   zh: 'cmn-CN-Wavenet-B'
 };
 
-// مسؤول عن اختيار صوت Google المناسب للغة
+// بيختار صوت Google المناسب للغة
 function resolveGoogleVoice(voice, language) {
   const languageCode = GOOGLE_LANGUAGE_CODES[language] || 'en-US';
   if (!voice || voice === 'device' || voice === `neural-${language}`) {

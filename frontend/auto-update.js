@@ -18,7 +18,7 @@
     return Array.from(document.querySelectorAll('audio')).some(audio => !audio.paused);
   }
 
-  // مسؤول عن إعادة تحميل الصفحة للنسخة الجديدة
+  // هنا: إعادة تحميل الصفحة للنسخة الجديدة
   function reloadNow() {
     if (reloading) return;
     reloading = true;
@@ -40,7 +40,7 @@
     document.body.appendChild(banner);
   }
 
-  // مسؤول عن تطبيق التحديث في أول وقت آمن
+  // بيطبّق التحديث في أول وقت آمن
   // Reload at the first safe moment; until then keep the banner visible.
   function applyWhenSafe() {
     if (!updateReady || reloading) return;

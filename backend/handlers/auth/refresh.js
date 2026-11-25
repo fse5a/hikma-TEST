@@ -3,7 +3,7 @@
 // ============================================================
 import {sendError, parseJsonBody, validateRequired, getRequestId, sendJson} from '../../lib/response.js';
 
-// مسؤول عن معالجة الطلب القادم لهذه النقطة
+// بيستقبل الطلب ويرد عليه
 export default async function handler(request, response) {
   const requestId = getRequestId(request);
   if (request.method && request.method.toUpperCase() !== 'POST') {

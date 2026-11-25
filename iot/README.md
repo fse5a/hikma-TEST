@@ -1,5 +1,5 @@
 # IoT / smart pen
 
-Reserved for the pen / reading-device part (firmware, device protocol, pairing, data contract with the backend).
+Empty for now. No pen or device code exists yet. The only hardware thing today is the camera scanner in `frontend/scanner.js`.
 
-Status: no device code exists in this repository yet. The only hardware-adjacent feature today is the camera scanner in `frontend/scanner.js`. When the pen work starts, put firmware in `iot/firmware/`, the protocol spec in `iot/PROTOCOL.md`, and any new backend endpoint in `backend/handlers/`.
+When the pen work starts: firmware in `iot/firmware/`, protocol in `iot/PROTOCOL.md`, any new endpoint in `backend/handlers/`.

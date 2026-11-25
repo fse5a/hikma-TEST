@@ -7,7 +7,7 @@ import {enforceApiQuota} from '../lib/quota.js';
 import {createTranslationProvider} from '../lib/translation-provider.js';
 import {createGeminiTranslationProvider} from '../lib/gemini-provider.js';
 
-// مسؤول عن معالجة الطلب القادم لهذه النقطة
+// الدالة الرئيسية للنقطة دي
 export default async function handler(request, response) {
   const requestId = getRequestId(request);
   if (request.method && request.method.toUpperCase() !== 'POST') {

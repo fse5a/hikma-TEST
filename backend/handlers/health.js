@@ -4,7 +4,7 @@
 import {sendJson, getRequestId, makeRequestId} from '../lib/response.js';
 import {createEdgeSpeechProvider} from '../lib/edge-provider.js';
 
-// مسؤول عن وصف حالة خدمة (مفعّلة/ناقصة) بدون كشف مفاتيح
+// بيوصف حالة خدمة (مفعّلة/ناقصة) بدون كشف مفاتيح
 function integrationStatus(name, value) {
   if (!value) return 'missing';
   return value === 'demo' ? 'demo-mode' : 'configured';
@@ -23,7 +23,7 @@ function recommendedLanguage(request) {
   return null;
 }
 
-// مسؤول عن معالجة الطلب القادم لهذه النقطة
+// بيستقبل الطلب ويرد عليه
 export default async function handler(request, response) {
   const requestId = getRequestId(request) || makeRequestId();
   const mode = process.env.APP_MODE === 'demo' || process.env.DEMO_MODE === 'true' ? 'demo' : 'production';

@@ -6,7 +6,7 @@ import {resolveSupabaseUser} from '../../lib/supabase-auth.js';
 import {enforceApiQuota} from '../../lib/quota.js';
 import {importUrlPreview} from '../../lib/url-extractor.js';
 
-// مسؤول عن معالجة الطلب القادم لهذه النقطة
+// هنا بنستقبل الطلب
 export default async function handler(request, response) {
   const requestId = getRequestId(request);
   if (request.method && request.method.toUpperCase() !== 'POST') {

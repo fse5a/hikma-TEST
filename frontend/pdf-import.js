@@ -6,7 +6,7 @@
   const MAX_PAGES = 1000;
   let pdfModule;
 
-  // مسؤول عن تنظيف سطر نصي من الرموز
+  // بينضّف سطر نصي من الرموز
   function codeLine(line) {
     const trimmed = line.trim();
     if (!trimmed) return false;
@@ -14,7 +14,7 @@
     return /^#include\b|^\/\/|^public:|^private:|\t/.test(trimmed) || punctuation >= Math.max(3, trimmed.length * 0.16);
   }
 
-  // مسؤول عن دمج الكلمات المقطوعة بشرطة بين الأسطر
+  // بيدمج الكلمات المقطوعة بشرطة بين الأسطر
   function joinHyphenatedLines(lines) {
     const output = [];
     for (const line of lines) {
@@ -24,7 +24,7 @@
     return output;
   }
 
-  // مسؤول عن تحويل عناصر الصفحة إلى أسطر مرتبة
+  // بيحوّل عناصر الصفحة إلى أسطر مرتبة
   function pageLines(items) {
     const positioned = items.filter(item => item.str?.trim()).map(item => ({
       text: String(item.str).replace(/\s+/g, ' ').trim(),
@@ -40,7 +40,7 @@
     return lines.map(line => line.items.sort((left, right) => left.x - right.x).map(item => item.text).join(' ').replace(/\s+/g, ' ').trim()).filter(text => text && !/^\d{1,4}$/.test(text));
   }
 
-  // مسؤول عن قراءة فهرس الفصول من الـPDF
+  // بيقرا فهرس الفصول من الـPDF
   async function getChapterOutline(document) {
     const outline = await document.getOutline().catch(() => null);
     if (!outline) return [];
@@ -61,7 +61,7 @@
     return chapters.sort((left, right) => left.page - right.page);
   }
 
-  // مسؤول عن قراءة ملف PDF كامل وإرجاع النص والفصول
+  // بيقرا ملف PDF كامل وإرجاع النص والفصول
   async function parse(file, {mode = 'prose', onProgress = () => {}} = {}) {
     if (!file || file.size < 8 || file.size > MAX_BYTES) throw new Error('اختر ملف PDF حجمه لا يتجاوز 50 ميغابايت.');
     const bytes = new Uint8Array(await file.arrayBuffer());

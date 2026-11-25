@@ -8,17 +8,17 @@ function digest(value) {
   return createHash('sha256').update(value).digest('hex');
 }
 
-// مسؤول عن مفتاح التخزين المؤقت لجزء صوتي
+// هنا: مفتاح التخزين المؤقت لجزء صوتي
 function cacheHash({provider, voice, language, text, rate, pitch}) {
   return digest(JSON.stringify([provider, voice, language, text, rate, pitch]));
 }
 
-// مسؤول عن هيدرز الاتصال بـSupabase بصلاحية الخادم
+// هيدرز الاتصال بـSupabase بصلاحية الخادم
 function serviceHeaders(serviceKey, extra = {}) {
   return {apikey: serviceKey, Authorization: `Bearer ${serviceKey}`, ...extra};
 }
 
-// مسؤول عن جلب صوت محفوظ سابقًا
+// بيجيب صوت محفوظ سابقًا
 export async function loadPrivateAudio({userId, provider, voice, language, text, rate, pitch}, environment = process.env, fetchImpl = fetch) {
   const supabaseUrl = String(environment.SUPABASE_URL || '').replace(/\/$/, '');
   const serviceKey = environment.SUPABASE_SERVICE_ROLE_KEY;
@@ -44,7 +44,7 @@ export async function loadPrivateAudio({userId, provider, voice, language, text,
   }
 }
 
-// مسؤول عن حفظ صوت جديد
+// بيحفظ صوت جديد
 export async function storePrivateAudio({userId, provider, voice, language, text, rate, pitch, audioBase64, contentType}, environment = process.env, fetchImpl = fetch) {
   const supabaseUrl = String(environment.SUPABASE_URL || '').replace(/\/$/, '');
   const serviceKey = environment.SUPABASE_SERVICE_ROLE_KEY;

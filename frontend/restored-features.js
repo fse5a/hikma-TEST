@@ -12,7 +12,7 @@
   const detectedUiLanguage = settings.uiLanguage || window.HikmaI18n.detectLanguage();
   const autoUiLanguage = settings.uiLanguageAuto ?? !settings.uiLanguage;
 
-  // مسؤول عن فحص حالة الخادم وتحديث رسالة الخدمات السحابية
+  // بيفحص حالة الخادم وتحديث رسالة الخدمات السحابية
   async function refreshBackendHealth() {
     try {
       const health = await api.health();
@@ -66,7 +66,7 @@
   helperButton.style.setProperty('font-size', '0');
   const originalMascot = document.querySelector('.welcome .owl').outerHTML;
   window.originalMascotSvg = originalMascot;
-  // مسؤول عن رابط «انتقل إلى المحتوى» لقارئي الشاشة
+  // ده بتاع رابط «انتقل إلى المحتوى» لقارئي الشاشة
   const skipLink = document.createElement('a');
   skipLink.className = 'skip-link';
   skipLink.href = '#mainContent';
@@ -77,7 +77,7 @@
     mainContent.id = 'mainContent';
     mainContent.tabIndex = -1;
   }
-  // مسؤول عن حاوية بوابة الدخول والتهيئة الأولى
+  // ده بتاع حاوية بوابة الدخول والتهيئة الأولى
   const gate = document.createElement('main');
   gate.id = 'onboarding';
   gate.className = 'onboarding';
@@ -114,7 +114,7 @@
   });
   document.body.appendChild(settingsOverlay);
   const mobileNav = document.querySelector('.mobile-nav');
-  // مسؤول عن إخفاء وإظهار الشريط السفلي في الموبايل حسب النوافذ المفتوحة
+  // بيخفي وإظهار الشريط السفلي في الموبايل حسب النوافذ المفتوحة
   function syncResponsiveControls() {
     const activeDialogHead = document.querySelector('.overlay.open .dialog-head');
     if (activeDialogHead) activeDialogHead.appendChild(helperButton);
@@ -124,12 +124,12 @@
   }
   const overlayObserver = new MutationObserver(syncResponsiveControls);
   document.querySelectorAll('.overlay').forEach(overlay => overlayObserver.observe(overlay, {attributes: true, attributeFilter: ['class']}));
-  // مسؤول عن قسم النسخة الاحتياطية في الإعدادات
+  // خاص بـقسم النسخة الاحتياطية في الإعدادات
   const backupBlock = document.createElement('div');
   backupBlock.className = 'feature-setting-block data-tools';
   backupBlock.innerHTML = '<h3>نسخة احتياطية</h3><button class="button secondary" id="exportLibrary" type="button">تصدير المكتبة والإعدادات</button><label class="button secondary" for="importLibrary">استيراد نسخة احتياطية</label><input id="importLibrary" type="file" accept="application/json,.json"><p class="data-note">النسخة تشمل القصص والملاحظات والإعدادات. التسجيلات الصوتية تبقى على هذا الجهاز ولا تُصدّر.</p><p class="status" id="backupStatus" role="status"></p>';
   settingsOverlay.querySelector('#resetApp').closest('.feature-setting-block').before(backupBlock);
-  // مسؤول عن قسم العمل دون اتصال في الإعدادات
+  // خاص بـقسم العمل دون اتصال في الإعدادات
   const offlineBlock = document.createElement('div');
   offlineBlock.className = 'feature-setting-block';
   offlineBlock.innerHTML = '<h3>العمل دون اتصال</h3><p class="voice-note" id="offlineInfo">جارٍ حساب المحتوى المحفوظ على هذا الجهاز...</p>';
@@ -165,7 +165,7 @@
   // ============================================================
   // القسم 3: التصفح والتأثيرات الصوتية (النطق والنغمات)
   // ============================================================
-  // مسؤول عن نطق جملة قصيرة للمستخدم بصوت الجهاز
+  // بينطق جملة قصيرة للمستخدم بصوت الجهاز
   function say(text, language = 'ar-EG') {
     if (!('speechSynthesis' in window) || !text) return;
     speechSynthesis.cancel();
@@ -180,7 +180,7 @@
     speechSynthesis.speak(utterance);
   }
 
-  // مسؤول عن نغمة قصيرة مميزة لكل سكن
+  // نغمة قصيرة مميزة لكل سكن
   function playChime() {
     try {
       const notes = {hikma: [523, 659, 784], cat: [392, 587, 880], bot: [220, 330, 220]}[settings.skin];
@@ -199,7 +199,7 @@
     } catch {}
   }
 
-  // مسؤول عن شريط الملف الشخصي وأزرار الإعدادات والثيم في الأعلى
+  // هنا: شريط الملف الشخصي وأزرار الإعدادات والثيم في الأعلى
   function updateProfile() {
     const actions = document.querySelector('.top-actions');
     let chip = document.querySelector('#profileChip');
@@ -246,7 +246,7 @@
   // ============================================================
   // القسم 4: لوحة الإحصائيات والمكتبة المحسّنة
   // ============================================================
-  // مسؤول عن رسم لوحة الإحصائيات
+  // بيرسم لوحة الإحصائيات
   function renderDashboard() {
     const activity = state.activity;
     const favoriteCount = state.stories.filter(item => item.favorite).length;
@@ -271,7 +271,7 @@
     state.activity.days = [...days].sort().slice(-90);
   }
 
-  // مسؤول عن تسجيل فتح قصة
+  // بيسجّل فتح قصة
   function recordStoryOpened(id) {
     if (!state.stories.some(item => item.id === id)) return;
     state.activity.opened = Number(state.activity.opened || 0) + 1;
@@ -282,7 +282,7 @@
     renderDashboard();
   }
 
-  // مسؤول عن تحسين بطاقات المكتبة (مفضلة، تقدم، ترتيب)
+  // بيحسّن بطاقات المكتبة (مفضلة، تقدم، ترتيب)
   function enhanceLibrary() {
     const library = document.querySelector('#library');
     const filter = document.querySelector('#filter');
@@ -324,7 +324,7 @@
     if (favoriteFilter) $('#libraryCount').textContent = `${visibleCards} قصة مفضلة`;
   }
 
-  // مسؤول عن استبدال دالة رسم المكتبة بنسخة محسّنة
+  // بيستبدل دالة رسم المكتبة بنسخة محسّنة
   const baseRenderLibrary = window.renderLibrary;
   window.renderLibrary = function renderEnhancedLibrary() {
     const filter = document.querySelector('#filter');
@@ -337,7 +337,7 @@
   };
   // مسؤول عن تحديث المكتبة عند تغيير الفلتر
   document.querySelector('#filter').addEventListener('change', () => window.renderLibrary());
-  // مسؤول عن زر المفضلة والنقر على بطاقات المكتبة
+  // زر المفضلة والنقر على بطاقات المكتبة
   document.addEventListener('click', event => {
     const favorite = event.target.closest('[data-favorite]');
     if (favorite) {
@@ -357,7 +357,7 @@
       // ============================================================
       // القسم 5: السكنز والثيم (فاتح وداكن)
       // ============================================================
-      // مسؤول عن تطبيق السكن والألوان والثيم على الصفحة كلها
+      // بيطبّق السكن والألوان والثيم على الصفحة كلها
       function applySkin() {
     if (settings.age === 'u16' && !settings.skinPicked) settings.skin = 'cat';
     const skin = skins[settings.skin] || skins.hikma;
@@ -395,7 +395,7 @@
     updateProfile();
   }
 
-  // مسؤول عن تعبئة نافذة الإعدادات بالقيم الحالية
+  // بيعبّي نافذة الإعدادات بالقيم الحالية
   function renderSettings() {
     $('#uiLanguage').value = settings.uiLanguage;
     settingsOverlay.querySelectorAll('[data-theme-choice]').forEach(button => {
@@ -430,7 +430,7 @@
     openModal('appSettingsOverlay');
   }
 
-  // مسؤول عن التبديل بين الوضع الفاتح والداكن
+  // بيبدّل بين الوضع الفاتح والداكن
   function setTheme(theme) {
     settings.theme = theme === 'dark' ? 'dark' : 'light';
     save();
@@ -441,7 +441,7 @@
   // ============================================================
   // القسم 6: النسخ الاحتياطي واستعادة البيانات
   // ============================================================
-  // مسؤول عن تنزيل نسخة احتياطية من المكتبة والإعدادات
+  // بينزّل نسخة احتياطية من المكتبة والإعدادات
   function downloadBackup() {
     const backup = {
       format: 'hikma-reading-library',
@@ -462,7 +462,7 @@
     $('#backupStatus').textContent = 'تم تنزيل نسخة المكتبة والإعدادات.';
   }
 
-  // مسؤول عن استعادة نسخة احتياطية من ملف
+  // بيرجّع نسخة احتياطية من ملف
   async function importBackup(file) {
     const status = $('#backupStatus');
     if (!file) return;
@@ -564,7 +564,7 @@
     syncResponsiveControls();
   }
 
-  // مسؤول عن التحقق من كود الدخول التجريبي (للعرض فقط وليس حماية حقيقية)
+  // بيتأكد من كود الدخول التجريبي (للعرض فقط وليس حماية حقيقية)
   gate.addEventListener('submit', event => {
     if (event.target.id !== 'demoLoginForm') return;
     event.preventDefault();
@@ -577,7 +577,7 @@
     save();
     window.location.href = '/index.html';
   });
-  // مسؤول عن اختيارات البوابة: العمر وإمكانية الوصول والسكن
+  // اختيارات البوابة: العمر وإمكانية الوصول والسكن
   gate.addEventListener('click', event => {
     const ageChoice = event.target.closest('[data-age]');
     const accessChoice = event.target.closest('[data-a11y]');
@@ -604,7 +604,7 @@
     else if (target === 'appSettingsOverlay') openAppSettings();
   });
 
-  // مسؤول عن أزرار نافذة الإعدادات (تصدير، استيراد، إعادة ضبط، مسح)
+  // أزرار نافذة الإعدادات (تصدير، استيراد، إعادة ضبط، مسح)
   settingsOverlay.addEventListener('click', event => {
     if (event.target.closest('#exportLibrary')) {
       downloadBackup();
@@ -644,7 +644,7 @@
       renderGate();
     }
   });
-  // مسؤول عن اختيار ملف النسخة الاحتياطية
+  // بيختار ملف النسخة الاحتياطية
   document.querySelector('#importLibrary').addEventListener('change', event => importBackup(event.target.files?.[0]));
 
   // ============================================================
@@ -674,7 +674,7 @@
     stop() { stopSpeech(); stopAudio(); },
     playBlob(blob) { return playRecordedStory(blob); }
   };
-  // مسؤول عن أزرار التحكم في الإشعارات وشاشة القفل
+  // أزرار التحكم في الإشعارات وشاشة القفل
   if ('mediaSession' in navigator) {
     try {
       navigator.mediaSession.setActionHandler('play', () => {
@@ -718,7 +718,7 @@
     document.body.appendChild(burst);
     setTimeout(() => burst.remove(), 2400);
   }
-  // مسؤول عن الاحتفال عند إنهاء قصة
+  // بيحتفل عند إنهاء قصة
   window.addEventListener('hikma:finished', celebrateStory);
 
   // مسؤول عن إيقاف الصوت الجاري
@@ -840,16 +840,16 @@
     if (wasPlaying) activeAudio.play().catch(() => toast('تعذر تشغيل التسجيل'));
   }, true);
 
-  // مسؤول عن تغيير سرعة الصوت أثناء التشغيل
+  // بيغيّر سرعة الصوت أثناء التشغيل
   document.addEventListener('input', event => {
     if (['readerRate', 'globalRate'].includes(event.target.id) && activeAudio) activeAudio.playbackRate = SPEECH_SETTINGS.clampRate(event.target.value);
   });
 
-  // مسؤول عن الاهتزاز الخفيف عند الضغط على الأزرار
+  // الاهتزاز الخفيف عند الضغط على الأزرار
   document.addEventListener('click', event => {
     if (settings.haptics && event.target.closest('button') && navigator.vibrate) navigator.vibrate(12);
   });
-  // مسؤول عن تغيير نبرة الصوت أثناء التشغيل
+  // بيغيّر نبرة الصوت أثناء التشغيل
   document.addEventListener('change', event => {
     if (!['readerPitch', 'globalPitch'].includes(event.target.id)) return;
     if (settings.voiceSource === 'device' && speaking) {
@@ -861,7 +861,7 @@
     }
   });
 
-  // مسؤول عن اختصارات لوحة المفاتيح في القارئ (مسطرة المسافة والأسهم)
+  // اختصارات لوحة المفاتيح في القارئ (مسطرة المسافة والأسهم)
   document.addEventListener('keydown', event => {
     if (!document.querySelector('#readerOverlay.open') || event.target.matches('input,textarea,select,[contenteditable=true]')) return;
     if (event.code === 'Space') {
@@ -902,7 +902,7 @@
     }
   }).observe(document.querySelector('#readerContent'), {childList: true, characterData: true, subtree: true});
 
-  // مسؤول عن زر إمكانية الوصول: تحديث الإعدادات
+  // زر إمكانية الوصول: تحديث الإعدادات
   document.addEventListener('click', event => {
     if (event.target.closest('#a11yToggle')) requestAnimationFrame(() => {
       settings.a11y = !!settings.a11y;
@@ -910,7 +910,7 @@
       applySkin();
     });
   });
-  // مسؤول عن نطق اسم الزر عند التركيز عليه (للتوجيه الصوتي)
+  // بينطق اسم الزر عند التركيز عليه (للتوجيه الصوتي)
   document.addEventListener('focusin', event => {
     if ((!settings.a11y && settings.voiceGuidance === false) || !event.target.matches('button,input,textarea,select,a')) return;
     if (document.querySelector('#readerOverlay.open') && speaking) return;
@@ -923,7 +923,7 @@
   // ============================================================
   // القسم 9: إمكانية الوصول والتوجيه الصوتي
   // ============================================================
-  // مسؤول عن الترحيب الصوتي عند أول لمسة
+  // بيرحّب الصوتي عند أول لمسة
   function announceFirstTouch() {
     if (!settings.a11y || settings.firstHint || !('speechSynthesis' in window)) return;
     settings.firstHint = true;
@@ -931,7 +931,7 @@
     say('مرحبًا، زر إمكانية الوصول في أسفل الشاشة. اضغطه لتكبير النص وتشغيل المساعدة الصوتية.');
   }
 
-  // مسؤول عن تغيير حجم الخط وسرعة التوجيه من الإعدادات
+  // بيغيّر حجم الخط وسرعة التوجيه من الإعدادات
   settingsOverlay.addEventListener('input', event => {
     const fields = {
       a11yTextScale: ['textScale', value => Number(value)],
@@ -945,7 +945,7 @@
     save();
     applySkin();
   });
-  // مسؤول عن تغيير لغة الواجهة والخيارات من الإعدادات
+  // بيغيّر لغة الواجهة والخيارات من الإعدادات
   settingsOverlay.addEventListener('change', event => {
     if (event.target.id === 'uiLanguage') {
       settings.uiLanguage = window.HikmaI18n.setLanguage(event.target.value);
@@ -973,7 +973,7 @@
     applySkin();
   });
 
-  // مسؤول عن إرجاع التركيز لزر الإعدادات بعد إغلاق النافذة
+  // بيرجّع التركيز لزر الإعدادات بعد إغلاق النافذة
   let dialogReturnFocus = null;
   settingsOverlay.addEventListener('click', event => {
     if (event.target.closest('#settingsOpen')) return;
@@ -985,7 +985,7 @@
   document.addEventListener('click', event => {
     if (event.target.closest('#settingsOpen')) dialogReturnFocus = event.target.closest('#settingsOpen');
   }, true);
-  // مسؤول عن حصر زر Tab داخل النافذة المفتوحة (للوصول بلوحة المفاتيح)
+  // بيحصر زر Tab داخل النافذة المفتوحة (للوصول بلوحة المفاتيح)
   document.addEventListener('keydown', event => {
     const dialog = document.querySelector('.overlay.open [role="dialog"]');
     if (!dialog || event.key !== 'Tab') return;
@@ -1004,7 +1004,7 @@
   const cloudCache = new Map();
   let readerSleepTimer = null;
 
-  // مسؤول عن جلب صوت محفوظ مسبقًا على الجهاز
+  // بيجيب صوت محفوظ مسبقًا على الجهاز
   async function getSpeechCache(key) {
     const database = await db();
     return new Promise(resolve => {
@@ -1014,7 +1014,7 @@
     });
   }
 
-  // مسؤول عن حفظ الصوت المولّد على الجهاز مع حد أقصى للحجم
+  // بيحفظ الصوت المولّد على الجهاز مع حد أقصى للحجم
   async function saveSpeechCache(key, blob, words = null) {
     const database = await db();
     await new Promise((resolve, reject) => {
@@ -1052,7 +1052,7 @@
     loadVoiceChoices();
   }
 
-  // مسؤول عن ملء قائمة الأصوات السحابية
+  // بيملا قائمة الأصوات السحابية
   async function loadVoiceChoices() {
     const select = document.querySelector('#voiceSource');
     if (!select) return;
@@ -1084,7 +1084,7 @@
     updateCloudControls();
   }
 
-  // مسؤول عن معاينة جودة الصوت بجمل جاهزة
+  // بيجرّب جودة الصوت بجمل جاهزة
   function addStaticQualityPreview(cases) {
     const body = document.querySelector('#settingsOverlay .dialog-body');
     if (!body || body.querySelector('#staticQualityPreview')) return;
@@ -1109,7 +1109,7 @@
       speechSynthesis.speak(utterance);
     });
   }
-  // مسؤول عن تغيير مصدر الصوت (الجهاز أو السحابة)
+  // بيغيّر مصدر الصوت (الجهاز أو السحابة)
   document.querySelector('#voiceSource').addEventListener('change', event => {
     settings.voiceSource = event.target.value;
     settings.voiceSourcePinned = true;
@@ -1126,7 +1126,7 @@
     status.classList.toggle('error', isError);
   }
 
-  // مسؤول عن إظهار وإخفاء أدوات الصوت السحابي
+  // بيظهر وإخفاء أدوات الصوت السحابي
   function updateCloudControls() {
     const translateButton = document.querySelector('#translateStory');
     const speechButton = document.querySelector('#neuralSpeech');
@@ -1155,7 +1155,7 @@
   // ============================================================
   // القسم 11: العمل دون اتصال
   // ============================================================
-  // مسؤول عن حساب حجم الصوت المحفوظ
+  // بيحسب حجم الصوت المحفوظ
   async function countSpeechCache() {
     try {
       const database = await db();
@@ -1170,7 +1170,7 @@
   }
 
   let offlineBadge = null;
-  // مسؤول عن شارة «دون اتصال» ورسائل الحالة
+  // شارة «دون اتصال» ورسائل الحالة
   async function updateOfflineUI() {
     const offline = !navigator.onLine;
     document.body.classList.toggle('hikma-offline', offline);
@@ -1244,9 +1244,9 @@
       cloudStatus(api.toFriendlyMessage(error), true);
     }
   }
-  // مسؤول عن ربط ترجمة القصة بالقارئ
+  // بيربط ترجمة القصة بالقارئ
   window.hikmaSetLanguage = translateStory;
-  // مسؤول عن جلب النص الأصلي أو المترجم المحفوظ
+  // بيجيب النص الأصلي أو المترجم المحفوظ
   function originalReaderText(targetLanguage) {
     if (!story) return '';
     if (targetLanguage === story.lang) return story.text;
@@ -1262,7 +1262,7 @@
   // ============================================================
   // القسم 13: القراءة بالصوت الطبيعي (تقسيم، تخزين، تشغيل)
   // ============================================================
-  // مسؤول عن تقسيم النص لأجزاء قصيرة للتحويل لصوت
+  // بيقسّم النص لأجزاء قصيرة للتحويل لصوت
   function splitSpeechChunks(text, maxLength = 200) {
     const chunks = [];
     let remaining = String(text).trim();
@@ -1276,14 +1276,14 @@
     return chunks;
   }
 
-  // مسؤول عن توليد مفتاح تخزين الصوت
+  // بيولّد مفتاح تخزين الصوت
   async function speechCacheKey(provider, voice, language, text) {
     const payload = JSON.stringify([provider, voice, language, text, settings.rate, settings.pitch]);
     const bytes = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(payload));
     return `speech-${[...new Uint8Array(bytes)].map(byte => byte.toString(16).padStart(2, '0')).join('')}`;
   }
 
-  // مسؤول عن تحويل الصوت المستلم من الخادم لملف يمكن تشغيله
+  // بيحوّل الصوت المستلم من الخادم لملف يمكن تشغيله
   function audioBlobFromBase64(audioBase64, contentType) {
     const binary = atob(audioBase64);
     const bytes = new Uint8Array(binary.length);
@@ -1291,7 +1291,7 @@
     return new Blob([bytes], {type: contentType || 'audio/mpeg'});
   }
 
-  // مسؤول عن تشغيل أجزاء الصوت الطبيعي مع تمييز الكلمات
+  // بيشغّل أجزاء الصوت الطبيعي مع تمييز الكلمات
   async function playGeneratedAudio(blobs, metaChunks = null) {
     stopSpeech();
     stopAudio();
@@ -1353,7 +1353,7 @@
     await playChunk();
   }
 
-  // مسؤول عن زر القراءة بالصوت الطبيعي: يجلب الصوت من الخادم أو من الذاكرة ثم يشغله
+  // ده بتاع زر القراءة بالصوت الطبيعي: يجلب الصوت من الخادم أو من الذاكرة ثم يشغله
   async function speakNaturally() {
     if (!story) return;
     const selectedVoice = settings.voiceSource.startsWith('friend:') ? settings.voiceSource.slice(7) : '';
@@ -1422,7 +1422,7 @@
   // ============================================================
   // القسم 14: الضغط على كلمة لمعرفة معناها
   // ============================================================
-  // مسؤول عن معرفة أي كلمة ضغط عليها المستخدم
+  // بيشوف أي كلمة ضغط عليها المستخدم
   function wordAtPoint(lineSpan, event) {
     const line = lines[Number(lineSpan.dataset.line)];
     if (!line) return null;
@@ -1466,7 +1466,7 @@
   } catch {}
 
   let wordPop = null;
-  // مسؤول عن إغلاق فقاعة معنى الكلمة
+  // إغلاق فقاعة معنى الكلمة
   function dismissWordPop() {
     wordPop?.remove();
     wordPop = null;
@@ -1514,7 +1514,7 @@
     setTimeout(dismissWordPop, 8000);
   }
 
-  // مسؤول عن الضغط على الكلمة داخل القصة لعرض معناها
+  // الضغط على الكلمة داخل القصة بيفتح معناها
   document.addEventListener('click', event => {
     const lineSpan = event.target.closest('#readingText [data-line]');
     if (lineSpan) {
@@ -1535,7 +1535,7 @@
   // ============================================================
   // القسم 15: تحسينات نافذة القراءة (أزرار وسرعة وترجمة ومؤقت النوم)
   // ============================================================
-  // مسؤول عن إضافة أدوات القارئ: السرعة، الصوت، الترجمة، التشكيل، مؤقت النوم
+  // بيضيف أدوات القارئ: السرعة، الصوت، الترجمة، التشكيل، مؤقت النوم
   function enhanceReader() {
     const panel = document.querySelector('#readerContent .voice-panel');
     if (!panel) return;
@@ -1731,7 +1731,7 @@
   // ============================================================
   // القسم 16: إضافة القصص (من صورة أو رابط أو PDF)
   // ============================================================
-  // مسؤول عن أدوات الإضافة: قراءة نص من صورة، استيراد رابط، ملف PDF
+  // هنا: أدوات الإضافة: قراءة نص من صورة، استيراد رابط، ملف PDF
   function addStaticStoryTools() {
     const storyForm = document.querySelector('#storyForm');
     if (!storyForm || storyForm.querySelector('#staticOcrImage')) return;

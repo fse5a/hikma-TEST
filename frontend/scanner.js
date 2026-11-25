@@ -50,7 +50,7 @@
     });
   }
 
-  // مسؤول عن زر المسح (الكاميرا) في الشريط العلوي
+  // زر المسح (الكاميرا) في الشريط العلوي
   function buildButton() {
     const actions = document.querySelector('.top-actions');
     if (!actions || $('#scanOpen')) return;
@@ -64,7 +64,7 @@
     actions.insertBefore(button, actions.firstChild);
   }
 
-  // مسؤول عن رسالة حالة المسح
+  // خاص بـرسالة حالة المسح
   function scanStatus(message, isError = false) {
     const status = $('#scanStatus');
     if (!status) return;
@@ -105,7 +105,7 @@
     if (capture) capture.disabled = true;
   }
 
-  // مسؤول عن البحث المستمر عن رمز QR في الكاميرا
+  // بيدوّر المستمر عن رمز QR في الكاميرا
   function startQrLoop() {
     if (!('BarcodeDetector' in window)) {
       scanStatus('مسح QR غير مدعوم في هذا المتصفح؛ يمكنك التقاط صفحة كتاب فقط.');
@@ -122,7 +122,7 @@
     }, 700);
   }
 
-  // مسؤول عن التعامل مع رمز QR: فتح قصة أو إضافة رابط
+  // بيتعامل مع مع رمز QR: فتح قصة أو إضافة رابط
   async function handleQr(value) {
     const text = String(value).trim();
     if (!text) return;
@@ -183,13 +183,13 @@
     if (undo) undo.hidden = !count;
   }
 
-  // مسؤول عن مسح الصفحات الملتقطة والبدء من جديد
+  // بيمسح الصفحات الملتقطة والبدء من جديد
   function resetPages() {
     scannedPages = [];
     updatePageButtons();
   }
 
-  // مسؤول عن إنهاء المسح وفتح نموذج الإضافة بالنص
+  // بينهي المسح وفتح نموذج الإضافة بالنص
   function finishScanning() {
     if (!scannedPages.length) return;
     const text = scannedPages.join('\n\n');
@@ -199,7 +199,7 @@
     openAddForm('', text);
   }
 
-  // مسؤول عن تصوير صفحة وقراءة نصها بالـOCR
+  // بيصوّر صفحة وقراءة نصها بالـOCR
   async function capturePage() {
     const video = $('#scanVideo');
     if (!stream || !video || video.readyState < 2) return;
@@ -239,7 +239,7 @@
     return field;
   }
 
-  // مسؤول عن فتح نموذج إضافة قصة بالنص الممسوح
+  // بيفتح نموذج إضافة قصة بالنص الممسوح
   function openAddForm(title, text) {
     buildOverlay();
     $('#storyTitle').value = title || '';
