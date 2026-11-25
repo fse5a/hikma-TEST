@@ -797,3 +797,7 @@ body.hikma-celebrate .reader-owl svg, body.hikma-celebrate .welcome .owl { anima
     width: 44px; min-width: 44px; height: 44px; min-height: 44px; border-radius: 14px;
   }
 }
+
+/* ---------- Update banner (shown when a new version is ready but the user is busy) ---------- */
+.update-banner { position: fixed; inset-inline: 12px; bottom: calc(88px + env(safe-area-inset-bottom)); z-index: 60; display: flex; justify-content: center; }
+.update-banner button { min-height: 48px; padding: 0 20px; border: 0; border-radius: 14px; background: var(--green); color: var(--on-accent, #fff); font: inherit; font-weight: 800; box-shadow: 0 8px 24px #0004; cursor: pointer; }

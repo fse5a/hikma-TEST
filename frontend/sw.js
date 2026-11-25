@@ -1,16 +1,20 @@
-const CACHE_NAME = 'hikma-shell-v23';
-const APP_SHELL = ['./index.html', './style.css', './settings.js', './public-data.js', './api-client.js', './i18n.js', './pdf-import.js', './vendor/pdf.min.mjs', './vendor/pdf.worker.min.mjs', './app.js', './skins.js', './features-styles.js', './restored-features.js', './scanner.js', './manifest.webmanifest', './icon.svg', './voices.json', './test-sentences.json'];
+const CACHE_NAME = 'hikma-shell-__BUILD_ID__';
+const APP_SHELL = ['./index.html', './style.css', './settings.js', './public-data.js', './api-client.js', './i18n.js', './pdf-import.js', './vendor/pdf.min.mjs', './vendor/pdf.worker.min.mjs', './app.js', './auto-update.js', './skins.js', './features-styles.js', './restored-features.js', './scanner.js', './manifest.webmanifest', './icon.svg', './voices.json', './test-sentences.json'];
 
 self.addEventListener('install', (event) => {
   event.waitUntil(caches.open(CACHE_NAME).then(async (cache) => {
     await Promise.all(APP_SHELL.map(async (asset) => {
       try {
-        const response = await fetch(asset);
+        const response = await fetch(asset, {cache: 'reload'});
         if (response.ok) await cache.put(asset, response);
       } catch {}
     }));
     await self.skipWaiting();
   }));
+});
+
+self.addEventListener('message', (event) => {
+  if (event.data === 'SKIP_WAITING') self.skipWaiting();
 });
 
 self.addEventListener('activate', (event) => {
@@ -24,7 +28,8 @@ self.addEventListener('fetch', (event) => {
   if (request.method !== 'GET') return;
   const url = new URL(request.url);
   if (url.origin !== self.location.origin || url.pathname.includes('/api/')) return;
-  const networkFirst = request.mode === 'navigate' || /\.(?:html|js)$/i.test(url.pathname);
+  const isStaticAsset = url.pathname.startsWith('/vendor/') || url.pathname.startsWith('/fonts/');
+  const networkFirst = !isStaticAsset;
   if (networkFirst) {
     event.respondWith(fetch(request).then((response) => {
       if (response.ok) caches.open(CACHE_NAME).then(cache => cache.put(request, response.clone()));
