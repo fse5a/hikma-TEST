@@ -822,3 +822,11 @@ body.hikma-celebrate .reader-owl svg, body.hikma-celebrate .welcome .owl { anima
 /* ---------- Update banner (shown when a new version is ready but the user is busy) ---------- */
 .update-banner { position: fixed; inset-inline: 12px; bottom: calc(88px + env(safe-area-inset-bottom)); z-index: 60; display: flex; justify-content: center; }
 .update-banner button { min-height: 48px; padding: 0 20px; border: 0; border-radius: 14px; background: var(--green); color: var(--on-accent, #fff); font: inherit; font-weight: 800; box-shadow: 0 8px 24px #0004; cursor: pointer; }
+
+/* الشخصية بتتحرك وتتكلم لما تتلمس */
+@keyframes mascot-talk { 0%, 100% { transform: scale(1) rotate(0); } 20% { transform: scale(1.08) rotate(-4deg); } 40% { transform: scale(1.04) rotate(4deg); } 60% { transform: scale(1.08) rotate(-3deg); } 80% { transform: scale(1.02) rotate(2deg); } }
+.welcome .owl { cursor: pointer; }
+.welcome .owl.mascot-talk { animation: mascot-talk .9s ease-in-out; }
+html[data-reduced-motion="true"] .welcome .owl.mascot-talk { animation: none; }
+.skin-code-form { display: grid; gap: .5rem; margin-top: .75rem; }
+.skin-code-form input { min-height: 44px; padding: 0 .75rem; border: 1px solid var(--line); border-radius: 10px; background: var(--surface); color: var(--ink); font: inherit; }

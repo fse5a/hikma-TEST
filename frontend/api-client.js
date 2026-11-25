@@ -161,7 +161,7 @@
   // بيحدد المسارات اللي مش محتاجة جلسة دخول
   function isAuthExempt(path) {
     const pathname = new URL(String(path), globalThis.location?.href || 'http://localhost').pathname;
-    return pathname === '/api/health' || pathname === '/api/activate' || pathname === '/api/auth/anonymous' || pathname === '/api/auth/refresh';
+    return pathname === '/api/health' || pathname === '/api/activate' || pathname === '/api/skin' || pathname === '/api/auth/anonymous' || pathname === '/api/auth/refresh';
   }
 
   // بيضيف رمز الدخول للطلب
@@ -210,6 +210,10 @@
         }
       }
       return result;
+    },
+    // بيبعت كود السكن للسيرفر ويرجّع اسم السكن لو الكود صح
+    async redeemSkinCode(code) {
+      return request('/api/skin', {method: 'POST', body: JSON.stringify({code})});
     },
     async upgradeAccount(email, password) {
       return request('/api/auth/upgrade', {

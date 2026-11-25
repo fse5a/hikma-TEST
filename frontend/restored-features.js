@@ -56,7 +56,7 @@
   // ============================================================
   // القسم 2: بناء عناصر الواجهة الإضافية (رابط التخطي، بوابة الدخول، اللوحة، نافذة الإعدادات)
   // ============================================================
-  const {skins, palettes, catArt, botArt, patterns} = window.HikmaSkins;
+  const {skins, palettes, catArt, botArt, patterns, art, lines} = window.HikmaSkins;
   const shell = document.querySelector('.shell');
   const helperButton = document.querySelector('#a11yToggle');
   helperButton.innerHTML = '<span aria-hidden="true">♿</span>';
@@ -65,6 +65,8 @@
   helperButton.style.setProperty('place-items', 'center');
   helperButton.style.setProperty('font-size', '0');
   const originalMascot = document.querySelector('.welcome .owl').outerHTML;
+  const brandMark = document.querySelector('.brand-mark');
+  const originalBrandMark = brandMark ? brandMark.innerHTML : '';
   window.originalMascotSvg = originalMascot;
   // ده بتاع رابط «انتقل إلى المحتوى» لقارئي الشاشة
   const skipLink = document.createElement('a');
@@ -94,7 +96,7 @@
   const settingsOverlay = document.createElement('div');
   settingsOverlay.id = 'appSettingsOverlay';
   settingsOverlay.className = 'overlay';
-  settingsOverlay.innerHTML = `<section class="dialog narrow" role="dialog" aria-modal="true" aria-labelledby="appSettingsTitle"><header class="dialog-head"><h2 id="appSettingsTitle">إعدادات حكمة</h2><button class="icon-button" data-close="appSettingsOverlay" aria-label="إغلاق">×</button></header><div class="dialog-body feature-settings"><div class="feature-setting-block"><h3>العمر والواجهة</h3><div class="feature-setting-row"><button class="button secondary" data-age-choice="u16">وضع الأطفال</button><button class="button secondary" data-age-choice="o16">16 سنة أو أكثر</button></div></div><div class="feature-setting-block"><h3>المساعدة وإمكانية الوصول</h3><button class="button secondary" id="settingsA11y"></button></div><div class="feature-setting-block"><h3>شخصية القلم</h3><div class="skin-choices" id="settingsSkins"></div></div><div class="feature-setting-block"><button class="button secondary" id="changePin">رقم الأهل السري</button><a class="button secondary" href="/privacy.html" target="_blank" rel="noopener">سياسة الخصوصية (مسودة)</a><a class="button secondary" href="/terms.html" target="_blank" rel="noopener">شروط الاستخدام (مسودة)</a></div><div class="feature-setting-block"><button class="button secondary" id="resetApp">إعادة ضبط التطبيق</button></div></div></section>`;
+  settingsOverlay.innerHTML = `<section class="dialog narrow" role="dialog" aria-modal="true" aria-labelledby="appSettingsTitle"><header class="dialog-head"><h2 id="appSettingsTitle">إعدادات حكمة</h2><button class="icon-button" data-close="appSettingsOverlay" aria-label="إغلاق">×</button></header><div class="dialog-body feature-settings"><div class="feature-setting-block"><h3>العمر والواجهة</h3><div class="feature-setting-row"><button class="button secondary" data-age-choice="u16">وضع الأطفال</button><button class="button secondary" data-age-choice="o16">16 سنة أو أكثر</button></div></div><div class="feature-setting-block"><h3>المساعدة وإمكانية الوصول</h3><button class="button secondary" id="settingsA11y"></button></div><div class="feature-setting-block"><h3>شخصية القلم</h3><div class="skin-choices" id="settingsSkins"></div><form id="skinCodeForm" class="skin-code-form"><label for="skinCode">كود سكن جديد (مع القلم)</label><input id="skinCode" type="text" dir="ltr" autocomplete="off" autocapitalize="characters" spellcheck="false" placeholder="XXXX-XXXX-XXXX-XXXX"><button class="button secondary" type="submit">فتح السكن</button><p class="gate-error" id="skinCodeMsg" role="status"></p></form></div><div class="feature-setting-block"><button class="button secondary" id="changePin">رقم الأهل السري</button><a class="button secondary" href="/privacy.html" target="_blank" rel="noopener">سياسة الخصوصية (مسودة)</a><a class="button secondary" href="/terms.html" target="_blank" rel="noopener">شروط الاستخدام (مسودة)</a></div><div class="feature-setting-block"><button class="button secondary" id="resetApp">إعادة ضبط التطبيق</button></div></div></section>`;
   settingsOverlay.querySelector('.feature-settings').insertAdjacentHTML('afterbegin', `<div class="feature-setting-block"><label for="uiLanguage">لغة التطبيق</label><select id="uiLanguage">${window.HikmaI18n.languages.map(language => `<option value="${language}">${window.HikmaI18n.languageNames[language]}</option>`).join('')}</select></div>`);
   settingsOverlay.querySelector('.feature-settings').insertAdjacentHTML('afterbegin', '<div class="feature-setting-block"><h3>المظهر</h3><div class="feature-setting-row theme-choices" role="group" aria-label="اختيار المظهر"><button class="button secondary" data-theme-choice="light">☀️ فاتح</button><button class="button secondary" data-theme-choice="dark">🌙 داكن</button></div></div>');
   settingsOverlay.querySelector('#settingsA11y').closest('.feature-setting-block').insertAdjacentHTML('afterend', '<div class="feature-setting-block" id="accessibilityOptions"><h3>خيارات إمكانية الوصول</h3><label for="a11yTextScale">حجم النص <output id="a11yTextScaleValue">100%</output></label><input id="a11yTextScale" type="range" min="100" max="200" step="10"><label for="a11yLineSpacing">تباعد الأسطر</label><select id="a11yLineSpacing"><option value="1.6">مضغوط</option><option value="2">مريح</option><option value="2.4">واسع</option></select><label><input id="a11yHighContrast" type="checkbox"> تباين عالٍ</label><label><input id="a11yDyslexiaFont" type="checkbox"> خط ميسّر للقراءة</label><label><input id="a11yReducedMotion" type="checkbox"> تقليل الحركة</label><label><input id="a11yVoiceGuidance" type="checkbox"> إرشاد صوتي</label><label for="a11yAnnouncementRate">سرعة الإعلانات الصوتية <output id="a11yAnnouncementRateValue">1x</output></label><input id="a11yAnnouncementRate" type="range" min="0.5" max="2" step="0.05"><label><input id="a11ySimpleMode" type="checkbox"> الوضع المبسّط</label><label><input id="a11yHaptics" type="checkbox"> اهتزاز عند التفاعل</label><label for="a11yHighlightStyle">نمط تمييز الجملة</label><select id="a11yHighlightStyle"><option value="yellow">أصفر</option><option value="underline">تسطير</option><option value="outline">إطار</option></select></div>');
@@ -360,6 +362,8 @@
       // بيطبّق السكن والألوان والثيم على الصفحة كلها
       function applySkin() {
     if (settings.age === 'u16' && !settings.skinPicked) settings.skin = 'cat';
+    // سكن مقفول من غير كود مفتوح؟ نرجع للبومة
+    if (skins[settings.skin]?.locked && !(settings.unlockedSkins || []).includes(settings.skin)) settings.skin = 'hikma';
     const skin = skins[settings.skin] || skins.hikma;
     const palette = palettes[settings.skin]?.[settings.theme] || palettes.hikma.light;
     const root = document.documentElement;
@@ -384,7 +388,11 @@
     root.dataset.highlightStyle = settings.highlightStyle || 'yellow';
     document.body.style.background = settings.a11y ? 'var(--paper)' : patterns[settings.skin] ? `${patterns[settings.skin]},var(--paper)` : 'var(--paper)';
     const mascot = document.querySelector('.welcome .owl');
-    if (mascot) mascot.outerHTML = settings.skin === 'hikma' ? originalMascot : settings.skin === 'cat' ? catArt : botArt;
+    if (mascot) mascot.outerHTML = settings.skin === 'hikma' ? originalMascot : (art[settings.skin] || botArt);
+    // شعار الهيدر الصغير كمان بيتحوّل مع السكنز المقفولة
+    if (brandMark) brandMark.innerHTML = skin.locked && art[settings.skin] ? art[settings.skin].replace('class="owl" ', 'aria-hidden="true" ').replace(/role="img" aria-label="[^"]*"/, '') : originalBrandMark;
+    const liveMascot = document.querySelector('.welcome .owl');
+    if (liveMascot) { liveMascot.setAttribute('tabindex', '0'); liveMascot.setAttribute('role', 'button'); liveMascot.setAttribute('aria-label', `${skin.name}، المسه ليتكلم`); }
     const welcome = document.querySelector('.welcome h1');
     if (welcome) welcome.textContent = settings.age === 'u16' ? `أهلاً يا بطل! ${skin.icon}` : 'كل قصة، عالم جديد.';
     const subtitle = document.querySelector('.brand-sub');
@@ -406,7 +414,7 @@
       button.setAttribute('aria-pressed', String(settings.age === button.dataset.ageChoice));
       button.classList.toggle('primary', settings.age === button.dataset.ageChoice);
     });
-    $('#settingsSkins').innerHTML = Object.entries(skins).map(([key, skin]) => `<button class="skin-choice" type="button" data-skin="${key}" aria-pressed="${settings.skin === key}"><span class="skin-swatch" style="--swatch:${skin.green}"></span><span>${skin.icon} ${skin.name}</span></button>`).join('');
+    $('#settingsSkins').innerHTML = Object.entries(skins).filter(([key, skin]) => !skin.locked || (settings.unlockedSkins || []).includes(key)).map(([key, skin]) => `<button class="skin-choice" type="button" data-skin="${key}" aria-pressed="${settings.skin === key}"><span class="skin-swatch" style="--swatch:${skin.green}"></span><span>${skin.icon} ${skin.name}</span></button>`).join('');
     $('#settingsA11y').textContent = settings.a11y ? 'المساعدة مفعّلة، اضغط للإيقاف' : 'المساعدة متوقفة، اضغط للتفعيل';
     $('#settingsA11y').setAttribute('aria-pressed', String(!!settings.a11y));
     $('#a11yTextScale').value = Math.max(100, Math.min(200, Number(settings.textScale || 100)));
@@ -991,6 +999,51 @@
     const text = event.target.getAttribute('aria-label') || event.target.textContent || event.target.placeholder || '';
     say(text.replace(/\s+/g, ' ').trim());
   });
+  // ============================================================
+  // القسم 9ب: كود السكن + الشخصية بتتكلم لما تتلمس
+  // ============================================================
+  // بيفحص كود السكن على السيرفر ولو صح بيفتح السكن ويحوّل الموقع كله له
+  settingsOverlay.addEventListener('submit', async event => {
+    if (event.target.id !== 'skinCodeForm') return;
+    event.preventDefault();
+    const input = $('#skinCode');
+    const message = $('#skinCodeMsg');
+    const submit = event.target.querySelector('button[type=submit]');
+    submit.disabled = true;
+    message.textContent = 'ثانية واحدة...';
+    try {
+      const result = await api.redeemSkinCode(input.value.trim());
+      if (!skins[result.skin]?.locked) throw new Error('سكن غير معروف.');
+      settings.unlockedSkins = Array.from(new Set([...(settings.unlockedSkins || []), result.skin]));
+      settings.skin = result.skin;
+      settings.skinPicked = true;
+      save();
+      input.value = '';
+      applySkin();
+      renderSettings();
+      playChime();
+      message.textContent = `تم فتح سكن ${skins[result.skin].name}!`;
+      say(lines[result.skin]?.[0] || '');
+    } catch (error) {
+      message.textContent = error.status === 401 ? 'الكود غلط. اتأكد منه وجرّب تاني.' : (error.message || 'حصلت مشكلة. جرّب تاني.');
+    } finally {
+      submit.disabled = false;
+    }
+  });
+  // لمس الشخصية (أو Enter عليها): بتتحرك وتقول جملة من جمل السكن الحالي
+  function mascotSpeak(event) {
+    const target = event.target.closest?.('.welcome .owl');
+    if (!target || (event.type === 'keydown' && event.key !== 'Enter' && event.key !== ' ')) return;
+    event.preventDefault();
+    const pool = lines[settings.skin] || lines.hikma;
+    settings.mascotTurn = ((settings.mascotTurn || 0) + 1) % pool.length;
+    target.classList.remove('mascot-talk');
+    void target.getBoundingClientRect();
+    target.classList.add('mascot-talk');
+    say(pool[settings.mascotTurn]);
+  }
+  document.addEventListener('click', mascotSpeak);
+  document.addEventListener('keydown', mascotSpeak);
   document.addEventListener('pointerdown', announceFirstTouch, {once: true});
   document.addEventListener('keydown', announceFirstTouch, {once: true});
   // ============================================================
