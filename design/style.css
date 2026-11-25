@@ -986,3 +986,52 @@ html[data-hc=off][data-theme=dark] .story-card *:not(.button):not(button) { colo
 html[data-hc=off][data-theme=dark] .story-card p, html[data-hc=off][data-theme=dark] .story-card small { color: #d9d3ea !important; }
 html[data-hc=off][data-theme=dark] .welcome h1, html[data-hc=off][data-theme=dark] .welcome p { color: #f6f2ff !important; text-shadow: 0 2px 10px #000a; }
 html[data-hc=on] .welcome h1, html[data-hc=on] .welcome p, html[data-hc=on] .welcome .eyebrow { color: #fff !important; }
+
+/* ===== every screen and component themed per skin ===== */
+html[data-skin=hikma] { --scene: url(assets/scenes/hikma.webp); }
+html[data-skin=doraemon] { --scene: url(assets/scenes/doraemon.webp); }
+html[data-skin=mickey] { --scene: url(assets/scenes/mickey.webp); }
+html[data-skin=anbu] { --scene: url(assets/scenes/anbu.webp); }
+html[data-skin=uchiha] { --scene: url(assets/scenes/uchiha.webp); }
+html[data-skin=zelda] { --scene: url(assets/scenes/zelda.webp); }
+html[data-skin=doom] { --scene: url(assets/scenes/doom.webp); }
+
+html[data-skin][data-hc=off] .overlay { background: linear-gradient(color-mix(in srgb, #050810 62%, transparent), color-mix(in srgb, #050810 78%, transparent)), var(--scene) center / cover no-repeat; }
+html[data-skin][data-hc=off] .dialog { background: linear-gradient(color-mix(in srgb, var(--surface) 90%, transparent), color-mix(in srgb, var(--surface) 95%, transparent)), var(--scene) center top / cover no-repeat, var(--surface); border: 2px solid color-mix(in srgb, var(--green) 55%, var(--line)); box-shadow: 0 0 0 4px color-mix(in srgb, var(--green) 14%, transparent), 0 24px 60px #0007; }
+html[data-skin][data-hc=off] .dialog-head { background: linear-gradient(90deg, color-mix(in srgb, var(--green) 30%, var(--surface)), color-mix(in srgb, var(--surface) 92%, transparent)); border-bottom: 2px solid color-mix(in srgb, var(--green) 45%, var(--line)); }
+html[data-skin][data-hc=off] .reading-text, html[data-skin][data-hc=off] .voice-panel, html[data-skin][data-hc=off] .feature-setting-block, html[data-skin][data-hc=off] .reader-saved-tools, html[data-skin][data-hc=off] .reader-foot { background: color-mix(in srgb, var(--surface) 82%, transparent) !important; border: 1px solid color-mix(in srgb, var(--green) 40%, var(--line)); border-radius: 16px; backdrop-filter: blur(6px); }
+html[data-skin][data-hc=off] .field input, html[data-skin][data-hc=off] .field textarea, html[data-skin][data-hc=off] .field select, html[data-skin][data-hc=off] select, html[data-skin][data-hc=off] input[type=text], html[data-skin][data-hc=off] input[type=url], html[data-skin][data-hc=off] textarea { background: color-mix(in srgb, var(--paper) 88%, transparent); border: 1.5px solid color-mix(in srgb, var(--green) 45%, var(--line)); }
+html[data-skin][data-hc=off] .field input:focus, html[data-skin][data-hc=off] textarea:focus, html[data-skin][data-hc=off] select:focus { outline: 3px solid color-mix(in srgb, var(--green) 45%, transparent); }
+html[data-skin][data-hc=off] .round-control, html[data-skin][data-hc=off] .icon-button { border-color: color-mix(in srgb, var(--green) 55%, var(--line)); }
+html[data-skin][data-hc=off] .play-control { box-shadow: 0 0 0 5px color-mix(in srgb, var(--green) 25%, transparent), 0 8px 22px color-mix(in srgb, var(--green) 45%, transparent); }
+html[data-skin][data-hc=off] .reading-text .active { background: color-mix(in srgb, var(--green) 24%, transparent); border-radius: 10px; }
+html[data-skin][data-hc=off] .onboarding { background: linear-gradient(color-mix(in srgb, var(--paper) 55%, transparent), color-mix(in srgb, var(--paper) 80%, transparent)), var(--scene) center / cover no-repeat !important; }
+html[data-skin][data-hc=off] .onboarding .gate-panel { background: color-mix(in srgb, var(--surface) 90%, transparent); border: 2px solid color-mix(in srgb, var(--green) 55%, var(--line)); backdrop-filter: blur(8px); }
+html[data-skin][data-hc=off] .mobile-nav { background: color-mix(in srgb, var(--surface) 90%, transparent); border-top: 2px solid color-mix(in srgb, var(--green) 50%, var(--line)); backdrop-filter: blur(10px); }
+html[data-skin][data-hc=off] .topbar { background: color-mix(in srgb, var(--surface) 78%, transparent); backdrop-filter: blur(10px); border-bottom: 2px solid color-mix(in srgb, var(--green) 40%, var(--line)); }
+html[data-skin][data-hc=off] .toast { background: var(--green); color: var(--on-green, #fff); border: 2px solid color-mix(in srgb, var(--ink) 25%, transparent); box-shadow: 0 10px 30px color-mix(in srgb, var(--green) 50%, transparent); }
+html[data-skin][data-hc=off] .search, html[data-skin][data-hc=off] .filter { border: 1.5px solid color-mix(in srgb, var(--green) 45%, var(--line)); background: color-mix(in srgb, var(--surface) 88%, transparent); }
+html[data-skin][data-hc=off] .story-card:hover { box-shadow: 0 0 0 3px color-mix(in srgb, var(--green) 35%, transparent), 0 14px 30px #0004; }
+html[data-skin][data-hc=off] .progress span { background: var(--green); }
+/* high contrast keeps solid, readable surfaces but still uses the skin accent */
+html[data-skin][data-hc=on] .dialog, html[data-skin][data-hc=on] .dialog-head { border-color: var(--green); }
+html[data-skin][data-hc=on] .dialog { border-width: 3px; }
+
+/* ===== interactive mascot ===== */
+.welcome img.owl { transition: translate .25s ease-out, rotate .25s ease-out, filter .2s; will-change: translate, rotate; }
+.welcome img.owl:hover { filter: drop-shadow(0 0 16px color-mix(in srgb, var(--green) 70%, transparent)) drop-shadow(0 10px 22px #0004); }
+@keyframes buddy-idle { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-6px); } }
+@keyframes buddy-jump { 0% { transform: translateY(0) scale(1); } 30% { transform: translateY(-26px) scale(1.1,.94); } 55% { transform: translateY(0) scale(.94,1.08); } 100% { transform: translateY(0) scale(1); } }
+@keyframes buddy-pop { from { opacity: 0; transform: translateY(8px) scale(.9); } to { opacity: 1; transform: none; } }
+#mascotBuddy { position: fixed; z-index: 2000; inset-inline-start: 14px; bottom: 78px; display: flex; flex-direction: column; align-items: flex-start; gap: 6px; pointer-events: none; }
+#mascotBuddy .buddy-img { width: 74px; height: 74px; object-fit: contain; pointer-events: auto; cursor: pointer; filter: drop-shadow(0 6px 10px #0006); animation: buddy-idle 3.2s ease-in-out infinite; transition: translate .2s ease-out, rotate .2s ease-out; }
+#mascotBuddy .buddy-img.jump { animation: buddy-jump .6s ease-out; }
+#mascotBuddy .buddy-bubble { max-width: 220px; padding: 9px 13px; border-radius: 16px; background: var(--surface); color: var(--ink); border: 2px solid var(--green); font-size: 13px; font-weight: 700; line-height: 1.5; box-shadow: 0 8px 22px #0004; pointer-events: auto; animation: buddy-pop .25s ease-out; }
+#mascotBuddy .buddy-bubble[hidden] { display: none; }
+body.hikma-reading #mascotBuddy .buddy-img { animation: buddy-jump 1.2s ease-in-out infinite; }
+:root[data-reduced-motion=true] #mascotBuddy .buddy-img, :root[data-reduced-motion=true] #mascotBuddy .buddy-img.jump { animation: none; }
+@media (max-width: 760px) { #mascotBuddy { bottom: 84px; } #mascotBuddy .buddy-img { width: 60px; height: 60px; } }
+html[data-skin][data-hc=off][data-theme=dark] .dialog, html[data-skin][data-hc=off][data-theme=dark] .dialog h1, html[data-skin][data-hc=off][data-theme=dark] .dialog h2, html[data-skin][data-hc=off][data-theme=dark] .dialog h3, html[data-skin][data-hc=off][data-theme=dark] .dialog label, html[data-skin][data-hc=off][data-theme=dark] .dialog p, html[data-skin][data-hc=off][data-theme=dark] .dialog summary, html[data-skin][data-hc=off][data-theme=dark] .dialog .voice-note, html[data-skin][data-hc=off][data-theme=dark] .dialog .status { color: #f4f1ea !important; }
+html[data-skin][data-hc=off][data-theme=dark] .dialog .button.secondary, html[data-skin][data-hc=off][data-theme=dark] .dialog .file-label { color: #f4f1ea; background: color-mix(in srgb, #000 45%, transparent); }
+html[data-skin][data-hc=off][data-theme=dark] .dialog input::placeholder, html[data-skin][data-hc=off][data-theme=dark] .dialog textarea::placeholder { color: #c9c4b8; }
+html[data-skin][data-hc=off][data-theme=dark] .dialog input, html[data-skin][data-hc=off][data-theme=dark] .dialog select, html[data-skin][data-hc=off][data-theme=dark] .dialog textarea { color: #f4f1ea; background: color-mix(in srgb, #000 50%, transparent); }
