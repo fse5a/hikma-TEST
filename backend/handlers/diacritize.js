@@ -4,6 +4,7 @@
 import {sendError, parseJsonBody, validateRequired, getRequestId, sendJson} from '../lib/response.js';
 import {resolveSupabaseUser} from '../lib/supabase-auth.js';
 import {enforceApiQuota} from '../lib/quota.js';
+import {createGeminiDiacritizationProvider} from '../lib/gemini-provider.js';
 
 // هنا بنستقبل الطلب
 export default async function handler(request, response) {
@@ -20,9 +21,23 @@ export default async function handler(request, response) {
 
   const text = String(body.text || '');
   if (!text.trim() || text.length > 20000) return sendError(response, 'invalid_text', 'Text must be between 1 and 20000 characters.', requestId, 400);
-  const user = await resolveSupabaseUser(request, response, requestId, {providerConfigured: Boolean(process.env.DIACRITIZATION_WORKER_URL)});
+  const gemini = process.env.DIACRITIZATION_WORKER_URL ? null : createGeminiDiacritizationProvider();
+  const user = await resolveSupabaseUser(request, response, requestId, {providerConfigured: Boolean(process.env.DIACRITIZATION_WORKER_URL || gemini)});
   if (!user) return;
-  if (process.env.DIACRITIZATION_WORKER_URL && !await enforceApiQuota(request, response, requestId, user.userId, 'diacritization')) return;
+  if ((process.env.DIACRITIZATION_WORKER_URL || gemini) && !await enforceApiQuota(request, response, requestId, user.userId, 'diacritization')) return;
+  // التشكيل عبر Gemini (مفتاح مجاني) لو مفيش worker مخصص
+  if (gemini) {
+    try {
+      const diacritizedText = await gemini.diacritize({text});
+      const removeMarks = value => value.replace(/[\u0640\u064B-\u065F\u0670\u06D6-\u06ED]/g, '');
+      if (!diacritizedText || removeMarks(diacritizedText) !== removeMarks(text)) {
+        return sendError(response, 'invalid_diacritization', 'The diacritization result changed the original letters; it was rejected.', requestId, 502);
+      }
+      return sendJson(response, 200, {ok: true, requestId, mode: 'configured', text: diacritizedText, provider: 'gemini'});
+    } catch {
+      return sendError(response, 'diacritization_provider_failed', 'Diacritization service is temporarily unavailable.', requestId, 502);
+    }
+  }
   if (!process.env.DIACRITIZATION_WORKER_URL) {
     return sendJson(response, 200, {
       ok: true,

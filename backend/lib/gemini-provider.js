@@ -104,3 +104,36 @@ export function createGeminiSpeechProvider(environment = process.env, fetchImpl 
     }
   };
 }
+
+// بيشكّل النص العربي عبر Gemini (تشكيل فقط، من غير تغيير أي حرف)
+export function createGeminiDiacritizationProvider(environment = process.env, fetchImpl = fetch) {
+  const apiKey = environment.GEMINI_API_KEY;
+  if (!apiKey) return null;
+  const model = String(environment.GEMINI_MODEL || 'gemini-3.5-flash-lite');
+
+  return {
+    name: 'gemini',
+    async diacritize({text}) {
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), Number(environment.UPSTREAM_TIMEOUT_MS) || 9000);
+      try {
+        const response = await fetchImpl(`${API_BASE}/models/${model}:generateContent?key=${encodeURIComponent(apiKey)}`, {
+          method: 'POST',
+          headers: {'Content-Type': 'application/json'},
+          body: JSON.stringify({
+            contents: [{parts: [{text: `Add full Arabic diacritics (tashkeel) to the text below, correctly and in context. Rules: do not change, add, remove or reorder any letter, word, punctuation, digit, space or line break. Only add the diacritic marks (fatha, damma, kasra, sukun, shadda, tanween, etc). Return ONLY the diacritized text, nothing else.\n\nText:\n${text}`}]}],
+            generationConfig: {temperature: 0}
+          }),
+          signal: controller.signal
+        });
+        if (!response.ok) throw new Error(`Gemini returned ${response.status}.`);
+        const result = await response.json();
+        const out = String(result?.candidates?.[0]?.content?.parts?.map(part => part.text || '').join('') || '').replace(/^```[a-z]*\n?|```$/g, '').trim();
+        if (!out || out.length > 60000) throw new Error('Gemini returned an invalid diacritization.');
+        return out;
+      } finally {
+        clearTimeout(timeoutId);
+      }
+    }
+  };
+}

@@ -134,3 +134,15 @@ test('edge Sec-MS-GEC v2 token matches the reference test vector', () => {
   const token = __edgeInternals.generateSecMsGec(1791888000 * 1000);
   assert.equal(token, '492D7694A183A45E-56E821F95D4579C5B7C7E33DC7303FF379EC36D510213555BBBB9EB17EF15876');
 });
+
+test('gemini diacritization provider sends a strict prompt and returns the text', async () => {
+  const {createGeminiDiacritizationProvider} = await import('../lib/gemini-provider.js');
+  let sentBody;
+  const provider = createGeminiDiacritizationProvider({GEMINI_API_KEY: 'k'}, async (url, options) => {
+    sentBody = JSON.parse(options.body);
+    return {ok: true, json: async () => ({candidates: [{content: {parts: [{text: 'كَانَ'}]}}]})};
+  });
+  assert.equal(await provider.diacritize({text: 'كان'}), 'كَانَ');
+  assert.match(sentBody.contents[0].parts[0].text, /do not change, add, remove or reorder/i);
+  assert.equal(createGeminiDiacritizationProvider({}), null);
+});
