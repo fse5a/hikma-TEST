@@ -1,6 +1,10 @@
+// ============================================================
+// نقطة قراءة حالة مهمة طويلة (/api/jobs/:id).
+// ============================================================
 import {sendError, getRequestId, sendJson} from '../../lib/response.js';
 import {resolveSupabaseUser} from '../../lib/supabase-auth.js';
 
+// مسؤول عن معالجة الطلب القادم لهذه النقطة
 export default async function handler(request, response) {
   const requestId = getRequestId(request);
   const user = await resolveSupabaseUser(request, response, requestId);

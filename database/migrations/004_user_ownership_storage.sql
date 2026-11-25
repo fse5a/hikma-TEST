@@ -1,3 +1,4 @@
+-- مسؤول عن: ملكية المستخدم للبيانات وتخزين الصوت الخاص
 do $$
 begin
   if not exists (select 1 from pg_constraint where conname = 'voices_user_auth_fk') then

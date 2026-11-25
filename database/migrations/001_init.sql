@@ -1,3 +1,4 @@
+-- مسؤول عن: إنشاء الجداول الأساسية (المستخدمين، المكتبة، الترجمات، الصوت، التقدم، الحصص)
 create extension if not exists pgcrypto;
 
 create table if not exists profiles (

@@ -1,6 +1,10 @@
+// ============================================================
+// ترقية الحساب المجهول لحساب بالبريد الإلكتروني.
+// ============================================================
 import {sendError, parseJsonBody, getRequestId, sendJson} from '../../lib/response.js';
 import {resolveSupabaseUser} from '../../lib/supabase-auth.js';
 
+// مسؤول عن معالجة الطلب القادم لهذه النقطة
 export default async function handler(request, response) {
   const requestId = getRequestId(request);
   if (request.method && request.method.toUpperCase() !== 'POST') {

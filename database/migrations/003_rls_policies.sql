@@ -1,3 +1,4 @@
+-- مسؤول عن: سياسات الأمان على مستوى الصف (RLS): كل مستخدم يرى بياناته فقط
 do $$
 begin
   if not exists (select 1 from pg_constraint where conname = 'profiles_user_auth_fk') then

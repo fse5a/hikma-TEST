@@ -1,3 +1,4 @@
+// التحديث التلقائي: مسؤول عن تسجيل الـService Worker وفحص النسخة الجديدة وتطبيقها بأمان.
 // Auto-update: registers the service worker, checks for a new version on load, on tab focus,
 // when back online and every 30 minutes, and applies it at a safe moment (never mid-reading or mid-recording).
 (() => {
@@ -7,6 +8,7 @@
   let reloading = false;
   let banner = null;
 
+  // مسؤول عن معرفة هل المستخدم مشغول (نافذة مفتوحة أو قراءة أو كتابة) فلا نقطع عليه
   // Busy means the user is in the middle of something: a dialog is open, reading is active, or text is being typed.
   function isBusy() {
     if (document.querySelector('.overlay.open')) return true;
@@ -16,12 +18,14 @@
     return Array.from(document.querySelectorAll('audio')).some(audio => !audio.paused);
   }
 
+  // مسؤول عن إعادة تحميل الصفحة للنسخة الجديدة
   function reloadNow() {
     if (reloading) return;
     reloading = true;
     location.reload();
   }
 
+  // مسؤول عن شريط «تحديث جديد، اضغط للتحديث»
   // Small banner: shown only when an update is ready but the user is busy.
   function showBanner() {
     if (banner) return;
@@ -36,6 +40,7 @@
     document.body.appendChild(banner);
   }
 
+  // مسؤول عن تطبيق التحديث في أول وقت آمن
   // Reload at the first safe moment; until then keep the banner visible.
   function applyWhenSafe() {
     if (!updateReady || reloading) return;

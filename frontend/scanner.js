@@ -1,8 +1,13 @@
 // Hikma scanner: QR codes (open a story/link) and book pages (photo -> text).
 // Everything starts only from an explicit button tap; the camera stops on close.
+// ============================================================
+// مسح الكتب: قراءة رمز QR وتصوير صفحة كتاب وتحويلها لنص (OCR). كل شيء يبدأ بضغطة من المستخدم.
+// ============================================================
 (() => {
+  // رابط مكتبة قراءة النص من الصور (مستضافة محليًا بدون إنترنت خارجي)
   const TESSERACT_URL = new URL('vendor/tesseract/tesseract.min.js', document.baseURI).href; // self-hosted, no third-party requests
   const TESSERACT_BASE = new URL('vendor/tesseract/', document.baseURI).href;
+  // حالة الماسح: تيار الكاميرا ومؤقت المسح والصفحات الملتقطة
   let stream = null;
   let scanTimer = null;
   let tesseractLoading = null;
@@ -10,6 +15,7 @@
 
   const $ = selector => document.querySelector(selector);
 
+  // مسؤول عن بناء نافذة المسح (الكاميرا والأزرار)
   function buildOverlay() {
     if ($('#scanOverlay')) return;
     const overlay = document.createElement('div');
@@ -44,6 +50,7 @@
     });
   }
 
+  // مسؤول عن زر المسح (الكاميرا) في الشريط العلوي
   function buildButton() {
     const actions = document.querySelector('.top-actions');
     if (!actions || $('#scanOpen')) return;
@@ -57,6 +64,7 @@
     actions.insertBefore(button, actions.firstChild);
   }
 
+  // مسؤول عن رسالة حالة المسح
   function scanStatus(message, isError = false) {
     const status = $('#scanStatus');
     if (!status) return;
@@ -64,6 +72,7 @@
     status.classList.toggle('error', isError);
   }
 
+  // مسؤول عن تشغيل الكاميرا
   async function startCamera() {
     if (!navigator.mediaDevices?.getUserMedia) {
       scanStatus('المتصفح لا يدعم الكاميرا هنا. أضف النص يدويًا من زر قصة جديدة.', true);
@@ -84,6 +93,7 @@
     startQrLoop();
   }
 
+  // مسؤول عن إيقاف الكاميرا وتفريغ المؤقتات
   function stopCamera() {
     if (scanTimer) { clearInterval(scanTimer); scanTimer = null; }
     if (stream) { stream.getTracks().forEach(track => track.stop()); stream = null; }
@@ -95,6 +105,7 @@
     if (capture) capture.disabled = true;
   }
 
+  // مسؤول عن البحث المستمر عن رمز QR في الكاميرا
   function startQrLoop() {
     if (!('BarcodeDetector' in window)) {
       scanStatus('مسح QR غير مدعوم في هذا المتصفح؛ يمكنك التقاط صفحة كتاب فقط.');
@@ -111,6 +122,7 @@
     }, 700);
   }
 
+  // مسؤول عن التعامل مع رمز QR: فتح قصة أو إضافة رابط
   async function handleQr(value) {
     const text = String(value).trim();
     if (!text) return;
@@ -141,6 +153,7 @@
     toast('الرمز لا يشير إلى قصة أو رابط.');
   }
 
+  // مسؤول عن تحميل قارئ النص (OCR) المحلي عند أول استخدام
   function loadTesseract() {
     tesseractLoading ||= new Promise((resolve, reject) => {
       const done = () => resolve({
@@ -161,6 +174,7 @@
     return tesseractLoading;
   }
 
+  // مسؤول عن تحديث أزرار الصفحات الملتقطة
   function updatePageButtons() {
     const count = scannedPages.length;
     const finish = $('#scanFinish');
@@ -169,11 +183,13 @@
     if (undo) undo.hidden = !count;
   }
 
+  // مسؤول عن مسح الصفحات الملتقطة والبدء من جديد
   function resetPages() {
     scannedPages = [];
     updatePageButtons();
   }
 
+  // مسؤول عن إنهاء المسح وفتح نموذج الإضافة بالنص
   function finishScanning() {
     if (!scannedPages.length) return;
     const text = scannedPages.join('\n\n');
@@ -183,6 +199,7 @@
     openAddForm('', text);
   }
 
+  // مسؤول عن تصوير صفحة وقراءة نصها بالـOCR
   async function capturePage() {
     const video = $('#scanVideo');
     if (!stream || !video || video.readyState < 2) return;
@@ -207,6 +224,7 @@
     }
   }
 
+  // مسؤول عن خيار إضافة النص لقصة موجودة
   function buildAppendField() {
     if ($('#appendToStory')) return $('#appendToStory').closest('.field');
     const form = $('#storyForm');
@@ -221,6 +239,7 @@
     return field;
   }
 
+  // مسؤول عن فتح نموذج إضافة قصة بالنص الممسوح
   function openAddForm(title, text) {
     buildOverlay();
     $('#storyTitle').value = title || '';

@@ -26,3 +26,5 @@ npm run test:e2e   # Playwright layout and accessibility checks
 ```
 
 Secrets never go in this repo. Copy `.env.example` to `.env.local` locally; production values live in Vercel Project Settings.
+
+تلميح: كل دالة في المشروع مكتوب فوقها تعليق عربي «مسؤول عن ...»، وفي الملفات الكبيرة أقسام مرقمة. دليل البحث: [docs/ابحث-عن.md](docs/ابحث-عن.md).

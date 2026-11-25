@@ -1,5 +1,8 @@
 // Assembles the deployable static site: frontend/ (pages, scripts, PWA shell) plus design/ (stylesheet, icon)
 // are flattened into dist/, which Vercel serves (outputDirectory).
+// ============================================================
+// البناء: يدمج مجلدات frontend و design داخل dist الذي ينشره Vercel.
+// ============================================================
 import {cpSync, rmSync} from 'node:fs';
 
 rmSync('dist', {recursive: true, force: true});

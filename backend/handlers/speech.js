@@ -1,3 +1,6 @@
+// ============================================================
+// نقطة تحويل النص لصوت: تتحقق من المستخدم والحصة، وتجرب الأصوات بالترتيب، وتخزن الصوت.
+// ============================================================
 import {sendError, parseJsonBody, validateRequired, getRequestId, sendJson} from '../lib/response.js';
 import {createSpeechProvider, createGoogleSpeechProvider} from '../lib/speech-provider.js';
 import {createGeminiSpeechProvider} from '../lib/gemini-provider.js';
@@ -6,6 +9,7 @@ import {resolveSupabaseUser} from '../lib/supabase-auth.js';
 import {enforceApiQuota} from '../lib/quota.js';
 import {loadPrivateAudio, storePrivateAudio} from '../lib/audio-cache.js';
 
+// مسؤول عن معالجة الطلب القادم لهذه النقطة
 export default async function handler(request, response) {
   const requestId = getRequestId(request);
   if (request.method && request.method.toUpperCase() !== 'POST') {

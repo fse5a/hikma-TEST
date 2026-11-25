@@ -1,3 +1,4 @@
+-- مسؤول عن: حصص الاستخدام (حد الطلبات لكل IP ومستخدم)
 create table if not exists public.api_rate_events (
   event_id bigint generated always as identity primary key,
   user_id uuid references auth.users(id) on delete cascade,

@@ -1,6 +1,10 @@
+// ============================================================
+// إنشاء جلسة مجهولة (زائر) عبر Supabase.
+// ============================================================
 import {sendError, getRequestId, sendJson} from '../../lib/response.js';
 import {enforceApiQuota} from '../../lib/quota.js';
 
+// مسؤول عن معالجة الطلب القادم لهذه النقطة
 export default async function handler(request, response) {
   const requestId = getRequestId(request);
   if (request.method && request.method.toUpperCase() !== 'POST') {

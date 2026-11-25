@@ -6,6 +6,10 @@
 const LANGUAGE_NAMES = {ar: 'Arabic', en: 'English', fr: 'French', de: 'German', es: 'Spanish', zh: 'Chinese (Simplified)'};
 const API_BASE = 'https://generativelanguage.googleapis.com/v1beta';
 
+// ============================================================
+// مزودات Gemini: الترجمة الذكية والصوت.
+// ============================================================
+// مسؤول عن تحويل الصوت الخام إلى ملف WAV
 function wavFromPcm(base64Pcm) {
   const bytes = Buffer.from(base64Pcm, 'base64');
   if (bytes.subarray(0, 4).toString('ascii') === 'RIFF') return base64Pcm;
@@ -26,6 +30,7 @@ function wavFromPcm(base64Pcm) {
   return Buffer.concat([header, bytes]).toString('base64');
 }
 
+// مسؤول عن الترجمة الذكية بالمعنى عبر Gemini
 export function createGeminiTranslationProvider(environment = process.env, fetchImpl = fetch) {
   const apiKey = environment.GEMINI_API_KEY;
   if (!apiKey) return null;
@@ -59,6 +64,7 @@ export function createGeminiTranslationProvider(environment = process.env, fetch
   };
 }
 
+// مسؤول عن توليد الصوت عبر Gemini
 export function createGeminiSpeechProvider(environment = process.env, fetchImpl = fetch) {
   if (String(environment.SPEECH_PROVIDER || '').trim().toLowerCase() !== 'gemini') return null;
   const apiKey = environment.GEMINI_API_KEY;

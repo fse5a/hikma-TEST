@@ -91,12 +91,16 @@ const CS64_ADJUSTMENT1 = 0x0B1A0000;
 
 const MASK = 0xFFFFFFFF;
 const rol16 = x => ((x << 16) | (x >>> 16)) >>> 0;
+// ============================================================
+// مزود الصوت المصري الطبيعي (أصوات Microsoft العصبية عبر اتصال WebSocket). ملاحظة: مؤقت للتجربة وسيُستبدل بمزود رسمي قبل أي بيع.
+// ============================================================
 const rotr = (x, k) => ((x >>> k) | (x << (32 - k))) >>> 0;
 const sigma0 = x => (rotr(x, 7) ^ rotr(x, 18) ^ (x >>> 3)) >>> 0;
 const sigma1 = x => (rotr(x, 17) ^ rotr(x, 19) ^ (x >>> 10)) >>> 0;
 const bigSigma0 = x => (rotr(x, 2) ^ rotr(x, 13) ^ rotr(x, 22)) >>> 0;
 const bigSigma1 = x => (rotr(x, 6) ^ rotr(x, 11) ^ rotr(x, 25)) >>> 0;
 
+// مسؤول عن جولات خوارزمية SHA-256 (لتوقيع الطلب)
 function sha256Rounds(state, words, firstRound = 0) {
   let [a, b, c, d, e, f, g, h] = state;
   const constants = firstRound === 14 ? SHA256_BLOCK_CONSTANTS : SHA256_ROUND_CONSTANTS;
@@ -111,12 +115,14 @@ function sha256Rounds(state, words, firstRound = 0) {
   return [a, b, c, d, e, f, g, h];
 }
 
+// مسؤول عن توسيع الكلمات في SHA-256
 function expandSha256Schedule(words, firstWord = 16) {
   for (let index = firstWord; index < 64; index++) {
     words[index] = (sigma1(words[index - 2]) + words[index - 7] + sigma0(words[index - 15]) + words[index - 16]) & MASK;
   }
 }
 
+// مسؤول عن تجهيز حالة SHA-256
 function sha256Init(data) {
   const words = new Array(14).fill(0);
   words.push(((data[0] << 16) | (data[1] << 8) | data[2]) >>> 0);
@@ -145,6 +151,7 @@ function sha256Init(data) {
   return working.map((value, i) => (value + SHA256_INITIAL[i]) & MASK);
 }
 
+// مسؤول عن حساب SHA-256
 function sha256Digest(data) {
   if (data.length < 7) throw new Error('Token salt must contain at least seven bytes');
   const length = 57 + data.length;
@@ -167,6 +174,7 @@ function sha256Digest(data) {
   return digest;
 }
 
+// مسؤول عن تحويل البيانات لكلمات 32 بت
 function wordsLe4Even(data) {
   const paddedLength = Math.max(4, Math.ceil(data.length / 8) * 8);
   const padded = Buffer.alloc(paddedLength, 0);
@@ -177,6 +185,7 @@ function wordsLe4Even(data) {
   return words;
 }
 
+// مسؤول عن حساب بصمة CS64 المطلوبة من الخدمة
 function cs64Digest(data, digest) {
   const keyA = digest.readUInt32LE(0) | 1;
   const keyB = digest.readUInt32LE(4) | 1;
@@ -223,6 +232,7 @@ function cs64Digest(data, digest) {
   return [swapLast ^ state, swapAcc ^ acc];
 }
 
+// مسؤول عن توليد رمز التحقق Sec-MS-GEC للاتصال
 function generateSecMsGec(now = Date.now()) {
   let ticks = Math.floor(now / 1000) + WIN_EPOCH_OFFSET;
   ticks -= ticks % 300;
@@ -237,6 +247,7 @@ function generateSecMsGec(now = Date.now()) {
 }
 
 // ---- Minimal WebSocket client (client-masked frames, RFC 6455) ----
+// مسؤول عن تغليف رسالة WebSocket
 function encodeFrame(opcode, payload) {
   const length = payload.length;
   let header;
@@ -305,10 +316,12 @@ class FrameParser {
   }
 }
 
+// مسؤول عن تأمين النص داخل SSML
 function escapeXml(text) {
   return String(text).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
 }
 
+// مسؤول عن اختيار الصوت العصبي المناسب
 function resolveVoice(voice, language) {
   const langCode = EDGE_LANGUAGE_CODES[language] || 'en-US';
   const fallback = EDGE_DEFAULT_VOICES[language] || EDGE_DEFAULT_VOICES.en;
@@ -318,6 +331,7 @@ function resolveVoice(voice, language) {
   return fallback;
 }
 
+// مسؤول عن تحويل النص لصوت وإرجاع الصوت وتوقيت الكلمات
 function synthesizeEdge({text, language, voice, rate, pitch}, timeoutMs = 20000) {
   const voiceName = resolveVoice(voice, language);
   const ratePct = `${rate >= 1 ? '+' : ''}${Math.round((rate - 1) * 100)}%`;
@@ -433,6 +447,7 @@ function synthesizeEdge({text, language, voice, rate, pitch}, timeoutMs = 20000)
   });
 }
 
+// مسؤول عن إنشاء مزود الصوت المصري
 export function createEdgeSpeechProvider(environment = process.env) {
   if (String(environment.EDGE_TTS || '').toLowerCase() === 'off') return null;
   const flag = String(environment.SPEECH_PROVIDER || '').toLowerCase();

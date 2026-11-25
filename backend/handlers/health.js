@@ -1,11 +1,16 @@
+// ============================================================
+// نقطة فحص الصحة: تقول أي الخدمات مفعّلة (من غير كشف أي مفتاح) وتوصي بلغة المستخدم.
+// ============================================================
 import {sendJson, getRequestId, makeRequestId} from '../lib/response.js';
 import {createEdgeSpeechProvider} from '../lib/edge-provider.js';
 
+// مسؤول عن وصف حالة خدمة (مفعّلة/ناقصة) بدون كشف مفاتيح
 function integrationStatus(name, value) {
   if (!value) return 'missing';
   return value === 'demo' ? 'demo-mode' : 'configured';
 }
 
+// مسؤول عن اقتراح لغة من هيدر المتصفح
 function recommendedLanguage(request) {
   const country = String(request?.headers?.['x-vercel-ip-country'] || '').toUpperCase();
   const countryLanguages = {SA: 'ar', EG: 'ar', AE: 'ar', QA: 'ar', KW: 'ar', BH: 'ar', OM: 'ar', FR: 'fr', DE: 'de', ES: 'es', CN: 'zh'};
@@ -18,6 +23,7 @@ function recommendedLanguage(request) {
   return null;
 }
 
+// مسؤول عن معالجة الطلب القادم لهذه النقطة
 export default async function handler(request, response) {
   const requestId = getRequestId(request) || makeRequestId();
   const mode = process.env.APP_MODE === 'demo' || process.env.DEMO_MODE === 'true' ? 'demo' : 'production';

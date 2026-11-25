@@ -1,12 +1,17 @@
+// ============================================================
+// عميل الـAPI: الملف الوحيد الذي يكلم الخادم (/api). مسؤول عن الطلبات والمهلة والأخطاء والمصادقة.
+// ============================================================
 (() => {
   const DEFAULT_TIMEOUT_MS = 12000;
 
+  // مسؤول عن التعرف على رد الخادم التجريبي
   function isDemoNotConfigured(payload) {
     const message = String(payload?.error?.message || '').toLowerCase();
     const code = String(payload?.error?.code || '').toLowerCase();
     return code.includes('not_configured') || code.includes('not-configured') || message.includes('not configured') || message.includes('not set up') || message.includes('not available');
   }
 
+  // مسؤول عن تحويل أخطاء الخادم لرسائل عربية مفهومة
   function toFriendlyMessage(error) {
     const message = error && error.message ? String(error.message) : '';
     const lower = message.toLowerCase();
@@ -25,6 +30,7 @@
     return 'حدثت مشكلة أثناء الاتصال. جرّب مرة أخرى، أو استخدم الوضع التجريبي.';
   }
 
+  // مسؤول عن الردود التجريبية عندما الخادم في وضع العرض
   function demoResponseFor(path, details = {}) {
     const url = String(path || '');
     if (url.includes('/api/health')) {
@@ -83,6 +89,7 @@
     };
   }
 
+  // مسؤول عن إرسال أي طلب للخادم مع مهلة وإعادة تجربة ومعالجة الأخطاء
   async function request(path, options = {}) {
     const timeoutMs = Number(options.timeoutMs || DEFAULT_TIMEOUT_MS);
     const {timeoutMs: _timeout, ...fetchOptions} = options;
@@ -134,25 +141,30 @@
     }
   }
 
+  // مسؤول عن صنع خطأ موحد للـAPI
   function apiError(message, code) {
     const error = new Error(message);
     error.code = code;
     return error;
   }
 
+  // مسؤول عن معرفة هل المسار هو فحص الصحة
   function isHealthPath(path) {
     return new URL(String(path), globalThis.location?.href || 'http://localhost').pathname.endsWith('/api/health');
   }
 
+  // مسؤول عن القراءة الآمنة من sessionStorage
   function sessionStorageSafe() {
     try { return globalThis.sessionStorage || null; } catch { return null; }
   }
 
+  // مسؤول عن تحديد المسارات التي لا تحتاج جلسة دخول
   function isAuthExempt(path) {
     const pathname = new URL(String(path), globalThis.location?.href || 'http://localhost').pathname;
     return pathname === '/api/health' || pathname === '/api/activate' || pathname === '/api/auth/anonymous' || pathname === '/api/auth/refresh';
   }
 
+  // مسؤول عن إضافة رمز الدخول (Bearer) للطلب
   async function authorizationHeader(path) {
     if (isAuthExempt(path)) return '';
     const storage = sessionStorageSafe();

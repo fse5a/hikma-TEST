@@ -1,9 +1,14 @@
+// ============================================================
+// مصادقة Supabase: التحقق من رمز الدخول (Bearer) وتحديد المستخدم.
+// ============================================================
 import {sendError} from './response.js';
 
+// مسؤول عن معرفة هل وضع العرض مفعّل صراحة
 export function hasExplicitDemoMode(environment = process.env) {
   return environment.APP_MODE === 'demo' || environment.DEMO_MODE === 'true';
 }
 
+// مسؤول عن التحقق من هوية المستخدم من الرمز، ورفض الطلب لو غير صالح
 export async function resolveSupabaseUser(request, response, requestId, {providerConfigured = false} = {}) {
   const supabaseUrl = String(process.env.SUPABASE_URL || '').replace(/\/$/, '');
   const anonKey = process.env.SUPABASE_ANON_KEY;

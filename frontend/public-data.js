@@ -1,7 +1,11 @@
+// ============================================================
+// تحميل ملفات البيانات العامة (الأصوات وجمل الاختبار) بشكل آمن.
+// ============================================================
 (() => {
   const allowedFiles = new Set(['voices.json', 'test-sentences.json']);
   const pending = new Map();
 
+  // مسؤول عن تحميل ملف JSON مسموح فقط
   async function loadJson(filename) {
     if (!allowedFiles.has(filename)) throw new Error('Unsupported public data file.');
     if (!pending.has(filename)) {

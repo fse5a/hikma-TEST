@@ -1,6 +1,10 @@
+// ============================================================
+// تعدد اللغات: ترجمة واجهة الموقع (6 لغات) واكتشاف لغة المستخدم.
+// ============================================================
 (() => {
   const languages = ['ar', 'en', 'fr', 'de', 'es', 'zh'];
   const languageNames = {ar: 'العربية', en: 'English', fr: 'Français', de: 'Deutsch', es: 'Español', zh: '中文'};
+  // قواميس الترجمة لكل لغة
   const dictionaries = {
     en: {
       'نقرأها سوا': 'Read together', 'إعدادات الصوت': 'Voice settings', 'قصة جديدة': 'New story',
@@ -107,11 +111,13 @@
   let activeLanguage = 'ar';
   let observer;
 
+  // مسؤول عن تحويل رمز اللغة لشكل موحد
   function normalizeLanguage(value) {
     const code = String(value || '').toLowerCase().split(/[-_]/)[0];
     return languages.includes(code) ? code : 'en';
   }
 
+  // مسؤول عن اكتشاف لغة المستخدم من المتصفح
   function detectLanguage(preferences = globalThis.navigator?.languages || [globalThis.navigator?.language]) {
     for (const preference of preferences || []) {
       const normalized = normalizeLanguage(preference);
@@ -120,10 +126,12 @@
     return 'ar';
   }
 
+  // مسؤول عن جلب قاموس لغة معينة
   function mapFor(language) {
     return dictionaries[language] || {};
   }
 
+  // مسؤول عن ترجمة نص عنصر واحد
   function translateNode(node, dictionary) {
     const parent = node.parentElement;
     if (!parent || parent.closest(skipSelector)) return;
@@ -136,6 +144,7 @@
     if (node.nodeValue !== nextValue) node.nodeValue = nextValue;
   }
 
+  // مسؤول عن ترجمة خصائص العنصر (العنوان والوصف)
   function translateAttributes(element, dictionary) {
     for (const attribute of ['aria-label', 'title', 'placeholder']) {
       const value = element.getAttribute(attribute);
@@ -183,6 +192,7 @@
     'جارٍ قراءة النص من الصفحة (قد يستغرق ثوانٍ)...': '正在识别页面文字（可能需要几秒钟）...'
   });
 
+  // مسؤول عن ترجمة الصفحة كلها
   function translateTree(root = document.body) {
     if (!root) return;
     const dictionary = mapFor(activeLanguage);
@@ -193,6 +203,7 @@
     root.querySelectorAll?.('*').forEach(element => translateAttributes(element, dictionary));
   }
 
+  // مسؤول عن تغيير لغة الواجهة
   function setLanguage(language) {
     activeLanguage = normalizeLanguage(language);
     const root = document.documentElement;
@@ -204,6 +215,7 @@
     return activeLanguage;
   }
 
+  // مسؤول عن ترجمة أي عنصر جديد يظهر بعد التحميل
   function observeBody() {
     if (!document.body || observer) return;
     observer = new MutationObserver(records => {

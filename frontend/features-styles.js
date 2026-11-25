@@ -1,5 +1,8 @@
 // Runtime stylesheets for the dashboard, gate, settings, accessibility mode and cloud voice tools.
 // Loaded before restored-features.js; appends <style> elements in the same order as before.
+// ============================================================
+// أنماط CSS تُضاف وقت التشغيل: بوابة الدخول، لوحة القراءة، الإعدادات، وضع إمكانية الوصول، أدوات الصوت.
+// ============================================================
 (() => {
   const styles = document.createElement('style');
   styles.textContent = `

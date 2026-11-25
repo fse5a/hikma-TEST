@@ -1,5 +1,9 @@
+// ============================================================
+// نقطة تفعيل الدخول بكود: تقبل الكود التجريبي في وضع العرض فقط وترفض في الإنتاج.
+// ============================================================
 import {sendError, parseJsonBody, validateRequired, getRequestId, sendJson} from '../lib/response.js';
 
+// مسؤول عن معالجة الطلب القادم لهذه النقطة
 export default async function handler(request, response) {
   const requestId = getRequestId(request);
   if (request.method && request.method.toUpperCase() !== 'POST') {

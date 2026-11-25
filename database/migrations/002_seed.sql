@@ -1,3 +1,4 @@
+-- مسؤول عن: بيانات أولية (السكنز والأصوات وكود تجريبي يجب حذفه قبل الإطلاق)
 insert into skins (slug, name, metadata, is_public)
 values
   ('alice', 'Alice in Wonderland', '{"source": "public domain", "notes": "Original placeholder art for the public domain story pack."}', true),

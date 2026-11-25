@@ -1,9 +1,13 @@
+// ============================================================
+// نقطة الترجمة: تتحقق من المستخدم والحصة وتترجم بمزود Gemini أو Worker.
+// ============================================================
 import {sendError, parseJsonBody, validateRequired, getRequestId, sendJson} from '../lib/response.js';
 import {resolveSupabaseUser} from '../lib/supabase-auth.js';
 import {enforceApiQuota} from '../lib/quota.js';
 import {createTranslationProvider} from '../lib/translation-provider.js';
 import {createGeminiTranslationProvider} from '../lib/gemini-provider.js';
 
+// مسؤول عن معالجة الطلب القادم لهذه النقطة
 export default async function handler(request, response) {
   const requestId = getRequestId(request);
   if (request.method && request.method.toUpperCase() !== 'POST') {
