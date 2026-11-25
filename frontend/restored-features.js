@@ -371,13 +371,17 @@
     root.dataset.a11y = settings.a11y ? 'on' : 'off';
     root.dataset.theme = settings.theme;
     const paper = palette.paper;
+    root.dataset.skin = settings.skin;
     for (const [name, value] of Object.entries({'--green': palette.green, '--green-dark': palette.dark, '--mint': palette.mint, '--paper': paper, '--surface': palette.surface, '--ink': palette.ink, '--muted': palette.muted, '--line': palette.line, '--on-accent': palette.on})) root.style.setProperty(name, value);
     const systemContrast = window.matchMedia?.('(prefers-contrast: more)').matches;
     const highContrast = settings.highContrast ?? systemContrast;
     if (settings.a11y || highContrast) {
       for (const [name, value] of Object.entries({'--paper': '#000', '--surface': '#111', '--ink': '#fff', '--muted': '#f1f1f1', '--green': '#ffd23f', '--green-dark': '#ffd23f', '--mint': '#222', '--line': '#fff', '--on-accent': '#000'})) root.style.setProperty(name, value);
       root.style.colorScheme = 'dark';
+      root.dataset.hc = 'on';
     } else {
+      root.dataset.hc = 'off';
+      root.style.setProperty('--surface', `color-mix(in srgb, ${palette.surface} 90%, transparent)`);
       root.style.colorScheme = settings.theme;
     }
     root.style.fontSize = `${Math.max(100, Math.min(200, Number(settings.textScale || (settings.a11y ? 150 : 100))))}%`;
