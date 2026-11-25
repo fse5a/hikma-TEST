@@ -18,6 +18,7 @@
       if (status) status.textContent = health?.mode === 'demo'
         ? 'الخدمات الخلفية في الوضع التجريبي؛ الترجمة والتشكيل السحابيان غير مهيأين.'
         : 'اتصال الخدمات الخلفية جاهز.';
+      loadVoiceChoices();
     } catch (error) {
       const status = document.querySelector('#voiceStatus');
       if (status) status.textContent = api.toFriendlyMessage(error);
