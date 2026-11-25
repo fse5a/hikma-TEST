@@ -379,6 +379,7 @@ button:focus-visible, input:focus-visible, textarea:focus-visible, select:focus-
   background: var(--glass); color: var(--ink);
   font-size: 17px; cursor: pointer;
 }
+.reader-controls .round-control:has(bdi) { width: auto; min-width: 46px; padding: 0 12px; border-radius: 23px; grid-auto-flow: column; gap: 4px; white-space: nowrap; }
 .play-control {
   width: 62px; height: 62px;
   border: none;
@@ -576,3 +577,14 @@ body.hikma-celebrate .reader-owl svg, body.hikma-celebrate .welcome .owl { anima
 :root[data-reduced-motion=true] .welcome .owl circle[fill="#101c33"],
 :root[data-reduced-motion=true] body.hikma-reading .reader-owl svg,
 :root[data-reduced-motion=true] body.hikma-celebrate .reader-owl svg { animation: none !important; }
+
+/* ---------- Offline mode ---------- */
+.offline-badge {
+  position: fixed; z-index: 95;
+  bottom: calc(78px + env(safe-area-inset-bottom)); inset-inline-start: 14px;
+  background: var(--ink); color: var(--paper);
+  border-radius: 99px; padding: 8px 16px;
+  font-size: 13px; font-weight: 700; box-shadow: var(--shadow);
+}
+@media (min-width: 1024px) { .offline-badge { bottom: 20px; } }
+.reader-controls .round-control bdi { white-space: nowrap; }

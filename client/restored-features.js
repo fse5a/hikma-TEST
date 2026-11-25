@@ -166,6 +166,10 @@
   backupBlock.className = 'feature-setting-block data-tools';
   backupBlock.innerHTML = '<h3>نسخة احتياطية</h3><button class="button secondary" id="exportLibrary" type="button">تصدير المكتبة والإعدادات</button><label class="button secondary" for="importLibrary">استيراد نسخة احتياطية</label><input id="importLibrary" type="file" accept="application/json,.json"><p class="data-note">النسخة تشمل القصص والملاحظات والإعدادات. التسجيلات الصوتية تبقى على هذا الجهاز ولا تُصدّر.</p><p class="status" id="backupStatus" role="status"></p>';
   settingsOverlay.querySelector('#resetApp').closest('.feature-setting-block').before(backupBlock);
+  const offlineBlock = document.createElement('div');
+  offlineBlock.className = 'feature-setting-block';
+  offlineBlock.innerHTML = '<h3>العمل دون اتصال</h3><p class="voice-note" id="offlineInfo">جارٍ حساب المحتوى المحفوظ على هذا الجهاز...</p>';
+  settingsOverlay.querySelector('#resetApp').closest('.feature-setting-block').before(offlineBlock);
   const voiceSourceField = document.createElement('div');
   voiceSourceField.className = 'field';
   voiceSourceField.innerHTML = '<label for="voiceSource">مصدر الصوت</label><select id="voiceSource"><option value="device">صوت الجهاز (جودة أقل)</option></select><p class="voice-note">الصوت السحابي الطبيعي يتاح تلقائيًا عند تهيئة الخدمة الخلفية.</p>';
@@ -432,6 +436,7 @@
 
   function openAppSettings() {
     renderSettings();
+    updateOfflineUI();
     openModal('appSettingsOverlay');
   }
 
@@ -1083,8 +1088,15 @@
     const translateButton = document.querySelector('#translateStory');
     const speechButton = document.querySelector('#neuralSpeech');
     const draftButton = document.querySelector('#translateDraft');
-    if (translateButton) translateButton.disabled = false;
-    if (draftButton) draftButton.disabled = false;
+    const offline = !navigator.onLine;
+    if (translateButton) {
+      translateButton.disabled = offline;
+      translateButton.title = offline ? 'الترجمة تحتاج اتصالًا بالإنترنت' : '';
+    }
+    if (draftButton) {
+      draftButton.disabled = offline;
+      draftButton.title = offline ? 'الترجمة تحتاج اتصالًا بالإنترنت' : '';
+    }
     if (speechButton) speechButton.disabled = false;
     if (speechButton) {
       speechButton.textContent = settings.voiceSource === 'device'
@@ -1096,6 +1108,46 @@
     if (!cloudStatusState.message) cloudStatusState.message = 'جارٍ التحقق من الخدمات الخلفية. الترجمة اليدوية وصوت الجهاز متاحان دائمًا.';
     cloudStatus(cloudStatusState.message, cloudStatusState.isError);
   }
+
+  async function countSpeechCache() {
+    try {
+      const database = await db();
+      return await new Promise(resolve => {
+        const request = database.transaction('speechCache').objectStore('speechCache').count();
+        request.onsuccess = () => resolve(request.result || 0);
+        request.onerror = () => resolve(0);
+      });
+    } catch {
+      return 0;
+    }
+  }
+
+  let offlineBadge = null;
+  async function updateOfflineUI() {
+    const offline = !navigator.onLine;
+    document.body.classList.toggle('hikma-offline', offline);
+    if (offline && !offlineBadge) {
+      offlineBadge = document.createElement('div');
+      offlineBadge.className = 'offline-badge';
+      offlineBadge.setAttribute('role', 'status');
+      offlineBadge.textContent = 'بلا اتصال — القصص المحفوظة والصوت المحفوظ يعملان';
+      document.body.appendChild(offlineBadge);
+    } else if (!offline && offlineBadge) {
+      offlineBadge.remove();
+      offlineBadge = null;
+    }
+    updateCloudControls();
+    const offlineInfo = document.querySelector('#offlineInfo');
+    if (offlineInfo) {
+      const clips = await countSpeechCache();
+      const saved = (state.stories || []).length;
+      offlineInfo.textContent = offline
+        ? `أنت بلا اتصال الآن. على هذا الجهاز: ${saved} قصة و${clips} مقطع صوتي محفوظ — كلها تعمل دون إنترنت.`
+        : `على هذا الجهاز: ${saved} قصة و${clips} مقطع صوتي محفوظ. القصص المحفوظة والصوت المحفوظ يعملان دون إنترنت تلقائيًا.`;
+    }
+  }
+  window.addEventListener('online', updateOfflineUI);
+  window.addEventListener('offline', updateOfflineUI);
 
   async function translateStory(to) {
     if (!story || !window.HikmaI18n.languages.includes(to)) return;
@@ -1247,8 +1299,9 @@
     const chunks = splitSpeechChunks(sourceText);
     const speechHealth = window.hikmaBackendHealth?.integrations?.speech;
     const configuredProvider = window.hikmaBackendHealth?.providers?.speech || 'worker';
-    const workerConfigured = speechHealth === 'configured';
-    cloudStatus(workerConfigured ? 'جارٍ تجهيز الصوت...' : 'جارٍ التحقق من الصوت الخلفي...');
+    const offline = !navigator.onLine;
+    const workerConfigured = !offline && speechHealth === 'configured';
+    cloudStatus(offline ? 'بلا اتصال: سيُستخدم الصوت المحفوظ إن وُجد، وإلا صوت الجهاز.' : workerConfigured ? 'جارٍ تجهيز الصوت...' : 'جارٍ التحقق من الصوت الخلفي...');
     try {
       const audioChunks = [];
       const metaChunks = [];
@@ -1257,11 +1310,20 @@
       for (const chunk of chunks) {
         const chunkStart = Math.max(0, sourceText.indexOf(chunk, searchFrom));
         searchFrom = chunkStart + chunk.length;
-        const cacheKey = workerConfigured ? await speechCacheKey(configuredProvider, voice, lang, chunk) : null;
-        const cachedEntry = cacheKey ? await getSpeechCache(cacheKey) : null;
+        let cachedEntry = null;
+        for (const providerName of [configuredProvider, 'edge']) {
+          if (cachedEntry) break;
+          const key = await speechCacheKey(providerName, voice, lang, chunk);
+          cachedEntry = await getSpeechCache(key);
+        }
         let audioBlob = cachedEntry?.blob || null;
         let chunkWords = cachedEntry?.words || null;
         if (!audioBlob) {
+          if (offline) {
+            cloudStatus('هذا الجزء غير محفوظ بعد؛ يعمل صوت الجهاز بدلًا منه.');
+            window.startSpeech();
+            return;
+          }
           const result = await api.speech(chunk, lang, voice, settings.rate, settings.pitch);
           if (result.mode !== 'configured' || !result.audioBase64) {
             cloudStatus('الصوت الخلفي في الوضع التجريبي؛ يعمل صوت الجهاز بدلًا منه.');
@@ -1745,6 +1807,7 @@
   cloudStyles.textContent = '.cloud-voice-tools{display:grid;gap:8px;margin:12px 0}.cloud-voice-tools .button{width:100%}.cloud-voice-tools .voice-note{margin:0}.cloud-voice-tools .button:disabled{cursor:not-allowed;opacity:.55}';
   document.head.appendChild(cloudStyles);
   loadStaticData();
+  updateOfflineUI();
   renderGate();
   window.renderLibrary();
   refreshBackendHealth();
