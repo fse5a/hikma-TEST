@@ -77,6 +77,7 @@
   helperButton.style.setProperty('place-items', 'center');
   helperButton.style.setProperty('font-size', '0');
   const originalMascot = document.querySelector('.welcome .owl').outerHTML;
+  window.originalMascotSvg = originalMascot;
   const skipLink = document.createElement('a');
   skipLink.className = 'skip-link';
   skipLink.href = '#mainContent';
@@ -674,7 +675,35 @@
     } catch {}
   }
 
+  function setReadingState(active) {
+    document.body.classList.toggle('hikma-reading', !!active);
+  }
+
+  function celebrateStory() {
+    document.body.classList.remove('hikma-celebrate');
+    void document.body.offsetWidth;
+    document.body.classList.add('hikma-celebrate');
+    setTimeout(() => document.body.classList.remove('hikma-celebrate'), 2600);
+    if (settings.reducedMotion) return;
+    const burst = document.createElement('div');
+    burst.className = 'celebrate-stars';
+    burst.setAttribute('aria-hidden', 'true');
+    const glyphs = settings.age === 'u16' ? ['⭐', '🌟', '✨', '🎈', '⭐', '✨'] : ['✦', '✧', '✦', '✧'];
+    glyphs.forEach((glyph, index) => {
+      const star = document.createElement('span');
+      star.textContent = glyph;
+      const angle = (index / glyphs.length) * Math.PI * 2;
+      star.style.transform = `translate(${Math.cos(angle) * 90}px, ${Math.sin(angle) * 60}px)`;
+      star.style.animationDelay = `${index * 90}ms`;
+      burst.appendChild(star);
+    });
+    document.body.appendChild(burst);
+    setTimeout(() => burst.remove(), 2400);
+  }
+  window.addEventListener('hikma:finished', celebrateStory);
+
   function stopAudio() {
+    setReadingState(false);
     if (activeAudio) {
       activeAudio.pause();
       activeAudio.src = '';
@@ -1168,6 +1197,7 @@
       audio.preservesPitch = true;
       audio.webkitPreservesPitch = true;
       const meta = metaChunks?.[chunkIndex];
+      setReadingState(true);
       if (meta?.words?.length && window.renderLines) {
         audio.addEventListener('timeupdate', () => {
           if (activeAudio !== audio) return;
@@ -1201,7 +1231,9 @@
         lineIndex = 0;
         saveProgress();
         renderLines();
+        setReadingState(false);
         cloudStatus('وصلت إلى نهاية القصة.');
+        window.dispatchEvent(new CustomEvent('hikma:finished'));
       }
     };
     await playChunk();
@@ -1423,6 +1455,14 @@
     if (readerDialog) {
       readerDialog.lang = lang;
       readerDialog.dir = lang === 'ar' ? 'rtl' : 'ltr';
+      const head = readerDialog.querySelector('.dialog-head');
+      if (head && !head.querySelector('.reader-owl') && window.originalMascotSvg) {
+        const owlWrap = document.createElement('span');
+        owlWrap.className = 'reader-owl';
+        owlWrap.setAttribute('aria-hidden', 'true');
+        owlWrap.innerHTML = window.originalMascotSvg;
+        head.insertBefore(owlWrap, head.firstChild);
+      }
     }
     if (!panel.querySelector('#sleepTimer')) {
       const timerField = document.createElement('div');
