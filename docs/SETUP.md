@@ -153,3 +153,14 @@ Text-layer PDFs are parsed in the browser by the vendored PDF.js worker. Files a
 - Supabase Free is used for a low-volume personal project.
 - Provider quotas are enforced when Supabase is configured; budget alerts and scheduled project keep-alive are not implemented.
 - Audio, PDFs, and imported content stay private to the user and are not mixed into shared public caches.
+
+
+## Supabase and activation codes (free plan)
+
+1. Create a project at supabase.com (Free plan).
+2. SQL Editor: run `database/migrations/001` to `006` in order. `006` removes the old demo code and adds server-side activation.
+3. Vercel > Project Settings > Environment Variables: `SUPABASE_URL`, `SUPABASE_ANON_KEY`, `SUPABASE_SERVICE_ROLE_KEY` (server only, never in the frontend), and `APP_MODE=production`. Redeploy.
+4. Make an activation code: `node scripts/make-activation-code.mjs 1 30` (1 use, 30 days). It prints the code to give to the user and one SQL line to run in the SQL Editor. Only the hash is stored.
+5. Check `/api/health`: `features.activation` should say `server`.
+
+Until Supabase is configured the site stays in demo mode and the server accepts only the demo code (`DEMO_ACTIVATION_CODE`, default `1234`) when `APP_MODE=demo`. The browser no longer contains any code.

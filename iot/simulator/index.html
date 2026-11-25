@@ -1,0 +1,48 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>محاكي القلم | حِكمة</title>
+<style>
+body{font-family:system-ui,sans-serif;max-width:720px;margin:0 auto;padding:20px;line-height:1.8}
+textarea,input,select,button{font:inherit;padding:8px;width:100%;box-sizing:border-box;margin:4px 0 10px}
+button{cursor:pointer;background:#1d3a6b;color:#fff;border:0;border-radius:8px}
+pre{background:#101c33;color:#e8e8e8;padding:12px;border-radius:8px;overflow:auto;direction:ltr;text-align:left;min-height:120px}
+.note{background:#e8b64c33;padding:10px;border-radius:8px}
+</style>
+</head>
+<body>
+<h1>محاكي القلم الذكي</h1>
+<p class="note">ده اختبار فقط. مفيش قلم حقيقي. الصفحة بتعمل أحداث «مسح جملة» بنفس شكل <code>iot/PROTOCOL.md</code> وبتعرضها هنا، وتقدر تبعتها لرابط عندك. افتح الملف بالنقر المزدوج، مش محتاج سيرفر.</p>
+<label for="text">الجملة اللي القلم «مسحها»</label>
+<textarea id="text" rows="3">كان يا ما كان، في قديم الزمان، بومة حكيمة تسكن شجرة عالية.</textarea>
+<label for="lang">اللغة</label>
+<select id="lang"><option value="ar">العربية</option><option value="en">English</option></select>
+<label for="url">رابط للإرسال (اختياري، POST بصيغة JSON)</label>
+<input id="url" type="url" dir="ltr" placeholder="http://localhost:4000/pen">
+<button id="scan" type="button">مسح الجملة</button>
+<h2>الأحداث</h2>
+<pre id="log">لسه مفيش أحداث.</pre>
+<script>
+let seq = 0;
+const $ = id => document.getElementById(id);
+$('scan').addEventListener('click', async () => {
+  seq += 1;
+  const event = {version: 1, type: 'pen.scan', deviceId: 'SIM-PEN-001', seq, ts: new Date().toISOString(), lang: $('lang').value, text: $('text').value.trim(), confidence: 0.97, battery: Math.max(5, 100 - seq), source: 'simulator'};
+  if (!event.text) { $('log').textContent = 'اكتب جملة الأول.'; return; }
+  let line = JSON.stringify(event);
+  const url = $('url').value.trim();
+  if (url) {
+    try {
+      const response = await fetch(url, {method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify(event)});
+      line += `\n-> ${response.status}`;
+    } catch (error) {
+      line += `\n-> فشل الإرسال: ${error.message}`;
+    }
+  }
+  $('log').textContent = ($('log').textContent.startsWith('لسه') ? '' : $('log').textContent + '\n') + line;
+});
+</script>
+</body>
+</html>

@@ -38,3 +38,14 @@ test('quota migration restricts event access and RPC execution to service role',
   assert.match(sql, /pg_advisory_xact_lock/i);
   assert.match(sql, /if p_user_id is not null then/i);
 });
+
+test('activation migration hashes codes, redeems atomically and removes the demo seed', async () => {
+  const sql = await readFile(new URL('../migrations/006_activation_codes.sql', import.meta.url), 'utf8');
+  assert.match(sql, /code_hash text unique/i);
+  assert.match(sql, /delete from public\.activation_codes where code = 'DEMO-1234'/i);
+  assert.match(sql, /create or replace function public\.redeem_activation_code/i);
+  assert.match(sql, /grant execute on function public\.redeem_activation_code\(text\) to service_role/i);
+  assert.match(sql, /revoke all on function public\.redeem_activation_code\(text\) from public, anon, authenticated/i);
+  const seed = await readFile(new URL('../migrations/002_seed.sql', import.meta.url), 'utf8');
+  assert.doesNotMatch(seed, /DEMO-1234/);
+});

@@ -48,8 +48,7 @@ export function validateRequired(body, requiredKeys) {
 // بيشوف هل السيرفر في وضع العرض التجريبي
 export function getDemoStatus() {
   return {
-    mode: process.env.APP_MODE === 'demo' || process.env.DEMO_MODE === 'true' ? 'demo' : 'production',
-    demoActivationCode: process.env.DEMO_ACTIVATION_CODE || '1234'
+    mode: process.env.APP_MODE === 'demo' || process.env.DEMO_MODE === 'true' ? 'demo' : 'production'
   };
 }
 

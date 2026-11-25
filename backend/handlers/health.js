@@ -69,7 +69,7 @@ export default async function handler(request, response) {
     },
     warnings: process.env.SUPABASE_URL ? [] : ['Supabase is not configured; the app is running in demo mode.'],
     features: {
-      activation: 'demo-mode',
+      activation: process.env.SUPABASE_URL && process.env.SUPABASE_SERVICE_ROLE_KEY ? 'server' : 'demo-mode',
       sync: process.env.ENABLE_SUPABASE_SYNC === 'true' ? 'enabled' : 'demo-only',
       voiceSynthesis: (process.env.SPEECH_WORKER_URL || (process.env.SPEECH_PROVIDER === 'google' && process.env.GOOGLE_TTS_API_KEY) || (process.env.SPEECH_PROVIDER === 'gemini' && process.env.GEMINI_API_KEY)) ? 'provider-enabled' : 'device-only',
       diacritization: process.env.DIACRITIZATION_WORKER_URL ? 'provider-enabled' : 'original-text-fallback'

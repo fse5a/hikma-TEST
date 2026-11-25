@@ -94,7 +94,7 @@
   const settingsOverlay = document.createElement('div');
   settingsOverlay.id = 'appSettingsOverlay';
   settingsOverlay.className = 'overlay';
-  settingsOverlay.innerHTML = `<section class="dialog narrow" role="dialog" aria-modal="true" aria-labelledby="appSettingsTitle"><header class="dialog-head"><h2 id="appSettingsTitle">إعدادات حكمة</h2><button class="icon-button" data-close="appSettingsOverlay" aria-label="إغلاق">×</button></header><div class="dialog-body feature-settings"><div class="feature-setting-block"><h3>العمر والواجهة</h3><div class="feature-setting-row"><button class="button secondary" data-age-choice="u16">وضع الأطفال</button><button class="button secondary" data-age-choice="o16">16 سنة أو أكثر</button></div></div><div class="feature-setting-block"><h3>المساعدة وإمكانية الوصول</h3><button class="button secondary" id="settingsA11y"></button></div><div class="feature-setting-block"><h3>شخصية القلم</h3><div class="skin-choices" id="settingsSkins"></div></div><div class="feature-setting-block"><button class="button secondary" id="resetApp">إعادة ضبط التطبيق</button></div></div></section>`;
+  settingsOverlay.innerHTML = `<section class="dialog narrow" role="dialog" aria-modal="true" aria-labelledby="appSettingsTitle"><header class="dialog-head"><h2 id="appSettingsTitle">إعدادات حكمة</h2><button class="icon-button" data-close="appSettingsOverlay" aria-label="إغلاق">×</button></header><div class="dialog-body feature-settings"><div class="feature-setting-block"><h3>العمر والواجهة</h3><div class="feature-setting-row"><button class="button secondary" data-age-choice="u16">وضع الأطفال</button><button class="button secondary" data-age-choice="o16">16 سنة أو أكثر</button></div></div><div class="feature-setting-block"><h3>المساعدة وإمكانية الوصول</h3><button class="button secondary" id="settingsA11y"></button></div><div class="feature-setting-block"><h3>شخصية القلم</h3><div class="skin-choices" id="settingsSkins"></div></div><div class="feature-setting-block"><button class="button secondary" id="changePin">رقم الأهل السري</button><a class="button secondary" href="/privacy.html" target="_blank" rel="noopener">سياسة الخصوصية (مسودة)</a><a class="button secondary" href="/terms.html" target="_blank" rel="noopener">شروط الاستخدام (مسودة)</a></div><div class="feature-setting-block"><button class="button secondary" id="resetApp">إعادة ضبط التطبيق</button></div></div></section>`;
   settingsOverlay.querySelector('.feature-settings').insertAdjacentHTML('afterbegin', `<div class="feature-setting-block"><label for="uiLanguage">لغة التطبيق</label><select id="uiLanguage">${window.HikmaI18n.languages.map(language => `<option value="${language}">${window.HikmaI18n.languageNames[language]}</option>`).join('')}</select></div>`);
   settingsOverlay.querySelector('.feature-settings').insertAdjacentHTML('afterbegin', '<div class="feature-setting-block"><h3>المظهر</h3><div class="feature-setting-row theme-choices" role="group" aria-label="اختيار المظهر"><button class="button secondary" data-theme-choice="light">☀️ فاتح</button><button class="button secondary" data-theme-choice="dark">🌙 داكن</button></div></div>');
   settingsOverlay.querySelector('#settingsA11y').closest('.feature-setting-block').insertAdjacentHTML('afterend', '<div class="feature-setting-block" id="accessibilityOptions"><h3>خيارات إمكانية الوصول</h3><label for="a11yTextScale">حجم النص <output id="a11yTextScaleValue">100%</output></label><input id="a11yTextScale" type="range" min="100" max="200" step="10"><label for="a11yLineSpacing">تباعد الأسطر</label><select id="a11yLineSpacing"><option value="1.6">مضغوط</option><option value="2">مريح</option><option value="2.4">واسع</option></select><label><input id="a11yHighContrast" type="checkbox"> تباين عالٍ</label><label><input id="a11yDyslexiaFont" type="checkbox"> خط ميسّر للقراءة</label><label><input id="a11yReducedMotion" type="checkbox"> تقليل الحركة</label><label><input id="a11yVoiceGuidance" type="checkbox"> إرشاد صوتي</label><label for="a11yAnnouncementRate">سرعة الإعلانات الصوتية <output id="a11yAnnouncementRateValue">1x</output></label><input id="a11yAnnouncementRate" type="range" min="0.5" max="2" step="0.05"><label><input id="a11ySimpleMode" type="checkbox"> الوضع المبسّط</label><label><input id="a11yHaptics" type="checkbox"> اهتزاز عند التفاعل</label><label for="a11yHighlightStyle">نمط تمييز الجملة</label><select id="a11yHighlightStyle"><option value="yellow">أصفر</option><option value="underline">تسطير</option><option value="outline">إطار</option></select></div>');
@@ -424,7 +424,8 @@
   }
 
   // ده بتاع فتح نافذة الإعدادات
-  function openAppSettings() {
+  async function openAppSettings() {
+    if (settings.age === 'u16' && settings.parentPinHash && !(await askParentPin())) return;
     renderSettings();
     updateOfflineUI();
     openModal('appSettingsOverlay');
@@ -448,7 +449,7 @@
       version: 1,
       exportedAt: new Date().toISOString(),
       stories: state.stories.map(({audio, ...item}) => ({...item})),
-      settings: {...settings},
+      settings: (({parentPinHash, parentPinSalt, ...rest}) => rest)(settings),
       activity: state.activity
     };
     const url = URL.createObjectURL(new Blob([JSON.stringify(backup, null, 2)], {type: 'application/json'}));
@@ -537,6 +538,65 @@
   }
 
   // ============================================================
+  // رقم الأهل السري (وضع الأطفال): بيقفل الإعدادات. التخزين محلي على الجهاز، يعني ده رادع للأطفال مش حماية قوية.
+  // ============================================================
+  // بيعمل هاش للرقم مع salt
+  async function pinHash(pin, salt) {
+    const bytes = new TextEncoder().encode(`${salt}:${pin}`);
+    const digest = await crypto.subtle.digest('SHA-256', bytes);
+    return Array.from(new Uint8Array(digest), byte => byte.toString(16).padStart(2, '0')).join('');
+  }
+  // بيفتح شباك صغير يطلب الرقم، ويرجّع الأرقام اللي اتكتبت أو null لو لغى
+  function pinDialog({title, text, confirmField = false, cancellable = true}) {
+    return new Promise(resolve => {
+      const box = document.createElement('div');
+      box.className = 'pin-overlay';
+      box.innerHTML = `<form class="pin-dialog" role="dialog" aria-modal="true" aria-labelledby="pinTitle"><h2 id="pinTitle">${title}</h2><p>${text}</p><label for="pinInput">الرقم السري (4 إلى 6 أرقام)</label><input id="pinInput" type="password" inputmode="numeric" pattern="[0-9]{4,6}" maxlength="6" autocomplete="off" required>${confirmField ? '<label for="pinInput2">اكتبه تاني للتأكيد</label><input id="pinInput2" type="password" inputmode="numeric" pattern="[0-9]{4,6}" maxlength="6" autocomplete="off" required>' : ''}<p class="gate-error" id="pinError" role="alert"></p><div class="gate-actions"><button class="button primary" type="submit">تمام</button>${cancellable ? '<button class="button secondary" type="button" data-pin-cancel>إلغاء</button>' : ''}</div></form>`;
+      document.body.appendChild(box);
+      const input = box.querySelector('#pinInput');
+      input.focus();
+      const finish = value => { document.removeEventListener('keydown', onKey, true); box.remove(); resolve(value); };
+      const onKey = event => { if (event.key === 'Escape' && cancellable) { event.stopPropagation(); finish(null); } };
+      document.addEventListener('keydown', onKey, true);
+      box.querySelector('[data-pin-cancel]')?.addEventListener('click', () => finish(null));
+      box.querySelector('form').addEventListener('submit', event => {
+        event.preventDefault();
+        const pin = input.value.trim();
+        if (!/^[0-9]{4,6}$/.test(pin)) { box.querySelector('#pinError').textContent = 'الرقم لازم يكون من 4 إلى 6 أرقام.'; return; }
+        if (confirmField && box.querySelector('#pinInput2').value.trim() !== pin) { box.querySelector('#pinError').textContent = 'الرقمين مش زي بعض.'; return; }
+        finish(pin);
+      });
+    });
+  }
+  // بيطلب رقم الأهل ويتأكد منه (بعد 5 محاولات غلط بيقفل دقيقة). بيرجّع true لو صح
+  let pinFailures = 0;
+  let pinLockedUntil = 0;
+  async function askParentPin() {
+    if (!settings.parentPinHash) return true;
+    for (;;) {
+      const wait = Math.ceil((pinLockedUntil - Date.now()) / 1000);
+      const pin = await pinDialog({title: 'رقم الأهل', text: wait > 0 ? `محاولات كتير غلط. استنى ${wait} ثانية.` : 'اكتب الرقم السري اللي حطّه الأهل عشان تفتح الإعدادات.'});
+      if (pin === null) return false;
+      if (Date.now() < pinLockedUntil) continue;
+      if (await pinHash(pin, settings.parentPinSalt) === settings.parentPinHash) { pinFailures = 0; return true; }
+      pinFailures += 1;
+      if (pinFailures >= 5) { pinFailures = 0; pinLockedUntil = Date.now() + 60000; }
+      toast('الرقم غلط.');
+    }
+  }
+  // بيخلّي الأهل يحطّوا رقم سري جديد. بيرجّع true لو اتحفظ. (changing=true يطلب الرقم القديم الأول)
+  async function setParentPin(changing = false) {
+    if (changing && !(await askParentPin())) return false;
+    const pin = await pinDialog({title: changing ? 'رقم سري جديد' : 'رقم الأهل', text: 'وضع الأطفال بيقفل الإعدادات برقم سري. حطّ رقم من 4 إلى 6 أرقام وماتنساهوش، مفيش طريقة لاسترجاعه غير إعادة ضبط التطبيق.', confirmField: true, cancellable: changing || Boolean(settings.age)});
+    if (pin === null) return false;
+    const salt = Array.from(crypto.getRandomValues(new Uint8Array(16)), byte => byte.toString(16).padStart(2, '0')).join('');
+    settings.parentPinSalt = salt;
+    settings.parentPinHash = await pinHash(pin, salt);
+    save();
+    return true;
+  }
+
+  // ============================================================
   // القسم 7: بوابة الدخول والتهيئة الأولى (العمر، إمكانية الوصول، كود الدخول)
   // ============================================================
   // ده بتاع رسم شاشات البوابة
@@ -554,7 +614,7 @@
     const heading = step === 'activate' ? 'أهلاً بيك في حكمة' : step === 'age' ? 'هل عمرك 16 سنة أو أكثر؟' : 'تحب نفعّل وضع المساعدة؟';
     let content;
     if (step === 'activate') {
-      content = `<p>Demo access only; this code does not protect the app or create an account.</p><form id="demoLoginForm"><label for="penCode">Demo code</label><input id="penCode" type="password" dir="ltr" autocomplete="current-password" placeholder="Enter demo code" required><div class="gate-actions"><button class="button primary" type="submit">دخول</button></div></form><p class="voice-note">Demo codes are visible in the frontend and are not real authentication.</p>`;
+      content = `<p>اكتب كود التفعيل اللي معاك للدخول.</p><form id="demoLoginForm"><label for="penCode">كود التفعيل</label><input id="penCode" type="text" dir="ltr" autocomplete="off" autocapitalize="characters" spellcheck="false" placeholder="HKMA-XXXX-XXXX-XXXX" required><p class="gate-error" id="gateError" role="alert"></p><div class="gate-actions"><button class="button primary" type="submit">دخول</button></div></form><p class="voice-note"><a href="/privacy.html" target="_blank" rel="noopener">سياسة الخصوصية</a> · <a href="/terms.html" target="_blank" rel="noopener">شروط الاستخدام</a> (مسودة)</p>`;
     } else if (step === 'age') {
       content = `<p>نضبط شكل القراءة والمكافآت على حسب العمر.</p><div class="gate-actions"><button class="button primary" data-age="u16">أقل من 16 سنة</button><button class="button secondary" data-age="o16">16 سنة أو أكثر</button></div>`;
     } else {
@@ -564,24 +624,34 @@
     syncResponsiveControls();
   }
 
-  // بيتأكد من كود الدخول التجريبي
-  gate.addEventListener('submit', event => {
+  // الدخول بكود التفعيل: الفحص كله على السيرفر (/api/activate)، مفيش كود جوه الصفحة
+  gate.addEventListener('submit', async event => {
     if (event.target.id !== 'demoLoginForm') return;
     event.preventDefault();
-    const code = $('#penCode').value.trim().toLowerCase();
-    if (code !== '1234' && code !== 'admin' && code !== 'demo-1234') {
-      alert('Wrong Password');
+    const code = $('#penCode').value.trim();
+    const errorBox = $('#gateError');
+    const submit = event.target.querySelector('button[type=submit]');
+    submit.disabled = true;
+    errorBox.textContent = 'ثانية واحدة...';
+    try {
+      await api.activate(code);
+    } catch (error) {
+      errorBox.textContent = error.status === 401 ? 'الكود غلط أو منتهي. اتأكد منه وجرّب تاني.' : (error.message || 'حصلت مشكلة. جرّب تاني.');
+      submit.disabled = false;
       return;
     }
-    Object.assign(settings, {activated: true, activationDemo: true, age: 'o16', a11y: false});
+    Object.assign(settings, {activated: true, age: null, a11y: null});
     save();
     window.location.href = '/index.html';
   });
   // اختيارات البوابة: العمر وإمكانية الوصول والسكن
-  gate.addEventListener('click', event => {
+  gate.addEventListener('click', async event => {
     const ageChoice = event.target.closest('[data-age]');
     const accessChoice = event.target.closest('[data-a11y]');
     if (ageChoice) {
+      if (ageChoice.dataset.age === 'u16' && !settings.parentPinHash) {
+        if (!(await setParentPin())) return;
+      }
       settings.age = ageChoice.dataset.age;
       save();
       renderGate();
@@ -605,7 +675,7 @@
   });
 
   // أزرار نافذة الإعدادات
-  settingsOverlay.addEventListener('click', event => {
+  settingsOverlay.addEventListener('click', async event => {
     if (event.target.closest('#exportLibrary')) {
       downloadBackup();
       return;
@@ -622,7 +692,10 @@
       applySkin();
       renderSettings();
       playChime();
+    } else if (event.target.closest('#changePin')) {
+      if (await setParentPin(true)) say('اتغيّر الرقم السري.');
     } else if (ageButton) {
+      if (ageButton.dataset.ageChoice === 'u16' && !settings.parentPinHash && !(await setParentPin())) return;
       settings.age = ageButton.dataset.ageChoice;
       save();
       applySkin();
@@ -636,7 +709,7 @@
       if (!confirm('إعادة ضبط التطبيق وحذف القصص والإعدادات المحفوظة؟')) return;
       speechSynthesis?.cancel();
       state.stories = SEED.map(item => ({...item, progress: 0}));
-      Object.assign(settings, {activated: false, age: null, a11y: null, skin: 'hikma', theme: 'light', stars: 0, arVoice: '', enVoice: '', ...SPEECH_SETTINGS.defaults});
+      Object.assign(settings, {parentPinHash: '', parentPinSalt: '', activated: false, age: null, a11y: null, skin: 'hikma', theme: 'light', stars: 0, arVoice: '', enVoice: '', ...SPEECH_SETTINGS.defaults});
       try { localStorage.removeItem(KEY); } catch {}
       save();
       closeModal('appSettingsOverlay');

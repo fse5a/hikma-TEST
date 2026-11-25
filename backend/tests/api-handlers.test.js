@@ -9,6 +9,7 @@ import speech from '../handlers/speech.js';
 import translate from '../handlers/translate.js';
 import {resolveSupabaseUser} from '../lib/supabase-auth.js';
 import {enforceApiQuota} from '../lib/quota.js';
+import {activationCodeHash} from '../lib/activation.js';
 
 function responseRecorder() {
   return {
@@ -406,4 +407,52 @@ test('email upgrade is applied to the verified anonymous user session', async ()
     if (previousKey === undefined) delete process.env.SUPABASE_ANON_KEY;
     else process.env.SUPABASE_ANON_KEY = previousKey;
   }
+});
+test('production activation redeems a hashed code on the server and rejects bad ones', async () => {
+  const keys = ['APP_MODE', 'DEMO_MODE', 'SUPABASE_URL', 'SUPABASE_SERVICE_ROLE_KEY'];
+  const saved = Object.fromEntries(keys.map(key => [key, process.env[key]]));
+  const realFetch = globalThis.fetch;
+  process.env.APP_MODE = 'production';
+  process.env.DEMO_MODE = 'false';
+  process.env.SUPABASE_URL = 'https://project.example';
+  process.env.SUPABASE_SERVICE_ROLE_KEY = 'service-key';
+  const calls = [];
+  globalThis.fetch = async (url, options) => {
+    calls.push({url: String(url), body: options?.body ? JSON.parse(options.body) : null});
+    if (String(url).endsWith('/rpc/consume_api_quota')) return {ok: true, json: async () => [{allowed: true}]};
+    if (String(url).endsWith('/rpc/redeem_activation_code')) {
+      const good = calls[calls.length - 1].body.p_code_hash === activationCodeHash('HKMA-GOOD-CODE-1234');
+      return {ok: true, json: async () => [{redeemed: good, expires_at: null}]};
+    }
+    return {ok: false, json: async () => ({})};
+  };
+  try {
+    const ok = responseRecorder();
+    await activate({method: 'POST', headers: {}, body: {code: ' hkma-good-code-1234 '}}, ok);
+    assert.equal(ok.statusCode, 200);
+    assert.equal(ok.payload.activation.status, 'active');
+
+    const bad = responseRecorder();
+    await activate({method: 'POST', headers: {}, body: {code: 'HKMA-WRONG-CODE-0000'}}, bad);
+    assert.equal(bad.statusCode, 401);
+
+    const demo = responseRecorder();
+    await activate({method: 'POST', headers: {}, body: {code: '1234'}}, demo);
+    assert.equal(demo.statusCode, 401, 'short or demo codes never pass in production');
+
+    const sent = calls.filter(call => call.url.endsWith('/rpc/redeem_activation_code')).map(call => JSON.stringify(call.body));
+    assert.ok(sent.every(body => !body.includes('GOOD') && /[0-9a-f]{64}/.test(body)), 'only the hash is sent to the database');
+  } finally {
+    globalThis.fetch = realFetch;
+    for (const key of keys) {
+      if (saved[key] === undefined) delete process.env[key];
+      else process.env[key] = saved[key];
+    }
+  }
+});
+
+test('health no longer exposes a demo activation code', async () => {
+  const response = responseRecorder();
+  await health({method: 'GET', headers: {}}, response);
+  assert.doesNotMatch(JSON.stringify(response.payload), /demoActivationCode|1234/);
 });

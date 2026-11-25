@@ -1,5 +1,9 @@
 # IoT / smart pen
 
-Empty for now. No pen or device code exists yet. The only hardware thing today is the camera scanner in `frontend/scanner.js`.
+No real pen code yet. There is a simulator so the rest of the app can be tested without hardware.
 
-When the pen work starts: firmware in `iot/firmware/`, protocol in `iot/PROTOCOL.md`, any new endpoint in `backend/handlers/`.
+- `PROTOCOL.md`: scan event format and how to run the simulator (Arabic).
+- `simulator/`: `pen-sim.mjs` (command line) and `index.html` (test page, open it directly in a browser). `events.mjs` builds and validates the events.
+- `tests/`: run by `npm test`.
+
+Real firmware goes in `iot/firmware/`. The backend has no endpoint for pen events yet.

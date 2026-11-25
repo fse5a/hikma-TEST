@@ -34,3 +34,11 @@ Scope: whole repo and live site (https://hekma-pearl.vercel.app). Checked: code 
 
 ## Not done on purpose
 Anything that costs money (paid Supabase/Vercel plans, paid TTS/AI providers, domain) or has legal impact (child-data policy, voice-cloning consent, XTTS license). These need the owner's decision.
+
+
+## Follow-up, 25 Nov (evening)
+- **Activation is now checked on the server** (`/api/activate` calls `redeem_activation_code` in Supabase with a hash). The browser has no code in it. The demo code only works while the server is in demo mode, and `/api/health` no longer shows it. Migration `006` deletes the `DEMO-1234` seed row and removes it from `002_seed`. Needs Supabase to be configured to take effect (see SETUP).
+- **Parent PIN for kids mode** (4-6 digits, stored as a salted hash on the device). It locks Settings, which covers age change, reset and backup restore. It is a local lock, so it stops a child but not someone who clears browser data or edits storage.
+- **Privacy policy and terms pages** (`/privacy.html`, `/terms.html`) in Arabic and English, clearly marked draft, not legal advice. Open points are listed at the bottom of each page.
+- **Pen simulator** in `iot/simulator/` with a protocol doc in Arabic (`iot/PROTOCOL.md`).
+- favicon 404 fixed.
