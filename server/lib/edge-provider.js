@@ -339,6 +339,23 @@ function synthesizeEdge({text, language, voice, rate, pitch}, timeoutMs = 20000)
   return new Promise((resolve, reject) => {
     let settled = false;
     const audioParts = [];
+    const words = [];
+    const collectMetadata = frameText => {
+      const bodyStart = frameText.indexOf('\r\n\r\n');
+      if (bodyStart === -1) return;
+      let parsed;
+      try { parsed = JSON.parse(frameText.slice(bodyStart + 4)); } catch { return; }
+      const entries = Array.isArray(parsed?.Metadata) ? parsed.Metadata : [];
+      for (const entry of entries) {
+        if (entry?.Type !== 'WordBoundary') continue;
+        const data = entry.Data || {};
+        const text = data?.text?.Text ?? data?.Text;
+        const offset = Number(data?.Offset);
+        const duration = Number(data?.Duration);
+        if (typeof text !== 'string' || !Number.isFinite(offset)) continue;
+        words.push({text, offset: offset / 10000, duration: Number.isFinite(duration) ? duration / 10000 : 0});
+      }
+    };
     const fail = message => {
       if (settled) return;
       settled = true;
@@ -353,7 +370,7 @@ function synthesizeEdge({text, language, voice, rate, pitch}, timeoutMs = 20000)
       socket.destroy();
       const audio = Buffer.concat(audioParts);
       if (!audio.length) return reject(new Error('Edge speech returned no audio.'));
-      resolve({provider: 'edge', contentType: 'audio/mpeg', audioBase64: audio.toString('base64')});
+      resolve({provider: 'edge', contentType: 'audio/mpeg', audioBase64: audio.toString('base64'), words});
     };
     const timer = setTimeout(() => fail('Edge speech timed out.'), timeoutMs);
 
@@ -391,6 +408,7 @@ function synthesizeEdge({text, language, voice, rate, pitch}, timeoutMs = 20000)
         return;
       }
       const text2 = payload.toString('utf8');
+      if (text2.includes('Path:audio.metadata')) collectMetadata(text2);
       if (text2.includes('Path:turn.end')) done();
     });
 

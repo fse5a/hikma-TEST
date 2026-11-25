@@ -547,3 +547,15 @@ button:focus-visible, input:focus-visible, textarea:focus-visible, select:focus-
 .skin-choice { display: flex; align-items: center; gap: 8px; padding: 10px 12px; border: 1px solid var(--line); border-radius: 14px; background: var(--paper); color: var(--ink); cursor: pointer; }
 .skin-choice[aria-pressed=true] { border-color: var(--gold); box-shadow: 0 0 0 2px var(--gold); }
 .skin-swatch { width: 18px; height: 18px; border-radius: 6px; background: var(--swatch, var(--green)); flex: none; }
+
+/* ---------- Tap-a-word meaning popup ---------- */
+.word-pop {
+  position: fixed; z-index: 90; max-width: min(300px, 82vw);
+  background: var(--surface); color: var(--ink);
+  border: 1px solid var(--gold); border-radius: 14px;
+  padding: 10px 14px; box-shadow: var(--shadow);
+  font-size: 15px; line-height: 1.6; text-align: center;
+}
+.word-pop-word { display: block; font-weight: 800; color: var(--gold-deep); font-size: 17px; }
+.word-pop-meaning { color: var(--muted); }
+:root[data-mode=kids] .word-pop { font-size: 17px; border-radius: 20px; padding: 12px 18px; }

@@ -939,16 +939,16 @@
     const database = await db();
     return new Promise(resolve => {
       const request = database.transaction('speechCache').objectStore('speechCache').get(key);
-      request.onsuccess = () => resolve(request.result?.blob || null);
+      request.onsuccess = () => resolve(request.result || null);
       request.onerror = () => resolve(null);
     });
   }
 
-  async function saveSpeechCache(key, blob) {
+  async function saveSpeechCache(key, blob, words = null) {
     const database = await db();
     await new Promise((resolve, reject) => {
       const transaction = database.transaction('speechCache', 'readwrite');
-      transaction.objectStore('speechCache').put({blob, createdAt: Date.now()}, key);
+      transaction.objectStore('speechCache').put({blob, words, createdAt: Date.now()}, key);
       transaction.oncomplete = resolve;
       transaction.onerror = () => reject(transaction.error);
     });
@@ -1149,7 +1149,7 @@
     return new Blob([bytes], {type: contentType || 'audio/mpeg'});
   }
 
-  async function playGeneratedAudio(blobs) {
+  async function playGeneratedAudio(blobs, metaChunks = null) {
     stopSpeech();
     stopAudio();
     let chunkIndex = 0;
@@ -1167,6 +1167,19 @@
       audio.playbackRate = SPEECH_SETTINGS.clampRate(settings.rate);
       audio.preservesPitch = true;
       audio.webkitPreservesPitch = true;
+      const meta = metaChunks?.[chunkIndex];
+      if (meta?.words?.length && window.renderLines) {
+        audio.addEventListener('timeupdate', () => {
+          if (activeAudio !== audio) return;
+          const t = audio.currentTime * 1000;
+          let current = null;
+          for (const word of meta.words) {
+            if (word.offset <= t + 60) current = word;
+            else break;
+          }
+          if (current) window.renderLines(meta.start + current.charIndex);
+        });
+      }
       audio.addEventListener('ended', () => {
         if (activeAudio !== audio) return;
         chunkIndex++;
@@ -1206,10 +1219,16 @@
     cloudStatus(workerConfigured ? 'جارٍ تجهيز الصوت...' : 'جارٍ التحقق من الصوت الخلفي...');
     try {
       const audioChunks = [];
+      const metaChunks = [];
       let resultProvider = 'worker';
+      let searchFrom = 0;
       for (const chunk of chunks) {
+        const chunkStart = Math.max(0, sourceText.indexOf(chunk, searchFrom));
+        searchFrom = chunkStart + chunk.length;
         const cacheKey = workerConfigured ? await speechCacheKey(configuredProvider, voice, lang, chunk) : null;
-        let audioBlob = cacheKey ? await getSpeechCache(cacheKey) : null;
+        const cachedEntry = cacheKey ? await getSpeechCache(cacheKey) : null;
+        let audioBlob = cachedEntry?.blob || null;
+        let chunkWords = cachedEntry?.words || null;
         if (!audioBlob) {
           const result = await api.speech(chunk, lang, voice, settings.rate, settings.pitch);
           if (result.mode !== 'configured' || !result.audioBase64) {
@@ -1219,12 +1238,23 @@
           }
           resultProvider = result.provider || resultProvider;
           audioBlob = audioBlobFromBase64(result.audioBase64, result.contentType);
+          chunkWords = Array.isArray(result.words) ? result.words : null;
           const finalKey = await speechCacheKey(resultProvider, voice, lang, chunk);
-          await saveSpeechCache(finalKey, audioBlob);
+          await saveSpeechCache(finalKey, audioBlob, chunkWords);
+        }
+        if (chunkWords?.length) {
+          let pointer = 0;
+          chunkWords = chunkWords.map(word => {
+            let charIndex = chunk.indexOf(word.text, pointer);
+            if (charIndex === -1) charIndex = chunk.indexOf(word.text);
+            if (charIndex >= 0) pointer = charIndex + word.text.length;
+            return {...word, charIndex: Math.max(0, charIndex)};
+          }).filter(word => word.charIndex >= 0 && chunk.includes(word.text));
         }
         audioChunks.push(audioBlob);
+        metaChunks.push({start: chunkStart, text: chunk, words: chunkWords});
       }
-      await playGeneratedAudio(audioChunks);
+      await playGeneratedAudio(audioChunks, metaChunks);
       cloudStatus('يعمل الصوت الخلفي المحفوظ على هذا الجهاز.');
     } catch (error) {
       cloudStatus(`${api.toFriendlyMessage(error)} يعمل صوت الجهاز بدلًا منه.`, true);
@@ -1232,7 +1262,105 @@
     }
   }
 
+  function wordAtPoint(lineSpan, event) {
+    const line = lines[Number(lineSpan.dataset.line)];
+    if (!line) return null;
+    let node = null;
+    let offset = 0;
+    if (document.caretRangeFromPoint) {
+      const range = document.caretRangeFromPoint(event.clientX, event.clientY);
+      if (!range) return null;
+      node = range.startContainer;
+      offset = range.startOffset;
+    } else if (document.caretPositionFromPoint) {
+      const position = document.caretPositionFromPoint(event.clientX, event.clientY);
+      if (!position) return null;
+      node = position.offsetNode;
+      offset = position.offset;
+    }
+    if (!node || node.nodeType !== Node.TEXT_NODE || !lineSpan.contains(node)) return null;
+    let absolute = 0;
+    const walker = document.createTreeWalker(lineSpan, NodeFilter.SHOW_TEXT);
+    let current;
+    while ((current = walker.nextNode())) {
+      if (current === node) { absolute += offset; break; }
+      absolute += current.nodeValue.length;
+    }
+    if (absolute > line.length) return null;
+    const before = line.slice(0, absolute).search(/\S+$/);
+    const afterMatch = line.slice(absolute).match(/^\S*/);
+    if (before === -1 && !afterMatch?.[0]) return null;
+    const start = before === -1 ? absolute : before;
+    const end = absolute + (afterMatch?.[0]?.length || 0);
+    const word = line.slice(start, Math.max(end, start));
+    if (!word || !/\S/.test(word)) return null;
+    return {word: word.trim(), start, lineIndex: Number(lineSpan.dataset.line)};
+  }
+
+  const wordCache = new Map();
+  try {
+    const stored = JSON.parse(localStorage.getItem('hikma-word-cache') || '{}');
+    Object.entries(stored).forEach(([key, value]) => wordCache.set(key, value));
+  } catch {}
+
+  let wordPop = null;
+  function dismissWordPop() {
+    wordPop?.remove();
+    wordPop = null;
+  }
+
+  async function showWordMeaning(hit, event) {
+    dismissWordPop();
+    const targetLang = lang === 'ar' ? 'en' : 'ar';
+    const cacheKey = `${hit.word.toLowerCase()}|${lang}|${targetLang}`;
+    wordPop = document.createElement('div');
+    wordPop.className = 'word-pop';
+    wordPop.setAttribute('role', 'status');
+    wordPop.innerHTML = `<bdi class="word-pop-word">${hit.word.replace(/[&<>"]/g, c => ({'&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;'}[c]))}</bdi><span class="word-pop-meaning">…</span>`;
+    document.body.appendChild(wordPop);
+    const rect = wordPop.getBoundingClientRect();
+    const x = Math.min(Math.max(8, event.clientX - rect.width / 2), window.innerWidth - rect.width - 8);
+    const y = event.clientY - rect.height - 12 > 8 ? event.clientY - rect.height - 12 : event.clientY + 18;
+    wordPop.style.left = `${x}px`;
+    wordPop.style.top = `${y}px`;
+    const meaningEl = wordPop.querySelector('.word-pop-meaning');
+    const setMeaning = text => { if (wordPop && meaningEl.isConnected) meaningEl.textContent = text; };
+    if (wordCache.has(cacheKey)) {
+      setMeaning(wordCache.get(cacheKey));
+    } else {
+      try {
+        const result = await api.translate(hit.word, targetLang);
+        const text = String(result.translatedText || result.text || '').trim();
+        if (text && result.mode !== 'demo') {
+          wordCache.set(cacheKey, text);
+          const stored = {};
+          wordCache.forEach((value, key) => { stored[key] = value; });
+          try { localStorage.setItem('hikma-word-cache', JSON.stringify(stored)); } catch {}
+          setMeaning(text);
+        } else {
+          setMeaning('—');
+        }
+      } catch {
+        setMeaning('تعذر جلب المعنى');
+      }
+    }
+    setTimeout(() => {
+      document.addEventListener('click', dismissWordPop, {once: true, capture: true});
+    }, 50);
+    setTimeout(dismissWordPop, 8000);
+  }
+
   document.addEventListener('click', event => {
+    const lineSpan = event.target.closest('#readingText [data-line]');
+    if (lineSpan) {
+      const hit = wordAtPoint(lineSpan, event);
+      if (hit) {
+        event.preventDefault();
+        event.stopImmediatePropagation();
+        showWordMeaning(hit, event);
+        return;
+      }
+    }
     if (settings.voiceSource === 'device' || !event.target.closest('#playPause, #readingText [data-line]')) return;
     event.preventDefault();
     event.stopImmediatePropagation();
