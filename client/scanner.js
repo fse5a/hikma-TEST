@@ -50,7 +50,7 @@
     button.className = 'button secondary';
     button.id = 'scanOpen';
     button.type = 'button';
-    button.innerHTML = '<span aria-hidden="true">📷</span> مسح';
+    button.innerHTML = '<svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round" aria-hidden="true"><path d="M4 8h3l1.6-2.5h6.8L17 8h3a1 1 0 0 1 1 1v9a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V9a1 1 0 0 1 1-1Z"/><circle cx="12" cy="13.2" r="3.6"/></svg><span class="btn-label">مسح</span>';
     button.setAttribute('aria-label', 'مسح كتاب أو رمز QR');
     button.addEventListener('click', () => { buildOverlay(); openModal('scanOverlay'); scanStatus('اضغط تشغيل الكاميرا للبدء.'); });
     actions.insertBefore(button, actions.firstChild);

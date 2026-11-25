@@ -617,3 +617,37 @@ body.hikma-celebrate .reader-owl svg, body.hikma-celebrate .welcome .owl { anima
 :root .dialog, :root .gate-panel { background: var(--surface); border-color: var(--line); }
 :root .field input, :root .field textarea, :root .field select, :root select, :root textarea, :root input[type=text], :root input[type=url] { background: var(--paper); color: var(--ink); border-color: var(--line); }
 :root[data-a11y=on] .story-tag, :root[data-a11y=on] .star-chip, :root[data-a11y=on] .profile-chip { background: #ffd23f; color: #000; }
+
+/* ---------- Mobile header fix: brand row + one clean row of icon buttons (all skins, light and dark) ---------- */
+@media (max-width: 700px) {
+  :root .topbar { flex-wrap: wrap; justify-content: space-between; align-items: center; row-gap: 10px; }
+  :root .topbar .brand { flex: 1 1 100%; min-width: 0; }
+  :root .topbar .top-actions { flex: 1 1 100%; width: 100%; flex-direction: row; flex-wrap: wrap; justify-content: flex-start; align-items: center; gap: 8px; min-width: 0; }
+  :root .topbar .top-actions .button,
+  :root .topbar .top-actions .icon-button {
+    flex: 0 0 44px; width: 44px; min-width: 44px; max-width: 44px; height: 44px; min-height: 44px;
+    padding: 0; display: inline-flex; align-items: center; justify-content: center;
+    font-size: 0; line-height: 1; white-space: nowrap; overflow: hidden;
+  }
+  :root .topbar .top-actions .button > span,
+  :root .topbar .top-actions .button > svg { flex: none; }
+  :root .topbar .top-actions #scanOpen span,
+  :root .topbar .top-actions #addOpen span { font-size: 22px; line-height: 1; }
+  :root .topbar .top-actions #settingsOpen,
+  :root .topbar .top-actions #themeToggle {
+    font-size: 22px; line-height: 1;
+    font-family: "Segoe UI Emoji","Apple Color Emoji","Noto Color Emoji",system-ui,sans-serif;
+  }
+  :root .topbar .top-actions .profile-chip { display: none; }
+  :root .topbar .a11y { margin-inline-start: auto; flex: none; }
+}
+@media (max-width: 700px) {
+  :root .topbar .top-actions .btn-label { display: none; }
+  :root .topbar .top-actions svg { width: 22px; height: 22px; }
+}
+@media (max-width: 700px) {
+  :root .topbar .top-actions #scanOpen,
+  :root .topbar .top-actions #themeToggle {
+    width: 44px; min-width: 44px; height: 44px; min-height: 44px; border-radius: 14px;
+  }
+}
