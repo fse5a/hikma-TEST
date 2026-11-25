@@ -12,3 +12,6 @@ What runs in the browser. Plain HTML + JS, no framework.
 - `auto-update.js`: picks up new versions by itself (safe reload, or a «تحديث جديد» banner).
 - `manifest.webmanifest`, `voices.json`, `test-sentences.json`: public data, no secrets.
 - `tests/`: unit tests and Playwright specs.
+
+## Mascot art credits
+The Mickey skin uses the public-domain 1928 "Steamboat Willie" era artwork from Wikimedia Commons (File:Mickey_Mouse_colored.svg). Other mascots are AI-generated images.
