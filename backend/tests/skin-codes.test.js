@@ -5,7 +5,7 @@ import {SKIN_CODE_HASHES, skinForCode} from '../lib/skin-codes.js';
 import {activationCodeHash} from '../lib/activation.js';
 
 test('خمس سكنات لكل واحد كود مختلف', () => {
-  assert.deepEqual(Object.values(SKIN_CODE_HASHES).sort(), ['anbu', 'doraemon', 'mickey', 'uchiha', 'zelda']);
+  assert.deepEqual(Object.values(SKIN_CODE_HASHES).sort(), ['anbu', 'doom', 'doraemon', 'mickey', 'uchiha', 'zelda']);
 });
 test('الكود الغلط أو الفاضي أو القصير بيترفض', () => {
   for (const bad of ['', 'abc', 'DORA-0000-0000-0000', 'HKMA-XXXX-XXXX-XXXX', null, undefined]) assert.equal(skinForCode(bad), null);
