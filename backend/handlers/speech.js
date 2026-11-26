@@ -77,7 +77,7 @@ export default async function handler(request, response) {
     }
     if (cacheConfigured) {
       try {
-        await storePrivateAudio({...identity, provider: result.provider, audioBase64: result.audioBase64, contentType: result.contentType});
+        await storePrivateAudio({...identity, provider: result.provider, audioBase64: result.audioBase64, contentType: result.contentType, words: result.words});
       } catch {
         return sendError(response, 'audio_storage_failed', 'Private audio storage is unavailable; the generated audio was not returned.', requestId, 503);
       }

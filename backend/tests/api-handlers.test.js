@@ -462,6 +462,7 @@ test('speech falls back to the next provider when the primary one fails', async 
   const keys = ['SPEECH_WORKER_URL', 'SPEECH_PROVIDER', 'SPEECH_API_KEY', 'GEMINI_API_KEY', 'GEMINI_TTS_MODEL', 'SUPABASE_URL', 'SUPABASE_ANON_KEY', 'SUPABASE_SERVICE_ROLE_KEY'];
   for (const key of keys) saved[key] = process.env[key];
   const realFetch = globalThis.fetch;
+  const calls = [];
   process.env.SPEECH_WORKER_URL = 'https://speech.example/synthesize';
   process.env.SPEECH_PROVIDER = 'gemini';
   delete process.env.SPEECH_API_KEY;
@@ -470,25 +471,32 @@ test('speech falls back to the next provider when the primary one fails', async 
   process.env.SUPABASE_URL = 'https://hikma-test.supabase.co';
   process.env.SUPABASE_ANON_KEY = 'public-test-anon';
   process.env.SUPABASE_SERVICE_ROLE_KEY = 'private-service-key';
-  globalThis.fetch = async (url) => {
+  globalThis.fetch = async (url, options) => {
+    calls.push({url: String(url), options});
     if (String(url).endsWith('/auth/v1/user')) return {ok: true, async json() { return {id: '7b4e30b4-70e3-4d4a-8a91-c5afd62c65a6'}; }};
     if (String(url).endsWith('/rest/v1/rpc/consume_api_quota')) return {ok: true, async json() { return [{allowed: true, reason: null}]; }};
     if (String(url).includes('/storage/v1/object/hikma-private-audio/')) return {ok: true, async json() { return {}; }};
     if (String(url).includes('/rest/v1/audio_cache')) return {ok: true, async json() { return []; }};
     if (String(url).startsWith('https://speech.example/')) return {ok: false, status: 500, async json() { return {}; }};
     if (String(url).startsWith('https://generativelanguage.googleapis.com/')) {
-      return {ok: true, async json() { return {candidates: [{content: {parts: [{inlineData: {data: 'AQIDBAU'}}]}}]}; }};
+      return {ok: true, async json() { return {candidates: [{content: {parts: [{inlineData: {data: Buffer.alloc(9600).toString('base64')}}]}}]}; }};
     }
     throw new Error(`Unexpected fetch: ${url}`);
   };
   try {
     const response = responseRecorder();
-    await speech({method: 'POST', headers: {authorization: 'Bearer valid-test-token'}, body: {text: 'مرحبا', voice: 'Kore', language: 'ar', rate: 1, pitch: 0}}, response);
+    await speech({method: 'POST', headers: {authorization: 'Bearer valid-test-token'}, body: {text: 'مرحبا بك', voice: 'Kore', language: 'ar', rate: 1, pitch: 0}}, response);
     assert.equal(response.statusCode, 200);
     assert.equal(response.payload.mode, 'configured');
     assert.equal(response.payload.provider, 'gemini', 'the failing worker falls through to Gemini');
     assert.equal(response.payload.contentType, 'audio/wav');
     assert.ok(response.payload.audioBase64.length > 12, 'PCM is wrapped in a WAV header');
+    assert.ok(Array.isArray(response.payload.words) && response.payload.words.length === 2, 'Gemini results carry estimated word timings');
+    assert.deepEqual(response.payload.words.map(word => word.text), ['مرحبا', 'بك']);
+    assert.ok(response.payload.words[0].offset >= 0 && response.payload.words[1].offset > response.payload.words[0].offset, 'word offsets increase');
+    const stored = calls.filter(call => String(call.url).includes('/rest/v1/audio_cache') && call.options?.method === 'POST');
+    assert.ok(stored.length > 0, 'audio is cached server-side');
+    assert.ok(JSON.parse(stored[0].options.body).metadata.words, 'word timings are cached with the audio');
   } finally {
     globalThis.fetch = realFetch;
     for (const key of keys) {

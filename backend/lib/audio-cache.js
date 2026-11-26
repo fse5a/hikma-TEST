@@ -38,14 +38,18 @@ export async function loadPrivateAudio({userId, provider, voice, language, text,
     if (!audioResponse.ok) throw new Error('Private audio retrieval failed.');
     const audio = Buffer.from(await audioResponse.arrayBuffer());
     if (!audio.length || audio.length > 4 * 1024 * 1024) throw new Error('Cached audio size is invalid.');
-    return {audioBase64: audio.toString('base64'), contentType: row.metadata?.content_type || audioResponse.headers.get('content-type') || 'audio/mpeg'};
+    return {
+      audioBase64: audio.toString('base64'),
+      contentType: row.metadata?.content_type || audioResponse.headers.get('content-type') || 'audio/mpeg',
+      words: Array.isArray(row.metadata?.words) ? row.metadata.words : null
+    };
   } finally {
     clearTimeout(timeoutId);
   }
 }
 
 // بيحفظ صوت جديد
-export async function storePrivateAudio({userId, provider, voice, language, text, rate, pitch, audioBase64, contentType}, environment = process.env, fetchImpl = fetch) {
+export async function storePrivateAudio({userId, provider, voice, language, text, rate, pitch, audioBase64, contentType, words}, environment = process.env, fetchImpl = fetch) {
   const supabaseUrl = String(environment.SUPABASE_URL || '').replace(/\/$/, '');
   const serviceKey = environment.SUPABASE_SERVICE_ROLE_KEY;
   if (!supabaseUrl || !serviceKey || !userId) throw new Error('Private audio storage is not configured.');
@@ -81,7 +85,7 @@ export async function storePrivateAudio({userId, provider, voice, language, text
         storage_key: storagePath,
         provider,
         voice,
-        metadata: {cache_hash: key, language, rate, pitch, content_type: contentType}
+        metadata: {cache_hash: key, language, rate, pitch, content_type: contentType, words: Array.isArray(words) ? words : null}
       }),
       signal: controller.signal
     });

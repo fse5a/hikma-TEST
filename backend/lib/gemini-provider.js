@@ -30,6 +30,32 @@ function wavFromPcm(base64Pcm) {
   return Buffer.concat([header, bytes]).toString('base64');
 }
 
+const ARABIC_DIACRITICS = /[\u064B-\u0652\u0670]/g;
+
+// تقدير توقيت كل كلمة من مدة الصوت، موزونة بطول الكلمة ووقفات الترقيم.
+// Gemini لا يرجع توقيت كلمات، فهذا بديل تقريبي لتمييز الكلمة أثناء القراءة.
+export function estimateWordTimings(text, durationMs) {
+  const words = String(text || '').split(/\s+/).filter(Boolean);
+  if (!words.length || !Number.isFinite(durationMs) || durationMs <= 0) return [];
+  const weights = words.map(word => {
+    const plain = word.replace(ARABIC_DIACRITICS, '');
+    let weight = Math.max(1, plain.length) + 1;
+    if (/[.!؟?…]$/.test(plain)) weight += 6;
+    else if (/[,،؛;:]$/.test(plain)) weight += 3;
+    return weight;
+  });
+  const leadMs = Math.min(120, durationMs * 0.05);
+  const speakable = Math.max(0, durationMs - leadMs);
+  const totalWeight = weights.reduce((sum, weight) => sum + weight, 0);
+  let elapsed = leadMs;
+  return words.map((word, index) => {
+    const wordDuration = speakable * (weights[index] / totalWeight);
+    const entry = {text: word, offset: Math.round(elapsed), duration: Math.round(wordDuration)};
+    elapsed += wordDuration;
+    return entry;
+  });
+}
+
 // ده بتاع الترجمة الذكية بالمعنى عبر Gemini
 export function createGeminiTranslationProvider(environment = process.env, fetchImpl = fetch) {
   const apiKey = environment.GEMINI_API_KEY;
@@ -97,7 +123,11 @@ export function createGeminiSpeechProvider(environment = process.env, fetchImpl 
         if (!audioBase64) throw new Error('Gemini TTS returned no audio.');
         const wav = wavFromPcm(audioBase64);
         if (wav.length > 4_200_000) throw new Error('Gemini TTS audio chunk is too large.');
-        return {provider: 'gemini', contentType: 'audio/wav', audioBase64: wav};
+        const pcmBytes = Buffer.from(audioBase64, 'base64');
+        const isRiff = pcmBytes.subarray(0, 4).toString('ascii') === 'RIFF';
+        const durationMs = ((isRiff ? pcmBytes.length - 44 : pcmBytes.length) / 2 / 24000) * 1000;
+        const words = estimateWordTimings(text, durationMs);
+        return {provider: 'gemini', contentType: 'audio/wav', audioBase64: wav, words, estimatedWords: true};
       } finally {
         clearTimeout(timeoutId);
       }
