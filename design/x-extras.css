@@ -55,7 +55,7 @@
 /* سهولة القراءة */
 .hx-switches { display: grid; gap: 10px; }
 .hx-switch { display: flex; gap: 10px; align-items: flex-start; background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); padding: 12px; cursor: pointer; }
-.hx-switch input { width: 22px; height: 22px; margin-top: 3px; accent-color: var(--green); flex: none; }
+.hx-switch input { width: 24px; height: 24px; margin-top: 3px; accent-color: var(--green); flex: none; }
 .hx-switch span { display: grid; gap: 2px; }
 .hx-switch em { font-style: normal; color: var(--muted); font-size: 13px; }
 .hx-field { display: grid; gap: 4px; padding-inline: 4px; }
@@ -166,3 +166,4 @@ body.hx-drowsy .reader-owl::after { content: "Zzz"; position: absolute; font-siz
 body.hx-print-keys > *:not(#hxKeys) { display: none !important; }
 @media print { body.hx-print-keys #hxKeys { position: static; display: block !important; } body.hx-print-keys #hxKeys .dialog-head button { display: none; } }
 @media print { .hx-fab { display: none; } }
+#hxModes .dialog-body { padding-bottom: 110px; }

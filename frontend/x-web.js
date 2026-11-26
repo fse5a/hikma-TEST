@@ -120,9 +120,9 @@
     const cur = P().mode || 'default';
     HX.dialog('hxModes', 'اختار طريقة الاستخدام', `<p class="voice-note" style="margin-top:0">كل وضع بيغيّر شكل الموقع وإعداداته كلها مرة واحدة. تقدر ترجع لـ«عادي» أي وقت.</p>
       <div class="hx-grid">${Object.entries(MODES).map(([id, m]) => `<button class="hx-tile" data-hx-mode="${id}" type="button" aria-pressed="${id === cur}"><span class="hx-tile-ico" aria-hidden="true">${m.icon}</span><span class="hx-tile-name">${m.name}</span><span class="hx-tile-sub">${m.sub}</span></button>`).join('')}</div>
-      <label class="hx-switch"><input type="checkbox" id="hxGray" ${P().gray ? 'checked' : ''}><span><strong>أبيض وأسود</strong><em>بنفس شخصيات حكمة لكن بدون ألوان. مريح لكبار السن.</em></span></label>
+      <div class="hx-switches" style="margin-top:12px"><label class="hx-switch"><input type="checkbox" id="hxGray" ${P().gray ? 'checked' : ''}><span><strong>أبيض وأسود</strong><em>بنفس شخصيات حكمة لكن بدون ألوان. مريح لكبار السن.</em></span></label>
       <label class="hx-switch"><input type="checkbox" id="hxAutoRead" ${P().autoRead ? 'checked' : ''}><span><strong>اقرأ كل نافذة أول ما تتفتح</strong><em>بيقرأ العنوان والمحتوى تلقائيا. تقدر توقفه من هنا.</em></span></label>
-      <label class="hx-switch"><input type="checkbox" id="hxAutoStories" ${P().autoStory ? 'checked' : ''}><span><strong>ابدأ القصة بالقراءة تلقائيا</strong><em>أول ما تفتح قصة، القراءة تبدأ لوحدها.</em></span></label>`);
+      <label class="hx-switch"><input type="checkbox" id="hxAutoStories" ${P().autoStory ? 'checked' : ''}><span><strong>ابدأ القصة بالقراءة تلقائيا</strong><em>أول ما تفتح قصة، القراءة تبدأ لوحدها.</em></span></label></div>`);
     HX.open('hxModes');
   }
   document.addEventListener('click', e => { const t = e.target.closest('button[data-hx-mode]'); if (t) { chooseMode(t.dataset.hxMode); openModes(); } });
