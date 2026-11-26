@@ -6,12 +6,12 @@ import {activationCodeHash} from './activation.js';
 
 // الهاش وأي سكن بيفتحه
 export const SKIN_CODE_HASHES = {
-    '8fe56114fef42c87ddf3ef7055c581b3458a83fda57ac62f36a8b0d86d93fa07': 'doraemon',
-    '5ad5562c973624066a3e3ec38595ade83d78dd3104dd9fe595021505f90ec38d': 'mickey',
-    '1e639c8cd5d482af485582335cda9efc016b658011251d695b73d6970b240a24': 'anbu',
-    '9d9f0cd06be0073f41752ab126e4fe7b9e3399ced98911bce8b0e0bb1387a17c': 'uchiha',
-    '813a2e9dc83a2549fae2b365427aeb7bc8fb1b8b85ea502c7c88826d81ea7a2e': 'zelda',
-    '4f7fadf42e2aca336947738e5cb945211de6affd8d24f608830afbb246b22059': 'doom',
+    'c723f4794b1dc2200f5abcd598c0ec90832b36338482d2a0dbc215d4c0901d2c': 'doraemon',
+    '246cfc73a8a50684d7246c2ba79f9013bebcf2d3d874f2903793ee07ea78b6b5': 'mickey',
+    '6e5fd5c8a4b5147b91d43a893355715e74ca0b02c8e18952962d02f0c391fee8': 'anbu',
+    '6807201c60fcb133daca16a6e1fe4ef80f3813e1ec860728861a6df16330f592': 'uchiha',
+    'd948b07a514a4f1b53aab02b7c07587b37507b419b7914d3eaf5c4202e6bdde1': 'zelda',
+    'd9d99c9a8ce4b2cb1c7e5bd4d6dfb78434234b90a0bb0f28672c025ef695a64d': 'doom',
 };
 
 // بيرجّع اسم السكن لو الكود صح، أو null لو غلط
