@@ -146,3 +146,31 @@ test('gemini diacritization provider sends a strict prompt and returns the text'
   assert.match(sentBody.contents[0].parts[0].text, /do not change, add, remove or reorder/i);
   assert.equal(createGeminiDiacritizationProvider({}), null);
 });
+
+test('gemini speech provider uses the Interactions endpoint for native voices and falls back to Kore', async () => {
+  const {createGeminiSpeechProvider} = await import('../lib/gemini-provider.js');
+  const pcm = Buffer.alloc(48000).toString('base64');
+  const calls = [];
+  const okInteraction = async (url, init) => {
+    calls.push({url: String(url), body: JSON.parse(init.body), key: init.headers['x-goog-api-key']});
+    return {ok: true, json: async () => ({status: 'completed', outputs: [{type: 'audio', mime_type: 'audio/wav', data: pcm}]})};
+  };
+  const native = createGeminiSpeechProvider({SPEECH_PROVIDER: 'gemini', GEMINI_API_KEY: 'k', GEMINI_TTS_VOICE: 'ar-eg-storyteller-3', GEMINI_TTS_MODEL: 'm'}, okInteraction);
+  const first = await native.synthesize({text: 'كان يا ما كان', voice: 'neural'});
+  assert.equal(first.provider, 'gemini');
+  assert.ok(calls[0].url.endsWith('/v1beta/interactions'));
+  assert.equal(calls[0].body.generation_config.speech_config[0].voice, 'ar-eg-storyteller-3');
+  assert.equal(calls[0].key, 'k');
+  assert.ok(first.words.length > 0);
+
+  const urls = [];
+  const failingNative = async (url, init) => {
+    urls.push(String(url));
+    if (String(url).includes('/interactions')) return {ok: false, status: 429, json: async () => ({})};
+    return {ok: true, json: async () => ({candidates: [{content: {parts: [{inlineData: {data: pcm}}]}}]})};
+  };
+  const fallback = createGeminiSpeechProvider({SPEECH_PROVIDER: 'gemini', GEMINI_API_KEY: 'k', GEMINI_TTS_VOICE: 'ar-eg-storyteller-3', GEMINI_TTS_MODEL: 'm'}, failingNative);
+  const second = await fallback.synthesize({text: 'كان يا ما كان', voice: 'neural'});
+  assert.equal(second.provider, 'gemini');
+  assert.ok(urls[0].includes('/interactions') && urls[1].includes(':generateContent'), 'native fails then Kore answers');
+});

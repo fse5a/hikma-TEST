@@ -98,39 +98,68 @@ export function createGeminiSpeechProvider(environment = process.env, fetchImpl 
   const model = String(environment.GEMINI_TTS_MODEL || 'gemini-2.5-flash-preview-tts');
   const defaultVoice = String(environment.GEMINI_TTS_VOICE || 'Kore');
 
+  const NATIVE_VOICE = /^(ar-[a-z]{2}-[a-z]+-\d{1,3}|voice_[A-Za-z0-9]{6,64})$/;
+  async function postJson(url, body) {
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), Number(environment.UPSTREAM_TIMEOUT_MS) || 20000);
+    try {
+      const response = await fetchImpl(url, {method: 'POST', headers: {'Content-Type': 'application/json', 'x-goog-api-key': apiKey}, body: JSON.stringify(body), signal: controller.signal});
+      if (!response.ok) throw new Error(`Gemini TTS returned ${response.status}.`);
+      return await response.json();
+    } finally {
+      clearTimeout(timeoutId);
+    }
+  }
+  async function synthesizePrebuilt(voiceName, text) {
+    const result = await postJson(`${API_BASE}/models/${model}:generateContent`, {
+      contents: [{parts: [{text: `Read aloud the following text exactly as written, with no additions:\n\n${text}`}]}],
+      generationConfig: {responseModalities: ['AUDIO'], speechConfig: {voiceConfig: {prebuiltVoiceConfig: {voiceName}}}}
+    });
+    const data = String(result?.candidates?.[0]?.content?.parts?.[0]?.inlineData?.data || '');
+    if (!data) throw new Error('Gemini TTS returned no audio.');
+    return data;
+  }
+  async function synthesizeInteraction(voice, text) {
+    const result = await postJson(`${API_BASE}/interactions`, {
+      model,
+      input: [{type: 'user_input', content: [{type: 'text', text}]}],
+      response_format: {type: 'audio'},
+      generation_config: {speech_config: [{voice}]}
+    });
+    const data = String(result?.output_audio?.data || findAudioData(result) || '');
+    if (!data) throw new Error('Gemini TTS returned no audio.');
+    return data;
+  }
+  // The audio block can sit at different depths in the response; find the first base64 "data" next to an audio mime type.
+  function findAudioData(node, depth = 0) {
+    if (!node || typeof node !== 'object' || depth > 6) return '';
+    if (typeof node.data === 'string' && node.data.length > 1000 && (!node.mime_type || /^audio\//.test(String(node.mime_type)))) return node.data;
+    for (const value of Object.values(node)) {
+      const found = findAudioData(value, depth + 1);
+      if (found) return found;
+    }
+    return '';
+  }
+
   return {
     name: 'gemini',
     async synthesize({text, voice}) {
-      const voiceName = /^[A-Z][A-Za-z]{2,30}$/.test(String(voice || '')) ? voice : defaultVoice;
-      const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), Number(environment.UPSTREAM_TIMEOUT_MS) || 20000);
-      try {
-        const response = await fetchImpl(`${API_BASE}/models/${model}:generateContent?key=${encodeURIComponent(apiKey)}`, {
-          method: 'POST',
-          headers: {'Content-Type': 'application/json'},
-          body: JSON.stringify({
-            contents: [{parts: [{text: `Read aloud the following text exactly as written, with no additions:\n\n${text}`}]}],
-            generationConfig: {
-              responseModalities: ['AUDIO'],
-              speechConfig: {voiceConfig: {prebuiltVoiceConfig: {voiceName}}}
-            }
-          }),
-          signal: controller.signal
-        });
-        if (!response.ok) throw new Error(`Gemini TTS returned ${response.status}.`);
-        const result = await response.json();
-        const audioBase64 = String(result?.candidates?.[0]?.content?.parts?.[0]?.inlineData?.data || '');
-        if (!audioBase64) throw new Error('Gemini TTS returned no audio.');
-        const wav = wavFromPcm(audioBase64);
-        if (wav.length > 4_200_000) throw new Error('Gemini TTS audio chunk is too large.');
-        const pcmBytes = Buffer.from(audioBase64, 'base64');
-        const isRiff = pcmBytes.subarray(0, 4).toString('ascii') === 'RIFF';
-        const durationMs = ((isRiff ? pcmBytes.length - 44 : pcmBytes.length) / 2 / 24000) * 1000;
-        const words = estimateWordTimings(text, durationMs);
-        return {provider: 'gemini', contentType: 'audio/wav', audioBase64: wav, words, estimatedWords: true};
-      } finally {
-        clearTimeout(timeoutId);
+      const requested = /^[A-Z][A-Za-z]{2,30}$/.test(String(voice || '')) ? voice : defaultVoice;
+      const fallbackVoice = /^[A-Z][A-Za-z]{2,30}$/.test(String(environment.GEMINI_TTS_FALLBACK_VOICE || '')) ? environment.GEMINI_TTS_FALLBACK_VOICE : 'Kore';
+      // Native library voices (for example ar-eg-storyteller-3) go through the Interactions endpoint.
+      // If that fails, retry once with the classic prebuilt voice before the chain falls back to Edge.
+      let audioBase64;
+      if (NATIVE_VOICE.test(requested)) {
+        try { audioBase64 = await synthesizeInteraction(requested, text); } catch { audioBase64 = ''; }
       }
+      if (!audioBase64) audioBase64 = await synthesizePrebuilt(NATIVE_VOICE.test(requested) ? fallbackVoice : requested, text);
+      const wav = wavFromPcm(audioBase64);
+      if (wav.length > 4_200_000) throw new Error('Gemini TTS audio chunk is too large.');
+      const pcmBytes = Buffer.from(audioBase64, 'base64');
+      const isRiff = pcmBytes.subarray(0, 4).toString('ascii') === 'RIFF';
+      const durationMs = ((isRiff ? pcmBytes.length - 44 : pcmBytes.length) / 2 / 24000) * 1000;
+      const words = estimateWordTimings(text, durationMs);
+      return {provider: 'gemini', contentType: 'audio/wav', audioBase64: wav, words, estimatedWords: true};
     }
   };
 }
