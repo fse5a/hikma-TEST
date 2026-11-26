@@ -693,7 +693,7 @@
       return;
     }
     const themeButton = event.target.closest('[data-theme-choice]');
-    const skinButton = event.target.closest('[data-skin]');
+    const skinButton = event.target.closest('[data-skin]:not(html)');
     const ageButton = event.target.closest('[data-age-choice]');
     if (themeButton) {
       setTheme(themeButton.dataset.themeChoice);
