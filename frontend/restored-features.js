@@ -665,8 +665,8 @@
   });
   // اختيارات البوابة: العمر وإمكانية الوصول والسكن
   gate.addEventListener('click', async event => {
-    const ageChoice = event.target.closest('[data-age]');
-    const accessChoice = event.target.closest('[data-a11y]');
+    const ageChoice = event.target.closest('button[data-age]');
+    const accessChoice = event.target.closest('button[data-a11y]');
     if (ageChoice) {
       if (ageChoice.dataset.age === 'u16' && !settings.parentPinHash) {
         if (!(await setParentPin())) return;

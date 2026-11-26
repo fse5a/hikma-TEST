@@ -203,3 +203,8 @@ body.hikma-reading .play-control::after { content: ""; position: absolute; inset
 .pose-tilt { animation: hx-p-tilt .9s ease-in-out; } .pose-spin { animation: hx-p-spin 1s ease-in-out; } .pose-bounce { animation: hx-p-bounce 1s ease-in-out; }
 .pose-sway { animation: hx-p-sway 1s ease-in-out; } .pose-peek { animation: hx-p-peek .9s ease-in-out; }
 .reader-owl img, #mascotBuddy .buddy-img { transform-origin: 50% 90%; }
+
+/* زر إمكانية الوصول: مربع ثابت والأيقونة مستقيمة (مش مايلة) */
+#a11yToggle { aspect-ratio: 1 / 1; padding: 0; line-height: 1; transform: none; rotate: none; }
+#a11yToggle .hx-i, #a11yToggle .hx-svg { width: 26px; height: 26px; transform: none; display: block; }
+.gate-brand #a11yToggle, #a11yToggle { width: 48px; min-width: 48px; height: 48px; min-height: 48px; }
