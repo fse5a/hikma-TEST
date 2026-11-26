@@ -120,3 +120,11 @@
 .hx-daily-ico { font-size: 30px; }
 
 .hx-hero span, .hx-stats span, .hx-muted, .hx-tile-sub { color: color-mix(in srgb, var(--ink) 78%, var(--surface)); }
+/* البومة بتتفاعل مع القراءة */
+@keyframes hx-nod { 0%, 100% { transform: rotate(0); } 30% { transform: rotate(-7deg) translateY(1px); } 65% { transform: rotate(5deg); } }
+.hx-nod { animation: hx-nod .7s ease-in-out 1; transform-origin: 50% 90%; }
+body.hx-drowsy .reader-owl { opacity: .6; filter: saturate(.6); transform: translateY(2px) rotate(-4deg); transition: all 1s; }
+body.hx-drowsy .reader-owl::after { content: "Zzz"; position: absolute; font-size: 11px; font-weight: 800; color: var(--muted); transform: translate(14px, -22px); }
+.reader-owl { position: relative; }
+:root[data-reduced-motion=true] .hx-nod { animation: none !important; }
+@media (prefers-reduced-motion: reduce) { .hx-nod { animation: none !important; } }
