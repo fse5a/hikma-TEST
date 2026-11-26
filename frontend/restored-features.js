@@ -559,11 +559,11 @@
     return Array.from(new Uint8Array(digest), byte => byte.toString(16).padStart(2, '0')).join('');
   }
   // بيفتح شباك صغير يطلب الرقم، ويرجّع الأرقام اللي اتكتبت أو null لو لغى
-  function pinDialog({title, text, confirmField = false, cancellable = true}) {
+  function pinDialog({title, text, confirmField = false, cancellable = true, error = ''}) {
     return new Promise(resolve => {
       const box = document.createElement('div');
       box.className = 'pin-overlay';
-      box.innerHTML = `<form class="pin-dialog" role="dialog" aria-modal="true" aria-labelledby="pinTitle"><h2 id="pinTitle">${title}</h2><p>${text}</p><label for="pinInput">الرقم السري (4 إلى 6 أرقام)</label><input id="pinInput" type="password" inputmode="numeric" pattern="[0-9]{4,6}" maxlength="6" autocomplete="off" required>${confirmField ? '<label for="pinInput2">اكتبه تاني للتأكيد</label><input id="pinInput2" type="password" inputmode="numeric" pattern="[0-9]{4,6}" maxlength="6" autocomplete="off" required>' : ''}<p class="gate-error" id="pinError" role="alert"></p><div class="gate-actions"><button class="button primary" type="submit">تمام</button>${cancellable ? '<button class="button secondary" type="button" data-pin-cancel>إلغاء</button>' : ''}</div></form>`;
+      box.innerHTML = `<form class="pin-dialog" role="dialog" aria-modal="true" aria-labelledby="pinTitle"><h2 id="pinTitle">${title}</h2><p>${text}</p><label for="pinInput">الرقم السري (4 إلى 6 أرقام)</label><input id="pinInput" type="password" inputmode="numeric" pattern="[0-9]{4,6}" maxlength="6" autocomplete="off" required>${confirmField ? '<label for="pinInput2">اكتبه تاني للتأكيد</label><input id="pinInput2" type="password" inputmode="numeric" pattern="[0-9]{4,6}" maxlength="6" autocomplete="off" required>' : ''}<p class="gate-error" id="pinError" role="alert">${error}</p><div class="gate-actions"><button class="button primary" type="submit">تمام</button>${cancellable ? '<button class="button secondary" type="button" data-pin-cancel>إلغاء</button>' : ''}</div></form>`;
       document.body.appendChild(box);
       const input = box.querySelector('#pinInput');
       input.focus();
@@ -585,15 +585,17 @@
   let pinLockedUntil = 0;
   async function askParentPin() {
     if (!settings.parentPinHash) return true;
+    let pinError = '';
     for (;;) {
       const wait = Math.ceil((pinLockedUntil - Date.now()) / 1000);
-      const pin = await pinDialog({title: 'رقم الأهل', text: wait > 0 ? `محاولات كتير غلط. استنى ${wait} ثانية.` : 'اكتب الرقم السري اللي حطّه الأهل عشان تفتح الإعدادات.'});
+      const pin = await pinDialog({title: 'رقم الأهل', text: wait > 0 ? `محاولات كتير غلط. استنى ${wait} ثانية.` : 'اكتب الرقم السري اللي حطّه الأهل عشان تفتح الإعدادات.', error: pinError});
       if (pin === null) return false;
       if (Date.now() < pinLockedUntil) continue;
       if (await pinHash(pin, settings.parentPinSalt) === settings.parentPinHash) { pinFailures = 0; return true; }
       pinFailures += 1;
       if (pinFailures >= 5) { pinFailures = 0; pinLockedUntil = Date.now() + 60000; }
-      toast('الرقم غلط.');
+      // التنبيه جوه النافذة نفسها: التوست بيظهر تحت طبقة الرقم السري ومايبانش.
+      pinError = 'الرقم غلط. حاول تاني.';
     }
   }
   // بيخلّي الأهل يحطّوا رقم سري جديد. بيرجّع true لو اتحفظ. (changing=true يطلب الرقم القديم الأول)
