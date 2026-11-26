@@ -92,5 +92,6 @@
   // أزرار السابق والتالي: الاسم المسموع لازم يحتوي على النص الظاهر
   HX.on('barmounted', () => document.querySelectorAll('#readerContent [data-step]').forEach(b => b.removeAttribute('aria-label')));
   HX.on('barmounted', ({detail}) => detail.bar.querySelector('[data-hx-tool=focus]')?.setAttribute('aria-pressed', String(!!P().focusMode)));
+  HX.applyAccess = apply;
   apply();
 })();

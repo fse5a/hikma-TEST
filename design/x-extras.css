@@ -128,3 +128,41 @@ body.hx-drowsy .reader-owl::after { content: "Zzz"; position: absolute; font-siz
 .reader-owl { position: relative; }
 :root[data-reduced-motion=true] .hx-nod { animation: none !important; }
 @media (prefers-reduced-motion: reduce) { .hx-nod { animation: none !important; } }
+
+/* ===== مزايا الموقع ===== */
+.hx-sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+.hx-fab { position: fixed; inset-inline-start: 14px; bottom: calc(92px + env(safe-area-inset-bottom)); z-index: 40; display: inline-flex; align-items: center; gap: 8px; min-height: 48px; padding: 8px 16px; border-radius: 999px; border: 2px solid var(--line); background: var(--surface); color: var(--ink); font: inherit; font-weight: 800; box-shadow: 0 8px 22px rgba(0,0,0,.18); cursor: pointer; }
+.hx-fab.on { background: var(--green); color: #fff; border-color: var(--green); }
+.hx-fab:focus-visible { outline: 3px solid var(--green); outline-offset: 3px; }
+@media (max-width: 600px) { .hx-fab b { font-size: 13px; } .hx-fab { bottom: calc(86px + env(safe-area-inset-bottom)); } }
+@media (min-width: 900px) { .hx-fab { bottom: 20px; } }
+.hx-pen-page { padding: 16px; border: 2px solid var(--line); border-radius: 14px; background: var(--surface); font-size: 24px; line-height: 2.2; margin: 10px 0; }
+.hx-pen-w { display: inline-block; padding: 0 3px; border-radius: 6px; cursor: pointer; transition: background .15s; }
+.hx-pen-w:hover, .hx-pen-w.on, .hx-pen-w:focus-visible { background: var(--mint); outline: 2px solid var(--green); }
+.hx-pen-w.on { text-decoration: underline; text-decoration-thickness: 3px; text-underline-offset: 6px; }
+.hx-field-inline { display: flex; gap: 8px; align-items: center; flex: 1; min-width: 220px; }
+.hx-field-inline input, .hx-field input[type=search] { flex: 1; min-height: 44px; padding: 6px 12px; border-radius: 10px; border: 2px solid var(--line); background: var(--surface); color: var(--ink); font: inherit; }
+.hx-keys { width: 100%; border-collapse: collapse; }
+.hx-keys th, .hx-keys td { padding: 10px; border-bottom: 1px solid var(--line); text-align: start; }
+.hx-keys kbd { display: inline-block; padding: 3px 10px; border: 2px solid var(--line); border-radius: 8px; background: var(--mint); color: var(--ink); font-weight: 800; direction: ltr; }
+.hx-rate { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; }
+.hx-card-btn { display: block; width: 100%; text-align: start; padding: 12px; border: 2px solid var(--line); border-radius: 12px; background: var(--surface); color: var(--ink); font: inherit; cursor: pointer; }
+.hx-card-btn span { display: block; color: var(--muted); font-size: 14px; margin-top: 4px; }
+.hx-about h3 { margin: 14px 0 4px; } .hx-about ul, .hx-about ol { margin: 4px 0; padding-inline-start: 22px; line-height: 1.9; }
+.hx-wpm { font-size: 20px; }
+/* الأوضاع */
+:root[data-hx-mode=child] { --hx-scale: 1.15; }
+:root[data-hx-mode=blind] { --hx-scale: 1.2; }
+:root[data-hx-mode=student] { --hx-scale: .96; }
+:root[data-hx-mode=school] { --hx-scale: 1.4; }
+:root[data-hx-mode=child] body, :root[data-hx-mode=blind] body, :root[data-hx-mode=school] body { font-size: calc(1rem * var(--hx-scale)); }
+:root[data-hx-mode=student] body { font-size: calc(1rem * var(--hx-scale)); }
+:root[data-hx-mode=student] .welcome, :root[data-hx-mode=student] .mascot-bubble { filter: saturate(.7); }
+:root[data-hx-mode=student] .reading-text, :root[data-hx-mode=student] #readingText { font-size: .95em; }
+:root[data-hx-mode=school] #readingText, :root[data-hx-mode=blind] #readingText, :root[data-hx-mode=child] #readingText { font-size: calc(1.15em * var(--hx-scale)); line-height: 2.1; }
+:root[data-hx-mode=school] .welcome, :root[data-hx-mode=school] .mascot-bubble { display: none; }
+:root[data-hx-mode=blind] .welcome { display: none; }
+:root[data-hx-gray=on] body { filter: grayscale(1); }
+body.hx-print-keys > *:not(#hxKeys) { display: none !important; }
+@media print { body.hx-print-keys #hxKeys { position: static; display: block !important; } body.hx-print-keys #hxKeys .dialog-head button { display: none; } }
+@media print { .hx-fab { display: none; } }
