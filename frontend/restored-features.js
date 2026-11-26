@@ -653,7 +653,8 @@
     submit.disabled = true;
     errorBox.textContent = 'ثانية واحدة...';
     try {
-      await api.activate(code);
+      const result = await api.activate(code);
+      if (result && result.admin) settings.unlockedSkins = Object.keys(skins).filter(k => skins[k].locked);
     } catch (error) {
       errorBox.textContent = error.status === 401 ? 'الكود غلط أو منتهي. اتأكد منه وجرّب تاني.' : (error.message || 'حصلت مشكلة. جرّب تاني.');
       submit.disabled = false;
@@ -1024,6 +1025,13 @@
     message.textContent = 'ثانية واحدة...';
     try {
       const result = await api.redeemSkinCode(input.value.trim());
+      if (result.skin === 'all') {
+        const all = Object.keys(skins).filter(k => skins[k].locked);
+        settings.unlockedSkins = Array.from(new Set([...(settings.unlockedSkins || []), ...all]));
+        save(); input.value = ''; renderSettings(); playChime();
+        message.textContent = 'تم فتح كل السكنز!';
+        return;
+      }
       if (!skins[result.skin]?.locked) throw new Error('سكن غير معروف.');
       settings.unlockedSkins = Array.from(new Set([...(settings.unlockedSkins || []), result.skin]));
       settings.skin = result.skin;

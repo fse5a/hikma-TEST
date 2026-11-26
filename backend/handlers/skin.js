@@ -4,6 +4,7 @@
 import {sendError, parseJsonBody, validateRequired, getRequestId, sendJson} from '../lib/response.js';
 import {enforceApiQuota} from '../lib/quota.js';
 import {skinForCode} from '../lib/skin-codes.js';
+import {isAdminCode} from '../lib/admin-code.js';
 
 // الدالة الرئيسية للنقطة دي
 export default async function handler(request, response) {
@@ -18,6 +19,9 @@ export default async function handler(request, response) {
   }
   // حد للمحاولات عشان محدش يخمّن الأكواد (لو الحصص متظبطة على السيرفر)
   if (process.env.SUPABASE_URL && !(await enforceApiQuota(request, response, requestId, null, 'skin'))) return;
+  if (isAdminCode(String(body.code).trim())) {
+    return sendJson(response, 200, {ok: true, requestId, skin: 'all', message: 'تم فتح كل السكنز.'});
+  }
   const skin = skinForCode(String(body.code).trim());
   if (!skin) {
     return sendError(response, 'invalid_skin_code', 'كود السكن غير صحيح.', requestId, 401);

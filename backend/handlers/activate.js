@@ -4,6 +4,7 @@
 import {sendError, parseJsonBody, validateRequired, getRequestId, sendJson} from '../lib/response.js';
 import {enforceApiQuota} from '../lib/quota.js';
 import {activationCodeHash} from '../lib/activation.js';
+import {isAdminCode} from '../lib/admin-code.js';
 
 // الدالة الرئيسية للنقطة دي
 export default async function handler(request, response) {
@@ -56,6 +57,11 @@ export default async function handler(request, response) {
   }
   // حد للمحاولات عشان محدش يخمّن الأكواد
   if (!(await enforceApiQuota(request, response, requestId, null, 'activate'))) return;
+
+  // كود العرض: دخول فقط وفتح كل السكنز (بدون أي وصول لبيانات). محسوب بعد حد المحاولات.
+  if (isAdminCode(provided)) {
+    return sendJson(response, 200, {ok: true, mode: 'production', requestId, message: 'تم التفعيل.', admin: true, activation: {status: 'active', expiresAt: null}});
+  }
 
   const controller = new AbortController();
   const timeoutId = setTimeout(() => controller.abort(), Number(process.env.UPSTREAM_TIMEOUT_MS) || 8000);
