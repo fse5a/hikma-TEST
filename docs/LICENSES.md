@@ -49,3 +49,7 @@ The static application is implemented with web platform APIs. Backend code uses 
 
 Playwright browser binaries are test-only and are not shipped to users; consult their distribution notices when installing them in CI. Imported web content and story illustrations must have independent reuse rights. No third-party story text or artwork is bundled in the URL fixtures.
 | `qrcode-generator` (vendored, `frontend/vendor/qrcode.js`) | MIT | QR codes for story links |
+
+## Story library content (school demo)
+
+The story library (`frontend/x-data.js`) holds public-domain works (Twain, Aesop, Clason, Kalila wa Dimna, Juha), myths retold in our own words, and our own short original summaries of a game's lore and of published books. Each item shows its source. The content is meant for the school jury demo only. Do not republish it outside that demo without checking rights for each item.

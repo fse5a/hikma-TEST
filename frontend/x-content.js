@@ -8,12 +8,12 @@
 
   // ---------- 8) مكتبة التراث ----------
   function openHeritage() {
-    const groups = {kalila: 'كليلة ودمنة', juha: 'جحا'};
+    const groups = {kalila: 'كليلة ودمنة', juha: 'جحا', myth: 'أساطير (يونانية، إسكندنافية، مصرية)', lore: 'عوالم الألعاب (ملخص بصياغتنا)', books: 'ملخصات كتب (بصياغتنا)', classic: 'حكايات ملك عام'};
     const html = Object.entries(groups).map(([g, name]) => `<h3 class="hx-h3">${name}</h3><ul class="hx-cards">${D.heritage.filter(h => h.group === g).map(h => {
       const has = state.stories.some(s => s.id === h.id);
-      return `<li class="hx-card"><span class="hx-card-ico" aria-hidden="true">${h.icon}</span><div><strong>${esc(h.title)}</strong><span class="hx-muted">${h.text.split(/\s+/).length} كلمة · أسئلة وعبرة</span></div><button class="button ${has ? 'secondary' : 'primary'}" data-hx-her="${h.id}" type="button" ${has ? 'disabled' : ''}>${has ? 'في مكتبتك ✔' : 'أضف'}</button></li>`;
+      return `<li class="hx-card"><span class="hx-card-ico" aria-hidden="true">${h.icon}</span><div><strong>${esc(h.title)}</strong><span class="hx-muted">${h.text.split(/\s+/).length} كلمة · أسئلة وعبرة</span>${h.source ? `<span class="hx-muted">المصدر: ${esc(h.source)}</span>` : ''}</div><button class="button ${has ? 'secondary' : 'primary'}" data-hx-her="${h.id}" type="button" ${has ? 'disabled' : ''}>${has ? 'في مكتبتك ✔' : 'أضف'}</button></li>`;
     }).join('')}</ul>`).join('');
-    HX.dialog('hxHeritage', 'مكتبة التراث', `<p class="voice-note" style="margin-top:0">حكايات قديمة مشهورة (ملك عام) بصياغة بسيطة. كل حكاية معاها أسئلة وعبرة.</p>${html}`, {wide: true});
+    HX.dialog('hxHeritage', 'مكتبة التراث', `<p class="voice-note" style="margin-top:0">حكايات وأساطير وملخصات بصياغتنا، كل واحدة معاها المصدر وأسئلة وعبرة.</p>${html}`, {wide: true});
     HX.open('hxHeritage');
   }
   document.addEventListener('click', e => {
@@ -216,7 +216,7 @@
   HX.addReaderTool({id: 'notes', icon: '📌', label: 'علامات', order: 15, onClick: openNotes});
 
   // ---------- تسجيل في قائمة حكمة+ ----------
-  HX.features.push({id: 'heritage', icon: '🏺', name: 'مكتبة التراث', sub: 'كليلة ودمنة وجحا', order: 10, open: openHeritage});
+  HX.features.push({id: 'heritage', icon: '🏺', name: 'مكتبة التراث', sub: 'كليلة ودمنة وجحا وأساطير وكتب', order: 10, open: openHeritage});
   HX.features.push({id: 'branch', icon: '🔀', name: 'اختار نهايتك', sub: 'قصص تفاعلية', order: 11, open: openBranching});
   importFromLocation();
 })();
