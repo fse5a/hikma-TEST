@@ -601,6 +601,8 @@
       pinError = 'الرقم غلط. حاول تاني.';
     }
   }
+  // بنكشف التحقق من رقم الأهل للمزايا الجديدة (حد الوقت وتقرير الأهل)
+  window.hikmaAskParentPin = askParentPin;
   // بيخلّي الأهل يحطّوا رقم سري جديد. بيرجّع true لو اتحفظ. (changing=true يطلب الرقم القديم الأول)
   async function setParentPin(changing = false) {
     if (changing && !(await askParentPin())) return false;

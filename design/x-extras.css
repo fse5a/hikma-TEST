@@ -94,3 +94,27 @@
 .hx-note q { grid-column: 1 / -1; color: var(--ink); font-size: 14px; }
 .hx-notes li { display: grid; }
 #hxPaste { margin-bottom: 8px; }
+/* التقدم */
+.hx-stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-bottom: 10px; }
+.hx-stats > div { background: var(--mint); border-radius: var(--radius); padding: 10px; text-align: center; display: grid; }
+.hx-stats strong { font-size: 24px; }
+.hx-stats span { color: var(--muted); font-size: 12px; }
+.hx-sec { background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); padding: 10px 14px; margin-bottom: 10px; }
+.hx-sec h3 { margin: 0 0 6px; font-size: 16px; }
+.hx-goal { display: flex; gap: 14px; align-items: center; }
+.hx-ring { width: 96px; height: 96px; flex: none; }
+.hx-num { width: 80px; min-height: 40px; border: 1px solid var(--line); border-radius: 12px; padding: 0 8px; font: inherit; background: var(--surface); color: var(--ink); }
+.hx-row.start { justify-content: flex-start; }
+.hx-row select { min-height: 40px; border-radius: 12px; border: 1px solid var(--line); background: var(--surface); color: var(--ink); font: inherit; padding: 0 8px; }
+.hx-bar-track { height: 14px; background: var(--line); border-radius: 99px; overflow: hidden; }
+.hx-bar-track span { display: block; height: 100%; background: var(--green); border-radius: 99px; }
+.hx-garden { width: 100%; height: auto; display: block; }
+.hx-badges { list-style: none; display: flex; flex-wrap: wrap; gap: 6px; padding: 0; margin: 0; }
+.hx-badges li { background: var(--accent-soft); border-radius: 99px; padding: 4px 12px; font-size: 13px; }
+.hx-days { display: grid; grid-template-columns: repeat(7, 1fr); gap: 4px; align-items: end; text-align: center; margin: 10px 0; min-height: 100px; }
+.hx-days > div { display: grid; justify-items: center; gap: 2px; }
+.hx-day-bar { width: 70%; background: var(--green); border-radius: 6px 6px 0 0; display: block; }
+.hx-daily { display: flex; align-items: center; gap: 12px; margin: 12px 0; padding: 10px 14px; background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); }
+.hx-daily > div { display: grid; flex: 1; min-width: 0; }
+.hx-daily > div span { color: var(--muted); font-size: 13px; }
+.hx-daily-ico { font-size: 30px; }

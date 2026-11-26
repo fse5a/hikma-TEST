@@ -118,7 +118,7 @@
     const p = HX.profile;
     const tiles = HX.features.slice().sort((a, b) => (a.order || 99) - (b.order || 99)).map(f => `<button class="hx-tile" data-hx-feature="${f.id}" type="button"><span class="hx-tile-ico" aria-hidden="true">${f.icon}</span><span class="hx-tile-name">${escapeHtml(f.name)}</span><span class="hx-tile-sub">${escapeHtml(f.sub || '')}</span></button>`).join('');
     const profiles = X.profiles.map(q => `<button class="hx-prof${q.id === p.id ? ' on' : ''}" data-hx-profile="${q.id}" type="button" aria-pressed="${q.id === p.id}">${escapeHtml(q.emoji)} ${escapeHtml(q.name)}</button>`).join('');
-    HX.dialog('hxHub', 'حكمة+', `<div class="hx-hero"><div><strong>${escapeHtml(p.emoji)} ${escapeHtml(p.name)}</strong><span>⭐ ${p.stars || 0} نجمة · 🔥 ${HX.streak()} يوم</span></div><div class="hx-profs">${profiles}<button class="hx-prof" id="hxAddProfile" type="button">＋ طفل</button></div></div><div class="hx-grid">${tiles}</div>`, {wide: true});
+    HX.dialog('hxHub', 'حكمة+', `<div class="hx-hero"><div><strong>${escapeHtml(p.emoji)} ${escapeHtml(p.name)}</strong><span>⭐ ${p.stars || 0} نجمة · 🔥 ${HX.streak()} يوم</span></div><div class="hx-profs">${profiles}<button class="hx-prof" id="hxAddProfile" type="button">＋ مستخدم</button></div></div><div class="hx-grid">${tiles}</div>`, {wide: true});
   }
   function openHub() { renderHub(); openModal('hxHub'); }
   HX.openHub = openHub;
@@ -135,7 +135,7 @@
     const prof = e.target.closest('[data-hx-profile]');
     if (prof) { X.active = prof.dataset.hxProfile; HX.save(); refreshChip(); renderHub(); HX.emit('profile'); return; }
     if (e.target.closest('#hxAddProfile')) {
-      const name = (prompt('اسم الطفل؟') || '').trim().slice(0, 20);
+      const name = (prompt('اسم المستخدم؟') || '').trim().slice(0, 20);
       if (!name) return;
       const emojis = ['🐱', '🦊', '🐻', '🐼', '🦁', '🐸', '🐧', '🦄'];
       const p = newProfile(name, emojis[X.profiles.length % emojis.length]);

@@ -10,7 +10,8 @@ export default defineConfig({
     baseURL: 'http://127.0.0.1:4173',
     ...devices['Desktop Chrome'],
     locale: 'ar-EG',
-    headless: true
+    headless: true,
+    launchOptions: process.env.HIKMA_CHROME ? {executablePath: process.env.HIKMA_CHROME, args: ['--no-sandbox']} : {}
   },
   webServer: {
     command: 'node scripts/dev-server.js',
