@@ -95,6 +95,9 @@
       renderLibrary();
       return item;
     },
+    // بنات الجمل الحالية من متغيرات القارئ الأساسية (hikmaReader.lines فيه تعارض أسماء في الكود القديم)
+    lines() { return lines; },
+    setIndex(i) { lineIndex = Math.max(0, Math.min(lines.length - 1, i)); renderLines(); saveProgress(); },
     storyById(id) { return state.stories.find(s => s.id === id); },
     features: [] // قائمة المزايا في نافذة «حكمة+»
   };

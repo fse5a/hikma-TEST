@@ -160,19 +160,19 @@
   HX.matchScore = matchScore;
   function openRepeat(s) {
     if (!s) return;
-    rep.i = Math.min(window.hikmaReader?.index || 0, (window.hikmaReader?.lines.length || 1) - 1);
+    rep.i = Math.min(window.hikmaReader?.index || 0, (HX.lines().length || 1) - 1);
     renderRepeat();
     HX.open('hxRepeat');
   }
   function renderRepeat(result) {
-    const r = window.hikmaReader, line = r?.lines[rep.i] || '';
+    const r = window.hikmaReader, line = HX.lines()[rep.i] || '';
     const supported = Boolean(SR);
     const lang = r?.story?.lang === 'en' ? 'en' : 'ar';
-    HX.dialog('hxRepeat', 'كرر ورايا', `<p class="hx-step">جملة ${rep.i + 1} من ${r?.lines.length || 1}</p><p class="hx-target" lang="${lang}" dir="${lang === 'ar' ? 'rtl' : 'ltr'}">${esc(line)}</p><div class="hx-row"><button class="button secondary" id="hxRepeatListen" type="button">🔊 اسمع الجملة</button><button class="button primary" id="hxRepeatMic" type="button" ${supported ? '' : 'disabled'}>🎤 اتكلم</button></div><p class="hx-feedback" id="hxRepeatOut" role="status">${supported ? (result || 'اسمع الجملة ثم اضغط اتكلم وكررها.') : 'متصفحك مش بيدعم التعرف على الكلام. جرّب Chrome على الموبايل أو الكمبيوتر.'}</p><div class="hx-row"><button class="button secondary" id="hxRepeatPrev" type="button" ${rep.i === 0 ? 'disabled' : ''}>‹ السابقة</button><button class="button secondary" id="hxRepeatNext" type="button" ${rep.i + 1 >= (r?.lines.length || 1) ? 'disabled' : ''}>التالية ›</button></div><p class="voice-note">الصوت بيتعالج في المتصفح نفسه حسب خدمة الجهاز. مبنخزنش أي تسجيل.</p>`);
+    HX.dialog('hxRepeat', 'كرر ورايا', `<p class="hx-step">جملة ${rep.i + 1} من ${HX.lines().length || 1}</p><p class="hx-target" lang="${lang}" dir="${lang === 'ar' ? 'rtl' : 'ltr'}">${esc(line)}</p><div class="hx-row"><button class="button secondary" id="hxRepeatListen" type="button">🔊 اسمع الجملة</button><button class="button primary" id="hxRepeatMic" type="button" ${supported ? '' : 'disabled'}>🎤 اتكلم</button></div><p class="hx-feedback" id="hxRepeatOut" role="status">${supported ? (result || 'اسمع الجملة ثم اضغط اتكلم وكررها.') : 'متصفحك مش بيدعم التعرف على الكلام. جرّب Chrome على الموبايل أو الكمبيوتر.'}</p><div class="hx-row"><button class="button secondary" id="hxRepeatPrev" type="button" ${rep.i === 0 ? 'disabled' : ''}>‹ السابقة</button><button class="button secondary" id="hxRepeatNext" type="button" ${rep.i + 1 >= (HX.lines().length || 1) ? 'disabled' : ''}>التالية ›</button></div><p class="voice-note">الصوت بيتعالج في المتصفح نفسه حسب خدمة الجهاز. مبنخزنش أي تسجيل.</p>`);
   }
   function listenOnce() {
     if (!SR) return;
-    const r = window.hikmaReader, line = r.lines[rep.i], lang = r.story.lang === 'en' ? 'en-US' : 'ar-EG';
+    const r = window.hikmaReader, line = HX.lines()[rep.i], lang = r.story.lang === 'en' ? 'en-US' : 'ar-EG';
     const out = document.getElementById('hxRepeatOut');
     try { rep.rec?.abort(); } catch {}
     const rec = rep.rec = new SR();
@@ -196,9 +196,9 @@
   }
   document.addEventListener('click', e => {
     if (e.target.closest('#hxRepeatMic')) listenOnce();
-    else if (e.target.closest('#hxRepeatListen')) { const r = window.hikmaReader; say(r.lines[rep.i], r.story.lang); }
+    else if (e.target.closest('#hxRepeatListen')) { const r = window.hikmaReader; say(HX.lines()[rep.i], r.story.lang); }
     else if (e.target.closest('#hxRepeatPrev')) { rep.i = Math.max(0, rep.i - 1); renderRepeat(); }
-    else if (e.target.closest('#hxRepeatNext')) { rep.i = Math.min(window.hikmaReader.lines.length - 1, rep.i + 1); renderRepeat(); }
+    else if (e.target.closest('#hxRepeatNext')) { rep.i = Math.min(HX.lines().length - 1, rep.i + 1); renderRepeat(); }
   });
   document.addEventListener('click', e => { if (e.target.closest('[data-close="hxRepeat"]') || e.target.id === 'hxRepeat') { try { rep.rec?.abort(); } catch {} } });
 
@@ -212,7 +212,7 @@
     const existing = p.cards.find(c => strip(c.w) === strip(w));
     if (existing) { if (meaning && !existing.m) existing.m = meaning; HX.save(); return 'exists'; }
     const r = window.hikmaReader;
-    const ctx = r?.lines?.find(l => l.includes(w)) || '';
+    const ctx = HX.lines()?.find(l => l.includes(w)) || '';
     p.cards.push({w, m: meaning || '', ctx, story: r?.story?.title || '', box: 0, due: HX.today(), lang: r?.story?.lang || 'ar'});
     HX.save();
     return true;

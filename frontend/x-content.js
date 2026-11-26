@@ -198,7 +198,7 @@
     if (!s) return;
     const list = marks(s);
     const r = window.hikmaReader;
-    const cur = r.lines[r.index] || '';
+    const cur = HX.lines()[r.index] || '';
     const rows = list.map((m, i) => `<li class="hx-note"><q>${esc(m.t)}</q><label class="sr-only" for="hxN${i}">ملاحظتك</label><input id="hxN${i}" class="hx-dlg-input" data-hx-note="${i}" value="${esc(m.n || '')}" placeholder="اكتب ملاحظتك" maxlength="200"><button class="icon-button" data-hx-note-del="${i}" aria-label="احذف العلامة" type="button">🗑</button></li>`).join('');
     HX.dialog('hxNotes', 'علاماتي وملاحظاتي', `<div class="hx-row"><button class="button primary" id="hxMarkAdd" type="button" ${cur ? '' : 'disabled'}>📌 علّم الجملة الحالية</button></div><p class="voice-note" style="margin-top:0">الجملة الحالية: ${esc(cur.slice(0, 80))}</p>${list.length ? `<ul class="hx-list hx-notes">${rows}</ul><div class="hx-row"><button class="button secondary" id="hxNotesCopy" type="button">📋 انسخ الكل</button><button class="button secondary" id="hxNotesDl" type="button">⬇️ نزّل كملف</button></div>` : '<p class="hx-muted">مفيش علامات. علّم الجمل المهمة وهتلاقيها هنا، وتقدر تنسخها لمذكراتك.</p>'}`, {wide: true});
     HX.open('hxNotes');
@@ -206,7 +206,7 @@
   const notesText = s => `${s.title}\n\n` + marks(s).map((m, i) => `${i + 1}. ${m.t}${m.n ? `\n   ملاحظة: ${m.n}` : ''}`).join('\n\n');
   document.addEventListener('click', async e => {
     const s = window.hikmaReader?.story; if (!s) return;
-    if (e.target.closest('#hxMarkAdd')) { const t = window.hikmaReader.lines[window.hikmaReader.index]; if (t && !marks(s).some(m => m.t === t)) { marks(s).push({t, n: ''}); save(); } openNotes(s); }
+    if (e.target.closest('#hxMarkAdd')) { const t = HX.lines()[window.hikmaReader.index]; if (t && !marks(s).some(m => m.t === t)) { marks(s).push({t, n: ''}); save(); } openNotes(s); }
     const del = e.target.closest('[data-hx-note-del]');
     if (del) { marks(s).splice(Number(del.dataset.hxNoteDel), 1); save(); openNotes(s); }
     if (e.target.closest('#hxNotesCopy')) { try { await navigator.clipboard.writeText(notesText(s)); HX.toast('اتنسخت الملاحظات'); } catch { HX.toast('تعذر النسخ'); } }

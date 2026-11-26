@@ -76,7 +76,8 @@
     while ((m = re.exec(line))) {
       if (m.index > last) out.push({t: line.slice(last, m.index), who: 'narrator'});
       const before = line.slice(Math.max(0, m.index - 40), m.index);
-      const sp = before.match(/(?:قال|قالت|صاح|صاحت|ردّ|ردت|رد|said|asked)\s+(\S+)/i);
+      const sps = [...before.matchAll(/(?:قال|قالت|صاح|صاحت|ردّ|ردت|رد|said|asked)\s+(\S+)/gi)];
+      const sp = sps[sps.length - 1];
       out.push({t: m[1], who: sp ? sp[1].replace(/[:،,]/g, '') : 'x'});
       last = m.index + m[0].length;
     }
@@ -115,11 +116,11 @@
     rolesOn = true; const my = ++rolesToken;
     HX.refreshBar();
     const speakers = new Map(), lang = r.story.lang;
-    for (let i = r.index; i < r.lines.length && rolesOn && my === rolesToken; i++) {
-      r.setIndex(i);
-      for (const seg of segments(r.lines[i])) { if (!rolesOn || my !== rolesToken) break; await speakSegment(seg, lang, speakers); }
+    for (let i = r.index; i < HX.lines().length && rolesOn && my === rolesToken; i++) {
+      HX.setIndex(i);
+      for (const seg of segments(HX.lines()[i])) { if (!rolesOn || my !== rolesToken) break; await speakSegment(seg, lang, speakers); }
     }
-    if (my === rolesToken) { rolesOn = false; HX.refreshBar(); if (r.index >= r.lines.length - 1) window.dispatchEvent(new CustomEvent('hikma:finished')); }
+    if (my === rolesToken) { rolesOn = false; HX.refreshBar(); if (r.index >= HX.lines().length - 1) window.dispatchEvent(new CustomEvent('hikma:finished')); }
   }
   function stopRoles() { if (!rolesOn) return; rolesOn = false; rolesToken++; try { speechSynthesis.cancel(); } catch {} }
   HX.addReaderTool({id: 'roles', icon: '🎭', label: () => rolesOn ? 'إيقاف الأدوار' : 'قراءة بالأدوار', order: 31, onClick: () => { if (rolesOn) { stopRoles(); HX.refreshBar(); } else playRoles(); }});
