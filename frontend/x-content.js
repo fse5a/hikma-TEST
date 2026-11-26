@@ -6,9 +6,20 @@
   'use strict';
   const HX = window.HX, D = window.HXData, esc = HX.escapeHtml;
 
+  // المكتبة الافتراضية: القصص الحقيقية بس. بنشيل قصتي التجربة القديمتين مرة واحدة، ونضيف القصص الحقيقية.
+  (function seedRealStories() {
+    if (state.settings.realStoriesV2) return;
+    state.stories = state.stories.filter(s => s.id !== 'seed-2' && !(s.id === 'seed-1' && /الأرنب/.test(s.title)) && !['wor-twain-fence','wor-aesop-crow','wor-clason-purse','bk-little-prince'].includes(s.id));
+    const real = D.heritage.filter(h => ['classic', 'myth', 'lore', 'books'].includes(h.group)).reverse();
+    real.forEach(h => { if (!state.stories.some(s => s.id === h.id)) state.stories.unshift({id: h.id, title: h.title, text: h.text, lang: 'ar', translation: '', progress: 0, icon: h.icon, moral: h.moral, quiz: h.quiz}); });
+    state.settings.realStoriesV2 = true;
+    save();
+    renderLibrary();
+  })();
+
   // ---------- 8) مكتبة التراث ----------
   function openHeritage() {
-    const groups = {kalila: 'كليلة ودمنة', juha: 'جحا', myth: 'أساطير (يونانية، إسكندنافية، مصرية)', lore: 'عوالم الألعاب (ملخص بصياغتنا)', books: 'ملخصات كتب (بصياغتنا)', classic: 'حكايات ملك عام'};
+    const groups = {kalila: 'كليلة ودمنة', juha: 'جحا', myth: 'أساطير (يونانية، إسكندنافية، مصرية)', lore: 'ألعاب وكرتون (ملخص بصياغتنا)', books: 'كتب وأدب (ملخصات بصياغتنا)', classic: 'حكايات ملك عام'};
     const html = Object.entries(groups).map(([g, name]) => `<h3 class="hx-h3">${name}</h3><ul class="hx-cards">${D.heritage.filter(h => h.group === g).map(h => {
       const has = state.stories.some(s => s.id === h.id);
       return `<li class="hx-card"><span class="hx-card-ico" aria-hidden="true">${h.icon}</span><div><strong>${esc(h.title)}</strong><span class="hx-muted">${h.text.split(/\s+/).length} كلمة · أسئلة وعبرة</span>${h.source ? `<span class="hx-muted">المصدر: ${esc(h.source)}</span>` : ''}</div><button class="button ${has ? 'secondary' : 'primary'}" data-hx-her="${h.id}" type="button" ${has ? 'disabled' : ''}>${has ? 'في مكتبتك ✔' : 'أضف'}</button></li>`;
