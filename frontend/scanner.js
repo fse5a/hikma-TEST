@@ -134,6 +134,15 @@
       document.querySelector(`[data-open="${story.id}"]`)?.click();
       return;
     }
+    // رابط مشاركة قصة من حكمة: بنستورده مباشرة من غير سيرفر
+    if (text.includes('#s=') && window.HX) {
+      try {
+        const o = await HX.decodeStory(text.slice(text.indexOf('#s=') + 3));
+        HX.addStory({title: o.title, text: o.text, lang: o.lang, icon: o.icon, extra: o.moral ? {moral: o.moral} : {}});
+        toast('اتضافت القصة من الكود');
+        return;
+      } catch { /* لو الرابط مش قصة نكمل المعالجة العادية */ }
+    }
     if (/^https?:\/\//i.test(text)) {
       scanStatus('');
       toast('تم قراءة الرمز؛ جارٍ جلب الصفحة...');

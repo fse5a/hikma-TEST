@@ -11,6 +11,7 @@
     root.dataset.dyslexia = P().dyslexia ? 'on' : 'off';
     root.dataset.dyslexiaTint = P().dyslexiaTint || 'cream';
     root.dataset.focusMode = P().focusMode ? 'on' : 'off';
+    root.dataset.contrast = P().contrast || 'off';
     root.dataset.switchScan = P().switchScan ? 'on' : 'off';
     if (P().switchScan) startScan(); else stopScan();
   }
@@ -63,10 +64,13 @@
         <label class="hx-switch"><input type="checkbox" id="hxDys" ${p.dyslexia ? 'checked' : ''}><span><strong>وضع عسر القراءة</strong><em>مسافات أوسع بين الحروف والكلمات وخلفية هادئة وسطر واحد في كل مرة.</em></span></label>
         <div class="hx-field" ${p.dyslexia ? '' : 'hidden'} id="hxTintBox"><label for="hxTint">لون الخلفية</label><select id="hxTint"><option value="cream">كريمي</option><option value="blue">أزرق فاتح</option><option value="green">أخضر فاتح</option><option value="peach">وردي فاتح</option></select></div>
         <label class="hx-switch"><input type="checkbox" id="hxFocus" ${p.focusMode ? 'checked' : ''}><span><strong>مسطرة التركيز</strong><em>بتظلّل كل الجمل ما عدا الجملة اللي بتقراها.</em></span></label>
+        <div class="hx-field"><label for="hxContrast">تباين عالي</label><select id="hxContrast"><option value="off">عادي</option><option value="light">تباين عالي فاتح (أسود على أبيض)</option><option value="dark">تباين عالي داكن (أصفر على أسود)</option></select></div>
+        <label class="hx-switch"><input type="checkbox" id="hxAnnounce" ${p.announce ? 'checked' : ''}><span><strong>إعلان الجملة لقارئ الشاشة</strong><em>لو بتستخدم قارئ شاشة (NVDA أو VoiceOver أو TalkBack)، الجملة الحالية بتتقرأ تلقائيًا أثناء التنقل.</em></span></label>
         <label class="hx-switch"><input type="checkbox" id="hxScan" ${p.switchScan ? 'checked' : ''}><span><strong>التحكم بزر واحد</strong><em>التطبيق بيعدّي على الأزرار واحد واحد، وتضغط مسافة أو Enter (أو أي زر موصّل بالكيبورد) لاختيار الزر المميّز.</em></span></label>
         <div class="hx-field" ${p.switchScan ? '' : 'hidden'} id="hxScanBox"><label for="hxScanSpeed">سرعة المسح</label><select id="hxScanSpeed"><option value="1.2">سريع (١٫٢ ثانية)</option><option value="2">متوسط (٢ ثانية)</option><option value="3.5">بطيء (٣٫٥ ثانية)</option></select></div>
       </div>
       <p class="voice-note">اختصارات الكيبورد في القارئ: مسافة للتشغيل، الأسهم للجمل، Esc للإغلاق.</p>`);
+    document.getElementById('hxContrast').value = p.contrast || 'off';
     document.getElementById('hxTint').value = p.dyslexiaTint || 'cream';
     document.getElementById('hxScanSpeed').value = String(p.scanSpeed || 2);
     HX.open('hxAccess');
@@ -75,6 +79,8 @@
     const id = e.target.id;
     if (id === 'hxDys') { P().dyslexia = e.target.checked; document.getElementById('hxTintBox').hidden = !e.target.checked; }
     else if (id === 'hxTint') P().dyslexiaTint = e.target.value;
+    else if (id === 'hxContrast') P().contrast = e.target.value;
+    else if (id === 'hxAnnounce') P().announce = e.target.checked;
     else if (id === 'hxFocus') P().focusMode = e.target.checked;
     else if (id === 'hxScan') { P().switchScan = e.target.checked; document.getElementById('hxScanBox').hidden = !e.target.checked; if (e.target.checked) HX.toast('التحكم بزر واحد شغال'); }
     else if (id === 'hxScanSpeed') P().scanSpeed = Number(e.target.value);

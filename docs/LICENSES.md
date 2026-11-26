@@ -48,3 +48,4 @@ The static application is implemented with web platform APIs. Backend code uses 
 | `xmlchars` | MIT | XML character definitions |
 
 Playwright browser binaries are test-only and are not shipped to users; consult their distribution notices when installing them in CI. Imported web content and story illustrations must have independent reuse rights. No third-party story text or artwork is bundled in the URL fixtures.
+| `qrcode-generator` (vendored, `frontend/vendor/qrcode.js`) | MIT | QR codes for story links |
