@@ -34,7 +34,9 @@ export default async function handler(request, response) {
     return sendError(response, 'invalid_voice_settings', 'Rate must be 0.5-2 and pitch must be -6 to 6 semitones.', requestId, 400);
   }
 
-  const provider = createSpeechProvider() || createGoogleSpeechProvider() || createGeminiSpeechProvider() || createEdgeSpeechProvider();
+  // Ordered fallback chain: if a provider fails (quota, outage), the next one answers.
+  const providers = [createSpeechProvider(), createGoogleSpeechProvider(), createGeminiSpeechProvider(), createEdgeSpeechProvider()].filter(Boolean);
+  const provider = providers[0];
   const supabaseConfigured = Boolean(process.env.SUPABASE_URL && process.env.SUPABASE_ANON_KEY);
   const cacheConfigured = Boolean(process.env.SUPABASE_URL && process.env.SUPABASE_SERVICE_ROLE_KEY);
 
@@ -44,7 +46,7 @@ export default async function handler(request, response) {
   if (provider && !supabaseConfigured) {
     let result;
     try {
-      result = await provider.synthesize({text, language, voice, rate, pitch});
+      result = await synthesizeWithFallback(providers, {text, language, voice, rate, pitch});
     } catch {
       return sendError(response, 'speech_provider_failed', 'Speech service is temporarily unavailable.', requestId, 502);
     }
@@ -59,15 +61,17 @@ export default async function handler(request, response) {
     const identity = {userId: user.userId, provider: provider.name, voice, language, text, rate, pitch};
     if (cacheConfigured) {
       try {
-        const cached = await loadPrivateAudio(identity);
-        if (cached) return sendJson(response, 200, {ok: true, requestId, mode: 'configured', provider: provider.name, cached: true, ...cached});
+        for (const candidate of providers) {
+          const cached = await loadPrivateAudio({...identity, provider: candidate.name});
+          if (cached) return sendJson(response, 200, {ok: true, requestId, mode: 'configured', provider: candidate.name, cached: true, ...cached});
+        }
       } catch {
         return sendError(response, 'audio_storage_failed', 'Private audio cache is unavailable.', requestId, 503);
       }
     }
     let result;
     try {
-      result = await provider.synthesize({text, language, voice, rate, pitch});
+      result = await synthesizeWithFallback(providers, {text, language, voice, rate, pitch});
     } catch {
       return sendError(response, 'speech_provider_failed', 'Speech service is temporarily unavailable.', requestId, 502);
     }
@@ -92,4 +96,17 @@ export default async function handler(request, response) {
     audioUrl: null,
     note: 'Speech worker is not configured; use device speech as the free local fallback.'
   });
+}
+
+// يجرب المزودات بالترتيب لحد ما واحد ينجح
+async function synthesizeWithFallback(providers, payload) {
+  let lastError;
+  for (const candidate of providers) {
+    try {
+      return await candidate.synthesize(payload);
+    } catch (error) {
+      lastError = error;
+    }
+  }
+  throw lastError || new Error('No speech provider is configured.');
 }
