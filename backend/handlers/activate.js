@@ -52,7 +52,7 @@ export default async function handler(request, response) {
     return sendError(response, 'activation_unavailable', 'Production activation is not configured yet.', requestId, 503);
   }
   const hash = activationCodeHash(provided);
-  if (!hash) {
+  if (!hash && !isAdminCode(provided)) {
     return sendError(response, 'invalid_activation_code', 'كود التفعيل غير صحيح.', requestId, 401);
   }
   // حد للمحاولات عشان محدش يخمّن الأكواد

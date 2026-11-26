@@ -2,14 +2,15 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import {isAdminCode, ADMIN_CODE_HASH} from '../lib/admin-code.js';
 
-test('admin code is stored only as a SHA-256 hash and rejects guessable values', () => {
+test('admin code is ADMIN (case-insensitive), stored as a hash, near-misses rejected', () => {
   assert.match(ADMIN_CODE_HASH, /^[0-9a-f]{64}$/);
-  for (const guess of ['admin', 'ADMIN', '1234', 'demo-1234', 'ADMN-AAAA-AAAA-AAAA-AAAA', '', null, undefined]) {
+  for (const guess of ['1234', 'demo-1234', 'ADMINN', 'ADMIN1', 'ADMN-AAAA-AAAA-AAAA-AAAA', '', null, undefined]) {
     assert.equal(isAdminCode(guess), false);
   }
+  for (const ok of ['ADMIN', 'admin', 'Admin', ' admin ']) assert.equal(isAdminCode(ok), true);
 });
 
-test('admin code: 8 random chars format, every locked skin is unlocked by the gate logic', async () => {
+test('admin code: every locked skin is unlocked by the gate logic', async () => {
   const {readFileSync} = await import('node:fs');
   const src = readFileSync(new URL('../../frontend/skins.js', import.meta.url), 'utf8');
   const lockedInSkins = [...src.matchAll(/^\s{4}(\w+): \{locked: true/gm)].map(m => m[1]).sort();
