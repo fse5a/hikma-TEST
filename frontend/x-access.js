@@ -89,6 +89,8 @@
   });
   HX.features.push({id: 'access', icon: '♿', name: 'سهولة القراءة', sub: 'عسر القراءة، التركيز، زر واحد', order: 5, open});
   HX.addReaderTool({id: 'focus', icon: '🔦', label: 'تركيز', order: 20, onClick: (s, b) => { P().focusMode = !P().focusMode; HX.save(); apply(); b.setAttribute('aria-pressed', String(!!P().focusMode)); }});
+  // أزرار السابق والتالي: الاسم المسموع لازم يحتوي على النص الظاهر
+  HX.on('barmounted', () => document.querySelectorAll('#readerContent [data-step]').forEach(b => b.removeAttribute('aria-label')));
   HX.on('barmounted', ({detail}) => detail.bar.querySelector('[data-hx-tool=focus]')?.setAttribute('aria-pressed', String(!!P().focusMode)));
   apply();
 })();

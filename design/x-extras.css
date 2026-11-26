@@ -118,3 +118,5 @@
 .hx-daily > div { display: grid; flex: 1; min-width: 0; }
 .hx-daily > div span { color: var(--muted); font-size: 13px; }
 .hx-daily-ico { font-size: 30px; }
+
+.hx-hero span, .hx-stats span, .hx-muted, .hx-tile-sub { color: color-mix(in srgb, var(--ink) 78%, var(--surface)); }
