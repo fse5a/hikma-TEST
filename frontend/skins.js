@@ -10,7 +10,7 @@
     cat: {name: 'قطة الفضاء', icon: '🐱', green: '#7c5cfa', dark: '#4b34b8', mint: '#cfc4ff', paper: '#1b1446', surface: '#2a2063', ink: '#f3eeff', muted: '#cfc4ff'},
     bot: {name: 'الروبوت الودود', icon: '🤖', green: '#4f7c96', dark: '#2f5063', mint: '#bfd6e3', paper: '#dce9f0', surface: '#fff', ink: '#12343b', muted: '#46656b'},
     // سكنز الأقلام المقفولة: بتظهر بعد إدخال كودها (locked) والكود بيتفحص على السيرفر
-    doraemon: {locked: true, name: 'دورايمون', icon: '🔔', green: '#1e88e5', dark: '#0d5ea8', mint: '#d7ecff', paper: '#eef7ff', surface: '#fff', ink: '#0e2a47', muted: '#4a6784'},
+    doraemon: {locked: true, name: 'دورايمون', icon: '🔔', green: '#1565c0', dark: '#0d47a1', mint: '#d7ecff', paper: '#eef7ff', surface: '#fff', ink: '#0e2a47', muted: '#4a6784'},
     mickey: {locked: true, name: 'ميكي', icon: '🎀', green: '#c8102e', dark: '#8f0b21', mint: '#f7dcdf', paper: '#f6f1ee', surface: '#fff', ink: '#1a1a1a', muted: '#5c5555'},
     anbu: {locked: true, name: 'أنبو', icon: '🎭', green: '#3a3f4f', dark: '#20232d', mint: '#e0e2e8', paper: '#efeff0', surface: '#fff', ink: '#16161a', muted: '#5a5a63'},
     uchiha: {locked: true, name: 'أوتشيها', icon: '🔥', green: '#1f2d6b', dark: '#131d4a', mint: '#dde2f5', paper: '#eef0f8', surface: '#fff', ink: '#141b3a', muted: '#55608a'},
@@ -32,7 +32,7 @@
       dark: {paper: '#111f27', surface: '#1c303a', ink: '#e4f3f7', muted: '#aac2cd', line: '#39525d', green: '#93c0d5', dark: '#56839a', mint: '#263d49', on: '#0f2630'}
     },
     doraemon: {
-      light: {paper: '#eef7ff', surface: '#ffffff', ink: '#0e2a47', muted: '#4a6784', line: '#cfe3f5', green: '#1e88e5', dark: '#0d5ea8', mint: '#d7ecff', on: '#ffffff'},
+      light: {paper: '#eef7ff', surface: '#ffffff', ink: '#0e2a47', muted: '#4a6784', line: '#cfe3f5', green: '#1565c0', dark: '#0d47a1', mint: '#d7ecff', on: '#ffffff'},
       dark: {paper: '#0b1a2b', surface: '#132b45', ink: '#eaf4ff', muted: '#9fc0e0', line: '#28496b', green: '#6ab7ff', dark: '#3d92e0', mint: '#1b3a5c', on: '#06213d'}
     },
     mickey: {

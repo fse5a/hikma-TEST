@@ -361,6 +361,9 @@
       // ============================================================
       // بيطبّق السكن والألوان والثيم على الصفحة كلها
       function applySkin() {
+    // بنوقف الانتقالات لحظة تغيير المظهر: النص بيتغير فورًا والخلفية بتتأخر، فكان بيبان نص فاتح على زرار فاتح لنص ثانية
+    document.documentElement.classList.add('theme-switching');
+    requestAnimationFrame(() => requestAnimationFrame(() => document.documentElement.classList.remove('theme-switching')));
     if (settings.age === 'u16' && !settings.skinPicked) settings.skin = 'cat';
     // سكن مقفول من غير كود مفتوح؟ نرجع للبومة
     if (skins[settings.skin]?.locked && !(settings.unlockedSkins || []).includes(settings.skin)) settings.skin = 'hikma';
@@ -1680,19 +1683,19 @@
     const nextButton = document.querySelector('#readerContent .reader-controls [data-step="1"]');
     if (previousButton && !previousButton.dataset.labeled) {
       previousButton.dataset.labeled = 'true';
-      previousButton.innerHTML = '<span aria-hidden="true">‹</span><bdi dir="ltr">Previous</bdi>';
-      previousButton.setAttribute('aria-label', 'Previous sentence');
+      previousButton.innerHTML = '<span aria-hidden="true">‹</span><bdi>السابق</bdi>';
+      previousButton.setAttribute('aria-label', 'الجملة السابقة');
     }
     if (nextButton && !nextButton.dataset.labeled) {
       nextButton.dataset.labeled = 'true';
-      nextButton.innerHTML = '<bdi dir="ltr">Next</bdi><span aria-hidden="true">›</span>';
-      nextButton.setAttribute('aria-label', 'Next sentence');
+      nextButton.innerHTML = '<bdi>التالي</bdi><span aria-hidden="true">›</span>';
+      nextButton.setAttribute('aria-label', 'الجملة التالية');
     }
     const controls = document.querySelector('#readerContent .reader-controls');
     if (controls && !controls.querySelector('#readerSpeedChip')) {
       const speedGroup = document.createElement('div');
       speedGroup.className = 'reader-speed-group';
-      speedGroup.innerHTML = `<button class="button secondary reader-speed-chip" id="readerSpeedChip" type="button" aria-expanded="false">Speed ${Number(settings.rate).toFixed(2)}x</button><div class="reader-speed-presets" id="readerSpeedPresets" hidden><button class="button secondary" type="button" data-speed="0.5">0.5x</button><button class="button secondary" type="button" data-speed="0.75">0.75x</button><button class="button secondary" type="button" data-speed="1">1x</button><button class="button secondary" type="button" data-speed="1.5">1.5x</button><button class="button secondary" type="button" data-speed="2">2x</button></div>`;
+      speedGroup.innerHTML = `<button class="button secondary reader-speed-chip" id="readerSpeedChip" type="button" aria-expanded="false">السرعة ${Number(settings.rate).toFixed(2)}x</button><div class="reader-speed-presets" id="readerSpeedPresets" hidden><button class="button secondary" type="button" data-speed="0.5">0.5x</button><button class="button secondary" type="button" data-speed="0.75">0.75x</button><button class="button secondary" type="button" data-speed="1">1x</button><button class="button secondary" type="button" data-speed="1.5">1.5x</button><button class="button secondary" type="button" data-speed="2">2x</button></div>`;
       controls.appendChild(speedGroup);
       const chip = speedGroup.querySelector('#readerSpeedChip');
       const presets = speedGroup.querySelector('#readerSpeedPresets');
@@ -1702,12 +1705,12 @@
       });
       speedGroup.querySelectorAll('[data-speed]').forEach(button => button.addEventListener('click', () => {
         window.setRate(Number(button.dataset.speed));
-        chip.textContent = `Speed ${Number(settings.rate).toFixed(2)}x`;
+        chip.textContent = `السرعة ${Number(settings.rate).toFixed(2)}x`;
         presets.hidden = true;
         chip.setAttribute('aria-expanded', 'false');
       }));
       document.querySelector('#readerRate')?.addEventListener('input', () => {
-        chip.textContent = `Speed ${Number(settings.rate).toFixed(2)}x`;
+        chip.textContent = `السرعة ${Number(settings.rate).toFixed(2)}x`;
       });
     }
     const tashkeelButton = panel.querySelector('#diacritizeText');
