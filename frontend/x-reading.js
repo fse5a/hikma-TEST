@@ -93,6 +93,7 @@
     const {story: s, qs, i} = quizState;
     if (i >= qs.length) {
       const stars = quizState.score;
+      HX.emit('quizdone', {score: quizState.score, total: qs.length});
       if (stars > 0) HX.award(Math.min(3, stars), 'quiz');
       HX.profile.quizzes = (HX.profile.quizzes || 0) + 1;
       if (quizState.score === qs.length) HX.badge('quizmaster', 'عبقري الأسئلة');
@@ -111,6 +112,7 @@
       quizState.answered = true;
       const q = quizState.qs[quizState.i], pick = Number(ans.dataset.hxAnswer);
       const ok = pick === q.a;
+      HX.emit('quiz', {ok});
       if (ok) quizState.score++;
       document.querySelectorAll('#hxQuiz [data-hx-answer]').forEach(b => {
         b.disabled = true;

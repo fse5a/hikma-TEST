@@ -29,14 +29,17 @@
   function speak(text, talk) {
     bubble.textContent = text; bubble.hidden = false;
     clearTimeout(timer); timer = setTimeout(() => { bubble.hidden = true; }, 5200);
-    img.classList.remove('jump'); void img.offsetWidth; img.classList.add('jump');
+    if (window.HikmaMascotLines) window.HikmaMascotLines.pose([img, ...document.querySelectorAll('.reader-owl img')]);
+    else { img.classList.remove('jump'); void img.offsetWidth; img.classList.add('jump'); }
     if (talk && 'speechSynthesis' in window && !document.body.classList.contains('hikma-reading')) {
       try { speechSynthesis.cancel(); const u = new SpeechSynthesisUtterance(text); u.lang = 'ar-EG'; speechSynthesis.speak(u); } catch {}
     }
   }
   const next = list => list[(turn++) % list.length];
-  img.addEventListener('click', () => speak(next(pool()), true));
-  img.addEventListener('keydown', e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); speak(next(pool()), true); } });
+  // سطور متنوعة لكل شخصية (x-mascot.js) مع رجوع للسطور القديمة لو مش موجودة
+  const line = (cat, fallback) => window.HikmaMascotLines?.pick(skin(), cat) || next(fallback || pool());
+  img.addEventListener('click', () => speak(line('click'), true));
+  img.addEventListener('keydown', e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); speak(line('click'), true); } });
   bubble.addEventListener('click', () => { bubble.hidden = true; });
   // eyes follow the pointer: mascots lean toward the cursor
   let raf = 0, px = 0, py = 0;
@@ -54,24 +57,25 @@
   }
   addEventListener('pointermove', e => { px = e.clientX; py = e.clientY; if (!raf) raf = requestAnimationFrame(lean); }, {passive: true});
   // reactions
-  addEventListener('hikma:finished', () => speak(next(react.done), true));
+  addEventListener('hikma:finished', () => speak(line('done', react.done), true));
   let wasReading = false;
   new MutationObserver(() => {
     const r = document.body.classList.contains('hikma-reading');
-    if (r && !wasReading) speak(next(react.reading), false);
+    if (r && !wasReading) speak(line('reading', react.reading), false);
     wasReading = r;
   }).observe(document.body, {attributes: true, attributeFilter: ['class']});
   document.addEventListener('click', e => {
     if (e.target.closest?.('[data-open]')) setTimeout(sync, 400);
   });
   // idle chatter, quiet and without voice
-  setInterval(() => { if (!document.hidden && bubble.hidden && Math.random() < .5) speak(next(pool()), false); }, 45000);
+  setInterval(() => { if (!document.hidden && bubble.hidden && Math.random() < .5) speak(line('idle'), false); }, 45000);
   function start() {
     document.body.appendChild(buddy);
     sync();
     new MutationObserver(sync).observe(root, {attributes: true, attributeFilter: ['data-skin']});
     new MutationObserver(sync).observe(document.body, {childList: true, subtree: true});
-    setTimeout(() => speak(next(react.hello), false), 2500);
+    setTimeout(() => speak(line('hello', react.hello), false), 2500);
   }
+  window.HikmaBuddy = {speak, line};
   if (document.body) start(); else addEventListener('DOMContentLoaded', start);
 })();

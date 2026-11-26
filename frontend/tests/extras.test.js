@@ -56,7 +56,7 @@ test('personal story templates leave no template tokens for either gender', asyn
 test('new scripts are in the page and in the offline shell', async () => {
   const html = await readFile(new URL('../index.html', import.meta.url), 'utf8');
   const sw = await readFile(new URL('../sw.js', import.meta.url), 'utf8');
-  for (const f of ['x-data', 'x-core', 'x-reading', 'x-access', 'x-audio', 'x-content', 'x-progress', 'x-polish', 'x-web', 'x-web2', 'x-free']) {
+  for (const f of ['x-data', 'x-core', 'x-reading', 'x-access', 'x-audio', 'x-content', 'x-progress', 'x-polish', 'x-web', 'x-web2', 'x-free', 'x-icons', 'x-mascot']) {
     assert.match(html, new RegExp(`src="${f}\\.js"`));
     assert.ok(sw.includes(`'./${f}.js'`), f);
   }

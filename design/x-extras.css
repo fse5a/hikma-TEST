@@ -169,3 +169,37 @@ body.hx-print-keys > *:not(#hxKeys) { display: none !important; }
 #hxModes .dialog-body { padding-bottom: 110px; }
 .hx-gate-owl { width: 100%; height: 100%; object-fit: contain; display: block; padding: 2px; box-sizing: border-box; }
 #toast { background: var(--ink) !important; color: var(--surface) !important; }
+
+/* ===== أيقونات SVG ===== */
+.hx-i { display: inline-grid; place-items: center; vertical-align: -0.2em; line-height: 1; }
+.hx-svg { display: block; width: 1.15em; height: 1.15em; }
+.hx-tile-ico .hx-svg { width: 28px; height: 28px; color: var(--green); }
+.hx-tool .hx-svg { width: 1.1em; height: 1.1em; }
+.hx-tool[aria-pressed=true] .hx-svg { color: inherit; }
+/* زر التشغيل: دايرة واضحة بأيقونة SVG */
+.play-control { width: 76px !important; height: 76px !important; border-radius: 50% !important; display: grid; place-items: center; padding: 0; position: relative;
+  background: radial-gradient(circle at 32% 28%, color-mix(in srgb, var(--gold) 70%, #fff), var(--gold) 45%, var(--gold-deep)) !important;
+  box-shadow: 0 10px 26px color-mix(in srgb, var(--gold) 45%, transparent), inset 0 -4px 8px rgba(0,0,0,.12), inset 0 3px 6px rgba(255,255,255,.35) !important; transition: transform .15s, box-shadow .2s; }
+.play-control #playIcon { display: grid; place-items: center; }
+.play-control .hx-svg { width: 34px; height: 34px; color: var(--on-accent, #fff); filter: drop-shadow(0 1px 1px rgba(0,0,0,.2)); }
+.play-control:active { transform: scale(.95); }
+.play-control:focus-visible { outline: 4px solid var(--green); outline-offset: 4px; }
+@keyframes hx-ring { 0% { box-shadow: 0 0 0 0 color-mix(in srgb, var(--gold) 55%, transparent); } 100% { box-shadow: 0 0 0 18px transparent; } }
+body.hikma-reading .play-control::after { content: ""; position: absolute; inset: 0; border-radius: 50%; animation: hx-ring 1.6s ease-out infinite; pointer-events: none; }
+.round-control .hx-svg { width: 20px; height: 20px; }
+:root[data-reduced-motion=true] body.hikma-reading .play-control::after { animation: none; }
+@media (prefers-reduced-motion: reduce) { body.hikma-reading .play-control::after { animation: none; } }
+
+/* ===== حركات الشخصية المرافقة ===== */
+@keyframes hx-p-hop { 0%,100% { transform: translateY(0); } 40% { transform: translateY(-14px); } 70% { transform: translateY(0); } 85% { transform: translateY(-4px); } }
+@keyframes hx-p-nod { 0%,100% { transform: rotate(0); } 30% { transform: rotate(-9deg) translateY(2px); } 65% { transform: rotate(6deg); } }
+@keyframes hx-p-wiggle { 0%,100% { transform: rotate(0); } 20% { transform: rotate(-12deg); } 40% { transform: rotate(10deg); } 60% { transform: rotate(-7deg); } 80% { transform: rotate(5deg); } }
+@keyframes hx-p-tilt { 0%,100% { transform: rotate(0) scale(1); } 50% { transform: rotate(-14deg) scale(1.04); } }
+@keyframes hx-p-spin { 0% { transform: rotate(0) scale(1); } 50% { transform: rotate(180deg) scale(1.12); } 100% { transform: rotate(360deg) scale(1); } }
+@keyframes hx-p-bounce { 0%,100% { transform: scale(1); } 25% { transform: scale(1.18, .86); } 50% { transform: scale(.92, 1.14) translateY(-10px); } 75% { transform: scale(1.06, .96); } }
+@keyframes hx-p-sway { 0%,100% { transform: translateX(0) rotate(0); } 33% { transform: translateX(-8px) rotate(-5deg); } 66% { transform: translateX(8px) rotate(5deg); } }
+@keyframes hx-p-peek { 0%,100% { transform: translateY(0) scale(1); } 40% { transform: translateY(10px) scale(.92); } 70% { transform: translateY(-4px) scale(1.06); } }
+.pose-hop { animation: hx-p-hop .9s ease-in-out; } .pose-nod { animation: hx-p-nod .8s ease-in-out; } .pose-wiggle { animation: hx-p-wiggle .9s ease-in-out; }
+.pose-tilt { animation: hx-p-tilt .9s ease-in-out; } .pose-spin { animation: hx-p-spin 1s ease-in-out; } .pose-bounce { animation: hx-p-bounce 1s ease-in-out; }
+.pose-sway { animation: hx-p-sway 1s ease-in-out; } .pose-peek { animation: hx-p-peek .9s ease-in-out; }
+.reader-owl img, #mascotBuddy .buddy-img { transform-origin: 50% 90%; }
