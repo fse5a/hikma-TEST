@@ -1205,6 +1205,11 @@
     if (speechConfigured && !select.querySelector('option[value="cloud"]')) {
       select.add(new Option('صوت طبيعي عصبي (سحابي)', 'cloud'));
     }
+    // One-time: make the natural voice the default for everyone, even if an earlier build pinned the device voice. The user can still switch back in settings.
+    if (speechConfigured && !settings.neuralDefaultV2) {
+      settings.neuralDefaultV2 = true;
+      if (settings.voiceSource === 'device') { settings.voiceSource = 'cloud'; settings.voiceSourcePinned = false; }
+    }
     if (speechConfigured && settings.voiceSource === 'device' && !settings.voiceSourcePinned) {
       settings.voiceSource = 'cloud';
     }
