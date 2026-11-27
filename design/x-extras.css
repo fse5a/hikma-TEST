@@ -208,3 +208,15 @@ body.hikma-reading .play-control::after { content: ""; position: absolute; inset
 #a11yToggle { aspect-ratio: 1 / 1; padding: 0; line-height: 1; transform: none; rotate: none; }
 #a11yToggle .hx-i, #a11yToggle .hx-svg { width: 26px; height: 26px; transform: none; display: block; }
 .gate-brand #a11yToggle, #a11yToggle { width: 48px; min-width: 48px; height: 48px; min-height: 48px; }
+
+/* زر حكمة+ : النجمة والعدّاد جنب بعض من غير قص (الموبايل والكمبيوتر) */
+.hx-chip { display: inline-flex; align-items: center; justify-content: center; white-space: nowrap; }
+.hx-chip-n { box-sizing: border-box; display: inline-flex; align-items: center; justify-content: center; height: 22px; min-width: 24px; padding: 0 7px; font-weight: 700; font-size: 13px; line-height: 1; }
+@media (max-width: 700px) {
+  :root .topbar .top-actions #hxOpen {
+    flex: 0 0 auto; width: auto; min-width: 44px; max-width: none; padding: 0 8px; gap: 6px;
+    overflow: visible; font-size: 0;
+  }
+  :root .topbar .top-actions #hxOpen > span { font-size: 22px; line-height: 1; }
+  :root .topbar .top-actions #hxOpen .hx-chip-n { font-size: 13px; }
+}
