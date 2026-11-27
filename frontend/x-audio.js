@@ -69,6 +69,7 @@
   // ---------- 11) قراءة بالأدوار (صوت مختلف لكل شخصية) ----------
   let rolesOn = false, rolesToken = 0;
   // بيقسم الجملة لأجزاء: سرد أو كلام شخصية
+  const SAY = '(?:قال|قالت|صاح|صاحت|ردّ|ردت|رد|همس|همست|سأل|سألت|ضحك|ضحكت|said|asked|replied|whispered|shouted)';
   function segments(line) {
     const out = [];
     const re = /[«"“]([^»"”]+)[»"”]/g;
@@ -76,35 +77,70 @@
     while ((m = re.exec(line))) {
       if (m.index > last) out.push({t: line.slice(last, m.index), who: 'narrator'});
       const before = line.slice(Math.max(0, m.index - 40), m.index);
-      const sps = [...before.matchAll(/(?:قال|قالت|صاح|صاحت|ردّ|ردت|رد|said|asked)\s+(\S+)/gi)];
+      const sps = [...before.matchAll(new RegExp(SAY + '\\s+(\\S+)', 'gi'))];
       const sp = sps[sps.length - 1];
-      out.push({t: m[1], who: sp ? sp[1].replace(/[:،,]/g, '') : 'x'});
-      last = m.index + m[0].length;
+      let who = sp ? sp[1].replace(/[:،,]/g, '') : '';
+      let fem = sp ? /^(قالت|صاحت|ردت|همست|سألت|ضحكت)/.test(sp[0]) : false;
+      if (!who) { // «...»، قال فلان
+        const after = line.slice(re.lastIndex, re.lastIndex + 40).match(new RegExp('^[\\s،,.\\-:]*(' + SAY + ')\\s+(\\S+)', 'i'));
+        if (after) { who = after[2].replace(/[:،,.]/g, ''); fem = /^(قالت|صاحت|ردت|همست|سألت|ضحكت)/.test(after[1]); re.lastIndex += after[0].length; }
+      }
+      out.push({t: m[1], who: who || 'x', fem});
+      last = re.lastIndex;
     }
-    // «قال الأرنب: كلام» بدون علامات اقتباس
+    // «قال الأرنب: كلام» أو «نوبيتا: كلام» من غير علامات اقتباس
     if (!out.length) {
-      const c = line.match(/^(.*?(?:قال|قالت|صاح|صاحت)\s+(\S+)\s*:)\s*(.+)$/);
-      if (c) return [{t: c[1], who: 'narrator'}, {t: c[3], who: c[2]}];
+      const c = line.match(new RegExp('^(.*?' + SAY + '\\s+(\\S+)\\s*:)\\s*(.+)$', 'i'));
+      if (c) return [{t: c[1], who: 'narrator'}, {t: c[3], who: c[2], fem: /(قالت|صاحت)/.test(c[1])}];
+      const d = line.match(/^\s*[-—]?\s*([\u0600-\u06FFA-Za-z]{2,14})\s*:\s*(.+)$/);
+      if (d) return [{t: d[2], who: d[1]}];
     }
     if (last < line.length) out.push({t: line.slice(last), who: 'narrator'});
     return out.filter(s => s.t.trim());
   }
   HX.roleSegments = segments;
   const hash = s => [...s].reduce((h, c) => (h * 31 + c.charCodeAt(0)) >>> 0, 7);
-  const PITCHES = [1.5, 0.7, 1.25, 0.85, 1.65];
+  // ملف صوت ثابت لكل شخصية (نفس الاسم = نفس الصوت دايمًا) ومعاه وصف للدور
+  const ROLE_HINTS = [
+    [/دورايمون|روبوت|robot/i, 'روبوت', {p: 0.6, r: 0.92}],
+    [/نوبيتا|ولد|طفل|صبي|boy|child/i, 'طفل', {p: 1.6, r: 1.1}],
+    [/سوزوكا|شيزوكا|بنت|فتاة|girl/i, 'بنت', {p: 1.75, r: 1.05}],
+    [/أم|ماما|mother|mom/i, 'أم', {p: 1.35, r: 0.95}],
+    [/أب|بابا|father|dad/i, 'أب', {p: 0.7, r: 0.92}],
+    [/جد|عجوز|شيخ|old/i, 'كبير في السن', {p: 0.55, r: 0.8}],
+    [/أسد|ذئب|دب|lion|wolf|bear/i, 'حيوان قوي', {p: 0.5, r: 0.88}],
+    [/فأر|أرنب|عصفور|mouse|rabbit|bird/i, 'حيوان صغير', {p: 1.9, r: 1.15}],
+    [/ساحر|ساحرة|witch|wizard/i, 'ساحر', {p: 0.8, r: 0.9}],
+    [/ملك|king/i, 'ملك', {p: 0.65, r: 0.88}]
+  ];
+  const profiles = (() => { try { return JSON.parse(localStorage.getItem('hikma-char-voices') || '{}'); } catch { return {}; } })();
+  function profileFor(name, fem) {
+    const key = String(name).replace(/^ال/, '').trim();
+    if (profiles[key]) return profiles[key];
+    const h = hash(key);
+    const hint = ROLE_HINTS.find(x => x[0].test(key));
+    let p = hint ? hint[2].p : (fem ? 1.45 : 0.85) + ((h % 7) - 3) * 0.06;
+    let r = hint ? hint[2].r : 0.95 + ((h >> 3) % 5) * 0.04;
+    const prof = {p: Math.min(2, Math.max(0.4, p)), r, v: h % 7, role: hint ? hint[1] : (fem ? 'شخصية (صوت أنثوي)' : 'شخصية'), name: key};
+    profiles[key] = prof;
+    try { localStorage.setItem('hikma-char-voices', JSON.stringify(profiles)); } catch {}
+    return prof;
+  }
+  HX.charVoice = profileFor; HX.charProfiles = profiles;
   function speakSegment(seg, lang, speakers) {
     return new Promise(resolve => {
       const u = new SpeechSynthesisUtterance(seg.t);
       u.lang = lang === 'en' ? 'en-US' : 'ar-EG';
-      u.rate = Math.min(1.5, Math.max(0.6, state.settings.rate || 1));
+      const base = Math.min(1.5, Math.max(0.5, state.settings.rate || 1));
+      u.rate = base;
+      const voices = speechSynthesis.getVoices().filter(v => v.lang.toLowerCase().startsWith(u.lang.slice(0, 2)));
       if (seg.who === 'narrator') u.pitch = 1;
       else {
-        if (!speakers.has(seg.who)) speakers.set(seg.who, speakers.size);
-        u.pitch = PITCHES[speakers.get(seg.who) % PITCHES.length];
-        u.rate *= 1.03;
+        const pr = profileFor(seg.who, seg.fem);
+        if (!speakers.has(seg.who)) speakers.set(seg.who, pr);
+        u.pitch = pr.p; u.rate = Math.min(2, base * pr.r);
+        if (voices.length > 1) u.voice = voices[(pr.v + 1) % voices.length];
       }
-      const voices = speechSynthesis.getVoices().filter(v => v.lang.toLowerCase().startsWith(u.lang.slice(0, 2)));
-      if (voices.length > 1 && seg.who !== 'narrator') u.voice = voices[(speakers.get(seg.who) + 1) % voices.length];
       u.onend = resolve; u.onerror = resolve;
       speechSynthesis.speak(u);
     });

@@ -7,6 +7,11 @@
   const HX = window.HX, D = window.HXData, esc = HX.escapeHtml;
 
   // المكتبة الافتراضية: القصص الحقيقية بس. بنشيل قصتي التجربة القديمتين مرة واحدة، ونضيف القصص الحقيقية.
+  // تحديث نص قصة دورايمون عند اللي اتسجّلت عندهم قبل كده (مشهد حوار بأصوات الشخصيات)
+  (function refreshDoraemon() {
+    const h = D.heritage.find(x => x.id === 'cart-doraemon'), s = state.stories.find(x => x.id === 'cart-doraemon');
+    if (h && s && s.text !== h.text && /مشهد من خيالنا/.test(h.text) && !/مشهد من خيالنا/.test(s.text)) { s.text = h.text; save(); }
+  })();
   (function seedRealStories() {
     if (state.settings.realStoriesV2) return;
     state.stories = state.stories.filter(s => s.id !== 'seed-2' && !(s.id === 'seed-1' && /الأرنب/.test(s.title)) && !['wor-twain-fence','wor-aesop-crow','wor-clason-purse','bk-little-prince'].includes(s.id));
