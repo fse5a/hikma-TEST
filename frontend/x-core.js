@@ -117,7 +117,7 @@
 
   function renderHub() {
     const p = HX.profile;
-    const tiles = HX.features.slice().sort((a, b) => (a.order || 99) - (b.order || 99)).map(f => `<button class="hx-tile" data-hx-feature="${f.id}" type="button"><span class="hx-tile-ico" aria-hidden="true">${f.icon}</span><span class="hx-tile-name">${escapeHtml(f.name)}</span><span class="hx-tile-sub">${escapeHtml(f.sub || '')}</span></button>`).join('');
+    const tiles = HX.features.filter(f => !(f.hidden && f.hidden())).sort((a, b) => (a.order || 99) - (b.order || 99)).map(f => `<button class="hx-tile" data-hx-feature="${f.id}" type="button"><span class="hx-tile-ico" aria-hidden="true">${f.icon}</span><span class="hx-tile-name">${escapeHtml(f.name)}</span><span class="hx-tile-sub">${escapeHtml(f.sub || '')}</span></button>`).join('');
     const profiles = X.profiles.map(q => `<button class="hx-prof${q.id === p.id ? ' on' : ''}" data-hx-profile="${q.id}" type="button" aria-pressed="${q.id === p.id}">${escapeHtml(q.emoji)} ${escapeHtml(q.name)}</button>`).join('');
     HX.dialog('hxHub', 'حكمة+', `<div class="hx-hero"><div><strong>${escapeHtml(p.emoji)} ${escapeHtml(p.name)}</strong><span>⭐ ${p.stars || 0} نجمة · 🔥 ${HX.streak()} يوم</span></div><div class="hx-profs">${profiles}<button class="hx-prof" id="hxAddProfile" type="button">＋ مستخدم</button></div></div><div class="hx-grid">${tiles}</div>`, {wide: true});
   }

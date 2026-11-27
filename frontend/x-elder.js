@@ -11,7 +11,21 @@
   const prefs = (() => { try { return JSON.parse(localStorage.getItem(KEY) || '{}'); } catch { return {}; } })();
   const store = () => { try { localStorage.setItem(KEY, JSON.stringify(prefs)); } catch {} };
   const speak = t => { try { HX.say(t, 'ar'); } catch {} };
-  const feat = (id, icon, name, sub, order, open) => HX.features.push({id, icon, name, sub, order, open});
+  const religious = () => !!prefs.religious;
+  HX.religiousOn = religious;
+  const feat = (id, icon, name, sub, order, open, hidden) => HX.features.push({id, icon, name, sub, order, open, hidden});
+  // القسم الديني (أذكار وقرآن) مقفول افتراضيًا، ويتفعّل من الإعدادات بس
+  function mountToggle() {
+    const body = document.querySelector('#settingsOverlay .dialog-body');
+    if (!body || document.getElementById('hxReligiousOn')) return;
+    const f = document.createElement('div'); f.className = 'field';
+    f.innerHTML = `<label><input type="checkbox" id="hxReligiousOn" style="width:24px;height:24px;min-height:0;vertical-align:middle;margin-inline-end:8px"${religious() ? " checked" : ""}> إظهار القسم الديني (أذكار وقرآن)</label><p class="voice-note">مقفول من الأول. لما تفتحه بيظهر في قايمة حكمة+. الصوت تسجيلات بشرية حقيقية.</p>`;
+    body.insertBefore(f, body.querySelector('#testVoice') || null);
+  }
+  document.addEventListener('change', e => { if (e.target.id === 'hxReligiousOn') { prefs.religious = e.target.checked; store(); HX.toast(prefs.religious ? 'اتفعّل القسم الديني' : 'اتقفل القسم الديني'); HX.emit('religious', {on: prefs.religious}); } });
+  document.addEventListener('click', e => { if (e.target.closest('[data-open="settingsOverlay"], #settingsButton, [data-open=settings]')) setTimeout(mountToggle, 50); });
+  new MutationObserver(mountToggle).observe(document.body, {childList: true, subtree: true});
+  mountToggle();
 
   // ---------- أذكار الصباح والمساء ----------
   const ADHKAR = {
@@ -23,6 +37,7 @@
   HX.adhkarAudio = ADH_AUDIO;
   const part = () => (new Date().getHours() < 15 ? 'morning' : 'evening');
   function openAdhkar(which = part()) {
+    if (!religious()) return;
     const list = ADHKAR[which];
     HX.dialog('hxAdhkar', which === 'morning' ? 'أذكار الصباح' : 'أذكار المساء', `<div class="hx-row"><button class="button${which === 'morning' ? ' primary' : ''}" data-hx-adh="morning" type="button">الصباح</button><button class="button${which === 'evening' ? ' primary' : ''}" data-hx-adh="evening" type="button">المساء</button></div><ol class="hx-list" style="font-size:1.25em;line-height:2">${list.map(t => `<li>${esc(t)}</li>`).join('')}</ol><p class="hx-muted">الصوت تسجيل حقيقي بصوت الشيخ مشاري العفاسي (مش صوت كمبيوتر)، من أرشيف الإنترنت، ومحتاج نت.</p><audio controls preload="none" id="hxAdhAudio" src="${ADH_AUDIO[which]}" style="width:100%"></audio>`);
     HX.open('hxAdhkar');
@@ -31,7 +46,7 @@
     const b = e.target.closest('button[data-hx-adh]'); if (b) openAdhkar(b.dataset.hxAdh);
   });
   HX.adhkar = ADHKAR;
-  feat('adhkar', '🤲', 'أذكار الصباح والمساء', 'بتتقرا بصوت', 50, () => openAdhkar());
+  feat('adhkar', '🤲', 'أذكار الصباح والمساء', 'تسجيل حقيقي', 50, () => openAdhkar(), () => !religious());
 
   // ---------- القرآن بقارئ تختاره (صوت من everyayah، محتاج نت) ----------
   const REC = [['Alafasy_128kbps', 'مشاري العفاسي'], ['Husary_128kbps', 'محمود خليل الحصري'], ['Minshawy_Murattal_128kbps', 'محمد صديق المنشاوي'], ['Abdul_Basit_Murattal_192kbps', 'عبد الباسط عبد الصمد']];
@@ -39,6 +54,7 @@
   HX.quranUrl = (rec, s, a) => `https://everyayah.com/data/${rec}/${String(s).padStart(3, '0')}${String(a).padStart(3, '0')}.mp3`;
   let qAudio = null;
   function openQuran() {
+    if (!religious()) return;
     const rec = prefs.reciter || REC[0][0];
     HX.dialog('hxQuran', 'القرآن الكريم', `<label class="hx-muted" for="hxQRec">القارئ</label><select id="hxQRec">${REC.map(r => `<option value="${r[0]}"${r[0] === rec ? ' selected' : ''}>${r[1]}</option>`).join('')}</select><div class="hx-row" style="flex-wrap:wrap;margin-top:10px">${SURAHS.map(s => `<button class="button" data-hx-sura="${s[0]}" type="button">${s[1]}</button>`).join('')}</div><p class="hx-muted" id="hxQMsg" role="status">الصوت تلاوة حقيقية بصوت القارئ نفسه (مش صوت كمبيوتر ولا ذكاء اصطناعي). محتاج نت.</p><div class="modal-actions"><button class="button" id="hxQStop" type="button">⏹ وقّف</button></div>`);
     HX.open('hxQuran');
@@ -57,11 +73,11 @@
     const b = e.target.closest('button[data-hx-sura]'); if (b) playSura(+b.dataset.hxSura);
     if (e.target.closest('#hxQStop') && qAudio) qAudio.pause();
   });
-  feat('quran', '📖', 'القرآن الكريم', 'اختار القارئ', 51, openQuran);
+  feat('quran', '📖', 'القرآن الكريم', 'اختار القارئ', 51, openQuran, () => !religious());
 
   // ---------- الزر الكبير ----------
   function openBig() {
-    HX.dialog('hxBig', 'الزر الكبير', `<div style="display:grid;gap:14px"><button class="button primary" id="hxBigRead" type="button" style="font-size:1.6em;padding:28px">🔊 اقرأ لي</button><button class="button" id="hxBigTime" type="button" style="font-size:1.6em;padding:28px">🕒 الساعة كام؟</button><button class="button" id="hxBigAdh" type="button" style="font-size:1.6em;padding:28px">🤲 أذكار</button></div>`);
+    HX.dialog('hxBig', 'الزر الكبير', `<div style="display:grid;gap:14px"><button class="button primary" id="hxBigRead" type="button" style="font-size:1.6em;padding:28px">🔊 اقرأ لي</button><button class="button" id="hxBigTime" type="button" style="font-size:1.6em;padding:28px">🕒 الساعة كام؟</button>${religious() ? '<button class="button" id="hxBigAdh" type="button" style="font-size:1.6em;padding:28px">🤲 أذكار</button>' : ''}</div>`);
     HX.open('hxBig');
   }
   document.addEventListener('click', e => {

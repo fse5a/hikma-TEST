@@ -27,7 +27,7 @@
   function openBoard() {
     const allowed = !!prefs.board;
     const rows = allowed ? HX.leaderboard().map((r, i) => `<li>${['🥇', '🥈', '🥉'][i] || (i + 1) + '.'} ${esc(r.emoji || '')} ${esc(r.name)}: ${r.stars} نجمة، ${r.stories} قصة</li>`).join('') : '';
-    HX.dialog('hxBoard', 'لوحة الصدارة', `<p class="hx-muted">بتظهر الأسماء والنجوم اللي على الجهاز ده بس (مفيش حاجة بتتبعت لأي حد). الأهل هم اللي يفتحوها.</p><label><input type="checkbox" id="hxBoardOk"${allowed ? ' checked' : ''}> الأهل موافقين على إظهار اللوحة</label><ol class="hx-list" style="list-style:none;padding:0">${rows || '<li>فعّل الموافقة عشان تظهر.</li>'}</ol>`);
+    HX.dialog('hxBoard', 'لوحة الصدارة', `<p class="hx-muted">بتظهر الأسماء والنجوم اللي على الجهاز ده بس (مفيش حاجة بتتبعت لأي حد). الأهل هم اللي يفتحوها.</p><label><input type="checkbox" style="width:24px;height:24px;min-height:0;vertical-align:middle;margin-inline-end:8px" id="hxBoardOk"${allowed ? ' checked' : ''}> الأهل موافقين على إظهار اللوحة</label><ol class="hx-list" style="list-style:none;padding:0">${rows || '<li>فعّل الموافقة عشان تظهر.</li>'}</ol>`);
     HX.open('hxBoard');
   }
   document.addEventListener('change', e => { if (e.target.id === 'hxBoardOk') { prefs.board = e.target.checked; store(); openBoard(); } });

@@ -1,6 +1,16 @@
 import {launch, newPage, ok, summary, startServer} from './helpers.mjs';
 const stop = await startServer(); const browser = await launch();
 const {page, errs, speech} = await newPage(browser, {w: 1100, seed: {activated: true, age: 'o16', a11y: false, skin: 'hikma', theme: 'light'}});
+ok(await page.evaluate(() => !HX.religiousOn()), 'religious section off by default');
+await page.evaluate(() => HX.features.find(f => f.id === 'adhkar').open()); await page.waitForTimeout(150);
+ok(!(await page.$('#hxAdhAudio')), 'adhkar does not open while religious section is off');
+await page.click('.profile-chip'); await page.waitForTimeout(300);
+const hubOff = await page.evaluate(() => { const o = document.getElementById('hxHub'); return o ? !!o.querySelector('[data-hx-feature=adhkar]') : false; });
+ok(hubOff === false, 'adhkar/quran tiles hidden in hub when off');
+await page.evaluate(() => { document.querySelectorAll('.overlay.open').forEach(o => o.classList.remove('open')); document.getElementById('settingsOverlay').classList.add('open'); });
+await page.waitForTimeout(200);
+await page.check('#hxReligiousOn'); await page.waitForTimeout(150);
+ok(await page.evaluate(() => HX.religiousOn()), 'settings toggle turns religious section on');
 const r = await page.evaluate(() => ({
   feats: ['adhkar', 'quran', 'big', 'table', 'mine', 'memories', 'changelog'].map(id => !!HX.features.find(f => f.id === id)),
   tbl: HX.tableToSpeech('الاسم، السعر\nتفاح، 10\nموز، 7'),
