@@ -14,4 +14,4 @@
 
 **الاختبارات:** `npm test` و `npm run lint`.
 
-**ملفات:** `design-diagram.md` (رسم التصميم)، `video-script.md` (سيناريو فيديو دقيقتين)، `pricing.md` (جدول الأسعار).
+**ملفات:** `design-diagram.md` (رسم التصميم)، `video-script.md` (سيناريو فيديو دقيقتين)، `pricing.md` (الأسعار: مفيش اشتراك، الدفع الوحيد سعر القلم).
