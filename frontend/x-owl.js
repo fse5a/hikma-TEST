@@ -1,7 +1,7 @@
 // بومة حكمة الحقيقية: تعابير، رمشة، وتنفّس. كل الصور من رسم المستخدم نفسه.
 (() => {
   const P = n => `assets/owl/${n}.webp`;
-  const POSES = ['neutral', 'blink', 'excited', 'surprised', 'suspicious', 'stern', 'sleepy', 'sleepy2', 'wink', 'hero'];
+  const POSES = ['neutral', 'blink', 'excited', 'surprised', 'suspicious', 'stern', 'sleepy', 'sleepy2', 'wink', 'hero', 'closed', 'happy', 'listening', 'thinking', 'thinking2', 'reading', 'reading2', 'encourage', 'curious', 'sad', 'proud', 'sneaky', 'thoughtful', 'anxious', 'laughing', 'celebrating'];
   const root = document.documentElement;
   const reduced = () => root.dataset.reducedMotion === 'true' || matchMedia('(prefers-reduced-motion: reduce)').matches;
   const st = document.createElement('style');
@@ -39,16 +39,22 @@
   POSES.forEach(n => { const i = new Image(); i.src = P(n); });
   const skinIsHikma = () => (root.dataset.skin || 'hikma') === 'hikma';
   new MutationObserver(() => { if (skinIsHikma()) paint(pose); }).observe(document.documentElement, {childList: true, subtree: true});
-  addEventListener('hikma:finished', () => set('excited', 4000));
-  addEventListener('hikma:wrong', () => set('surprised', 2500));
-  addEventListener('hikma:thinking', () => set('suspicious', 2500));
+  const HXon = (n, f) => window.HX?.on ? window.HX.on(n, f) : null;
+  addEventListener('hikma:finished', () => set('celebrating', 4500));
+  addEventListener('hikma:wrong', () => set('encourage', 2800));
+  addEventListener('hikma:thinking', () => set('thinking', 2500));
+  addEventListener('hikma:listening', () => set('listening', 4000));
+  HXon('quiz', e => set(e.detail?.ok ? 'happy' : 'encourage', 2800));
+  HXon('stars', () => set('proud', 2500));
   document.addEventListener('click', e => {
-    if (e.target.closest?.('#mascotBuddy .buddy-img, .welcome img.owl, .reader-owl')) set(Math.random() < .5 ? 'excited' : 'wink', 2200);
+    if (e.target.closest?.('#mascotBuddy .buddy-img, .welcome img.owl, .reader-owl')) set(['laughing', 'wink', 'excited', 'curious'][Math.random() * 4 | 0], 2200);
     else if (pose === 'sleepy') set('neutral');
   });
   new MutationObserver(() => {
-    if (document.body.classList.contains('hikma-reading')) set('stern'); else if (pose === 'stern') set('neutral');
+    if (document.body.classList.contains('hikma-reading')) set('reading'); else if (pose === 'reading') set('neutral');
   }).observe(document.body, {attributes: true, attributeFilter: ['class']});
+  // لو الصفحة ساكتة فترة، البومة تنام. الصور اللي عينها مقفولة: closed للراحة
+  document.addEventListener('visibilitychange', () => { if (!document.hidden && pose === 'sleepy') set('neutral'); });
   window.HikmaOwl = {set, POSES};
   set('neutral'); blink();
 })();

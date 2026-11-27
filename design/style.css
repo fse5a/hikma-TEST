@@ -1035,3 +1035,7 @@ html[data-skin][data-hc=off][data-theme=dark] .dialog, html[data-skin][data-hc=o
 html[data-skin][data-hc=off][data-theme=dark] .dialog .button.secondary, html[data-skin][data-hc=off][data-theme=dark] .dialog .file-label { color: #f4f1ea; background: color-mix(in srgb, #000 45%, transparent); }
 html[data-skin][data-hc=off][data-theme=dark] .dialog input::placeholder, html[data-skin][data-hc=off][data-theme=dark] .dialog textarea::placeholder { color: #c9c4b8; }
 html[data-skin][data-hc=off][data-theme=dark] .dialog input, html[data-skin][data-hc=off][data-theme=dark] .dialog select, html[data-skin][data-hc=off][data-theme=dark] .dialog textarea { color: #f4f1ea; background: color-mix(in srgb, #000 50%, transparent); }
+
+/* على الموبايل المساعد العايم مخفي عشان ما يغطيش أزرار ولا نص (البومة موجودة في الرئيسية وشاشة القراءة) */
+#mascotBuddy .buddy-bubble { max-width: min(220px, 52vw); }
+@media (max-width: 760px) { #mascotBuddy { display: none !important; } }

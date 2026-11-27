@@ -27,6 +27,7 @@
     });
   }
   function speak(text, talk) {
+    if (!talk && matchMedia('(max-width: 760px)').matches) { window.HikmaMascotLines?.pose?.([img]); return; }
     bubble.textContent = text; bubble.hidden = false;
     clearTimeout(timer); timer = setTimeout(() => { bubble.hidden = true; }, 5200);
     if (window.HikmaMascotLines) window.HikmaMascotLines.pose([img, ...document.querySelectorAll('.reader-owl img')]);
