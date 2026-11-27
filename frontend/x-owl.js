@@ -42,10 +42,10 @@
   new MutationObserver(() => { if (skinIsHikma()) paint(pose); }).observe(document.documentElement, {childList: true, subtree: true, attributes: true, attributeFilter: ['data-skin']});
   const HXon = (n, f) => window.HX?.on ? window.HX.on(n, f) : null;
   addEventListener('hikma:finished', () => set('celebrating', 4500));
-  addEventListener('hikma:wrong', () => set('encourage', 2800));
+  addEventListener('hikma:wrong', () => set('thoughtful', 2800));
   addEventListener('hikma:thinking', () => set('thinking', 2500));
   addEventListener('hikma:listening', () => set('listening', 4000));
-  HXon('quiz', e => set(e.detail?.ok ? 'happy' : 'encourage', 2800));
+  HXon('quiz', e => set(e.detail?.ok ? 'happy' : 'thoughtful', 2800));
   HXon('stars', () => set('proud', 2500));
   document.addEventListener('click', e => {
     if (e.target.closest?.('#mascotBuddy .buddy-img, .welcome img.owl, .reader-owl')) set(['laughing', 'wink', 'excited', 'curious'][Math.random() * 4 | 0], 2200);

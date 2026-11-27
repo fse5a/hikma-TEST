@@ -1633,7 +1633,7 @@
     wordPop = document.createElement('div');
     wordPop.className = 'word-pop';
     wordPop.setAttribute('role', 'status');
-    wordPop.innerHTML = `<bdi class="word-pop-word">${hit.word.replace(/[&<>"]/g, c => ({'&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;'}[c]))}</bdi><span class="word-pop-meaning">…</span><button type="button" class="word-pop-sentence" data-sentence="${hit.lineIndex}">معنى الجملة كلها</button><span class="word-pop-sent-out" hidden></span>`;
+    wordPop.innerHTML = `<bdi class="word-pop-word">${hit.word.replace(/[&<>"]/g, c => ({'&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;'}[c]))}</bdi><span class="word-pop-meaning">…</span><button type="button" class="word-pop-sentence" data-sentence="${hit.lineIndex}">معنى الجملة كلها</button><span class="word-pop-sent-out" hidden></span>${typeof window.Translator==='undefined'?'<small class="word-pop-note">الكلمة بتتبعت لخدمة ترجمة مجانية</small>':''}`;
     document.body.appendChild(wordPop);
     const rect = wordPop.getBoundingClientRect();
     const x = Math.min(Math.max(8, event.clientX - rect.width / 2), window.innerWidth - rect.width - 8);

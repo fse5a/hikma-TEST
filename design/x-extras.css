@@ -229,3 +229,4 @@ body.hikma-reading .play-control::after { content: ""; position: absolute; inset
 @media (prefers-reduced-motion: reduce) { .read-prog > i { transition: none; } }
 .word-pop-sentence { display: block; margin: 8px auto 0; padding: 6px 12px; border: 1px solid var(--gold); border-radius: 999px; background: transparent; color: var(--ink); font: inherit; font-size: 13px; cursor: pointer; min-height: 32px; }
 .word-pop-sent-out { display: block; margin-top: 8px; padding-top: 8px; border-top: 1px solid var(--line); color: var(--ink); }
+.word-pop-note{display:block;font-size:11px;opacity:.7;margin-top:4px}
