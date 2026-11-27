@@ -56,7 +56,7 @@
   // ============================================================
   // القسم 2: بناء عناصر الواجهة الإضافية (رابط التخطي، بوابة الدخول، اللوحة، نافذة الإعدادات)
   // ============================================================
-  const {skins, palettes, catArt, botArt, patterns, art, lines} = window.HikmaSkins;
+  const {skins, palettes, catArt, botArt, patterns, art, lines: skinLines} = window.HikmaSkins;
   const shell = document.querySelector('.shell');
   const helperButton = document.querySelector('#a11yToggle');
   helperButton.innerHTML = '<span aria-hidden="true">♿</span>';
@@ -249,16 +249,19 @@
   // القسم 4: لوحة الإحصائيات والمكتبة المحسّنة
   // ============================================================
   // بيرسم لوحة الإحصائيات
+  // مفتاح اليوم بتوقيت الجهاز (مش UTC) عشان العداد ما يتلخبطش حوالين نص الليل
+  const localDay = d => `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+  addEventListener('hikma:finished', () => setTimeout(() => { try { window.renderLibrary(); } catch {} }, 120));
   function renderDashboard() {
     const activity = state.activity;
     const favoriteCount = state.stories.filter(item => item.favorite).length;
     const completed = Number(activity.completed || 0);
-    const days = new Set(activity.days || []);
+    const days = new Set([...(activity.days || []), ...(window.HX?.profile?.days || [])]);
     let streak = 0;
     const cursor = new Date();
-    cursor.setHours(0, 0, 0, 0);
-    if (!days.has(cursor.toISOString().slice(0, 10))) cursor.setDate(cursor.getDate() - 1);
-    while (days.has(cursor.toISOString().slice(0, 10))) {
+    cursor.setHours(12, 0, 0, 0);
+    if (!days.has(localDay(cursor))) cursor.setDate(cursor.getDate() - 1);
+    while (days.has(localDay(cursor))) {
       streak++;
       cursor.setDate(cursor.getDate() - 1);
     }
@@ -269,7 +272,7 @@
   // ده بتاع تسجيل يوم القراءة للأيام المتتالية
   function markReadingDay() {
     const days = new Set(state.activity.days || []);
-    days.add(new Date().toISOString().slice(0, 10));
+    days.add(localDay(new Date()));
     state.activity.days = [...days].sort().slice(-90);
   }
 
@@ -303,7 +306,7 @@
         button.dataset.favorite = item.id;
         card.querySelector('.story-top').insertBefore(button, card.querySelector('.story-tag'));
       }
-      button.textContent = item.favorite ? '★' : '☆';
+      button.innerHTML = `<svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true" focusable="false"><path d="M12 3l2.7 5.6 6.1.9-4.4 4.3 1 6.1L12 17l-5.4 2.9 1-6.1L3.2 9.5l6.1-.9z" fill="${item.favorite ? '#f2b705' : 'none'}" stroke="${item.favorite ? '#b8860b' : 'currentColor'}" stroke-width="1.8" stroke-linejoin="round"/></svg>`;
       button.setAttribute('aria-pressed', String(item.favorite));
       button.setAttribute('aria-label', item.favorite ? `إزالة ${item.title} من المفضلة` : `إضافة ${item.title} للمفضلة`);
       button.title = button.getAttribute('aria-label');
@@ -1042,7 +1045,7 @@
       renderSettings();
       playChime();
       message.textContent = `تم فتح سكن ${skins[result.skin].name}!`;
-      say(lines[result.skin]?.[0] || '');
+      say(skinLines[result.skin]?.[0] || '');
     } catch (error) {
       message.textContent = error.status === 401 ? 'الكود غلط. اتأكد منه وجرّب تاني.' : (error.message || 'حصلت مشكلة. جرّب تاني.');
     } finally {
@@ -1054,7 +1057,7 @@
     const target = event.target.closest?.('.welcome .owl');
     if (!target || (event.type === 'keydown' && event.key !== 'Enter' && event.key !== ' ')) return;
     event.preventDefault();
-    const pool = lines[settings.skin] || lines.hikma;
+    const pool = skinLines[settings.skin] || skinLines.hikma;
     settings.mascotTurn = ((settings.mascotTurn || 0) + 1) % pool.length;
     target.classList.remove('mascot-talk');
     void target.getBoundingClientRect();
@@ -1630,7 +1633,7 @@
     wordPop = document.createElement('div');
     wordPop.className = 'word-pop';
     wordPop.setAttribute('role', 'status');
-    wordPop.innerHTML = `<bdi class="word-pop-word">${hit.word.replace(/[&<>"]/g, c => ({'&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;'}[c]))}</bdi><span class="word-pop-meaning">…</span>`;
+    wordPop.innerHTML = `<bdi class="word-pop-word">${hit.word.replace(/[&<>"]/g, c => ({'&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;'}[c]))}</bdi><span class="word-pop-meaning">…</span><button type="button" class="word-pop-sentence" data-sentence="${hit.lineIndex}">معنى الجملة كلها</button><span class="word-pop-sent-out" hidden></span>`;
     document.body.appendChild(wordPop);
     const rect = wordPop.getBoundingClientRect();
     const x = Math.min(Math.max(8, event.clientX - rect.width / 2), window.innerWidth - rect.width - 8);
@@ -1655,18 +1658,32 @@
           setMeaning('—');
         }
       } catch {
-        setMeaning('تعذر جلب المعنى');
+        setMeaning(navigator.onLine === false ? 'محتاج إنترنت عشان المعنى' : 'تعذر جلب المعنى');
       }
     }
+    wordPop.addEventListener('click', async e => {
+      const b = e.target.closest('.word-pop-sentence'); if (!b) return;
+      e.stopPropagation(); const out = wordPop.querySelector('.word-pop-sent-out'); out.hidden = false; out.textContent = '…'; b.hidden = true;
+      try {
+        const r = await api.translate(lines[hit.lineIndex] || '', targetLang);
+        out.textContent = String(r.translatedText || r.text || '').trim() || '—';
+      } catch { out.textContent = navigator.onLine === false ? 'محتاج إنترنت عشان الترجمة' : 'تعذر جلب المعنى'; }
+    });
     setTimeout(() => {
-      document.addEventListener('click', dismissWordPop, {once: true, capture: true});
+      const mine = wordPop;
+      const away = ev => { if (wordPop !== mine) { document.removeEventListener('click', away, true); return; } if (!mine.contains(ev.target)) { dismissWordPop(); document.removeEventListener('click', away, true); } };
+      document.addEventListener('click', away, true);
     }, 50);
-    setTimeout(dismissWordPop, 8000);
+    setTimeout(dismissWordPop, 14000);
   }
 
   // الضغط على الكلمة داخل القصة بيفتح معناها
   document.addEventListener('click', event => {
-    const lineSpan = event.target.closest('#readingText [data-line]');
+    let lineSpan = event.target.closest('#readingText [data-line]');
+    if (!lineSpan && event.target.id === 'readingText' && document.caretRangeFromPoint) { // الضغطة وقعت بين سطرين: نلاقي أقرب جملة
+      const rg = document.caretRangeFromPoint(event.clientX, event.clientY);
+      lineSpan = rg?.startContainer?.parentElement?.closest?.('#readingText [data-line]') || null;
+    }
     if (lineSpan) {
       const hit = wordAtPoint(lineSpan, event);
       if (hit) {

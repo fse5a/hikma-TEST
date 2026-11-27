@@ -221,11 +221,41 @@
         body: JSON.stringify({email, password})
       });
     },
+    // ترجمة مجانية من غير بطاقة: مترجم المتصفح (على الجهاز) لو موجود، وإلا خدمة MyMemory المجانية (محتاجة إنترنت).
     async translate(text, targetLanguage = 'en') {
-      return request('/api/translate', {
-        method: 'POST',
-        body: JSON.stringify({text, targetLanguage})
-      });
+      const src = String(text || '').trim();
+      if (!src) return {ok: true, mode: 'free', translatedText: '', text: ''};
+      const from = /[\u0600-\u06FF]/.test(src) ? 'ar' : /[\u4e00-\u9fff]/.test(src) ? 'zh' : 'autodetect';
+      if (from === targetLanguage) return {ok: true, mode: 'free', translatedText: src, text: src};
+      try {
+        if (from !== 'autodetect' && typeof window !== 'undefined' && window.Translator && typeof window.Translator.create === 'function') {
+          const avail = await window.Translator.availability({sourceLanguage: from, targetLanguage});
+          if (avail === 'available') {
+            const t = await window.Translator.create({sourceLanguage: from, targetLanguage});
+            const out = await t.translate(src.slice(0, 6000));
+            if (out) return {ok: true, mode: 'free', provider: 'device', translatedText: out, text: out};
+          }
+        }
+      } catch { /* نكمّل للخدمة المجانية */ }
+      const parts = src.match(/[^.!؟?\n]+[.!؟?]*\s*/g) || [src];
+      const chunks = []; let cur = '';
+      for (const part of parts) { if ((cur + part).length > 420 && cur) { chunks.push(cur); cur = ''; } cur += part; }
+      if (cur) chunks.push(cur);
+      const out = [];
+      for (const chunk of chunks.slice(0, 40)) {
+        const ctrl = typeof AbortController !== 'undefined' ? new AbortController() : null;
+        const timer = ctrl ? setTimeout(() => ctrl.abort(), 12000) : 0;
+        let data;
+        try {
+          const res = await fetch('https://api.mymemory.translated.net/get?q=' + encodeURIComponent(chunk.slice(0, 480)) + '&langpair=' + from + '|' + targetLanguage, {signal: ctrl?.signal});
+          data = await res.json();
+        } finally { clearTimeout(timer); }
+        const t = String(data?.responseData?.translatedText || '').trim();
+        if (!t || Number(data?.responseStatus) >= 400 || /MYMEMORY WARNING|QUERY LENGTH LIMIT|INVALID/i.test(t)) throw new Error('translation unavailable');
+        out.push(t);
+      }
+      const joined = out.join(' ');
+      return {ok: true, mode: 'free', provider: 'mymemory', translatedText: joined, text: joined};
     },
     async diacritize(text) {
       return request('/api/diacritize', {

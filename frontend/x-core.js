@@ -69,7 +69,7 @@
     },
     secondsToday() { return HX.profile.seconds[today()] || 0; },
     streak() {
-      const days = new Set(HX.profile.days);
+      const days = new Set([...HX.profile.days, ...((typeof state !== 'undefined' && state.activity?.days) || [])]);
       const c = new Date(); c.setHours(12, 0, 0, 0);
       if (!days.has(today(c))) c.setDate(c.getDate() - 1);
       let n = 0;

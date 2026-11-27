@@ -1,0 +1,12 @@
+import {launch, newPage, startServer} from './frontend/tests/browser/helpers.mjs';
+const stop = await startServer(); const b = await launch();
+const r = await newPage(b, {w: 1280, h: 800, seed: {activated: true, age: 'o16', a11y: false, skin: 'hikma', theme: 'light'}});
+const p = r.page; p.on('console', m => console.log('console', m.text().slice(0,200)));
+await p.waitForTimeout(1500);
+await p.click('.story-card [data-open]'); await p.waitForTimeout(800);
+const pt = await p.evaluate(() => { const sp = document.querySelector('#readingText [data-line="1"]'); const tn = sp.firstChild; const rg = document.createRange(); rg.setStart(tn, 4); rg.setEnd(tn, 8); const b = rg.getBoundingClientRect(); const x=b.left+b.width/2,y=b.top+b.height/2; return {x,y, el: document.elementFromPoint(x,y)?.tagName+'.'+document.elementFromPoint(x,y)?.className, rc: document.caretRangeFromPoint(x,y)?.startContainer?.nodeType}; });
+console.log(JSON.stringify(pt));
+await p.evaluate(() => { document.addEventListener('click', e => console.log('CAPTURE click', e.target.tagName, e.target.className, e.defaultPrevented), true); });
+await p.mouse.click(pt.x, pt.y); await p.waitForTimeout(1200);
+console.log('popup', await p.evaluate(() => document.querySelector('.word-pop')?.outerHTML.slice(0,200) || 'NONE'));
+await b.close(); stop();
