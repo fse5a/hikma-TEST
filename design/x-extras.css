@@ -224,3 +224,6 @@ body.hikma-reading .play-control::after { content: ""; position: absolute; inset
 .hx-tile-ico .hx-paint { width: 34px; height: 34px; }
 .play-control .hx-paint { width: 40px; height: 40px; filter: drop-shadow(0 1px 1px rgba(0,0,0,.25)); }
 .round-control .hx-paint { width: 24px; height: 24px; }
+.read-prog { display: block; width: min(220px, 60%); height: 8px; margin: 6px auto 0; border-radius: 8px; background: color-mix(in srgb, var(--ink) 14%, transparent); overflow: hidden; }
+.read-prog > i { display: block; height: 100%; width: 0; background: var(--green); border-radius: 8px; transition: width .35s ease; }
+@media (prefers-reduced-motion: reduce) { .read-prog > i { transition: none; } }
