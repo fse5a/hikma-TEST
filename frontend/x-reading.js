@@ -132,8 +132,9 @@
   function openMoral(s) {
     if (!s) return;
     const m = moralFor(s);
+    const auto = !m && HX.autoMoral ? HX.autoMoral(s.text) : '';
     const isSeedOrHeritage = Boolean(D.seedExtras[s.id] || D.heritage.find(h => h.id === s.id));
-    HX.dialog('hxMoral', 'العبرة من القصة', `<div class="hx-moral big"><div class="hx-big" aria-hidden="true">💡</div><h3>${esc(s.title)}</h3>${m ? `<p class="hx-moral-text">${esc(m)}</p>` : '<p class="hx-muted">لسه مفيش عبرة للقصة دي. اكتب العبرة بكلامك:</p>'}${isSeedOrHeritage ? '' : `<label class="sr-only" for="hxMoralInput">العبرة</label><textarea id="hxMoralInput" rows="2" maxlength="140" placeholder="مثلًا: الصدق دايمًا أحسن">${esc(s.moral || '')}</textarea><div class="modal-actions"><button class="button primary" id="hxMoralSave" type="button">حفظ العبرة</button></div>`}</div>`);
+    HX.dialog('hxMoral', 'العبرة من القصة', `<div class="hx-moral big"><div class="hx-big" aria-hidden="true">💡</div><h3>${esc(s.title)}</h3>${m ? `<p class="hx-moral-text">${esc(m)}</p>` : (auto ? `<p class="hx-moral-text">${esc(auto)}</p><p class="hx-muted">عبرة تقديرية اتولّدت تلقائيًا من نص القصة. تقدر تعدّلها بكلامك:</p>` : '<p class="hx-muted">لسه مفيش عبرة للقصة دي. اكتب العبرة بكلامك:</p>')}${isSeedOrHeritage ? '' : `<label class="sr-only" for="hxMoralInput">العبرة</label><textarea id="hxMoralInput" rows="2" maxlength="140" placeholder="مثلًا: الصدق دايمًا أحسن">${esc(s.moral || '')}</textarea><div class="modal-actions"><button class="button primary" id="hxMoralSave" type="button">حفظ العبرة</button></div>`}</div>`);
     HX.open('hxMoral');
   }
   document.addEventListener('click', e => {
