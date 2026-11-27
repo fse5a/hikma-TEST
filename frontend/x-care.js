@@ -63,6 +63,20 @@
   });
   HX.features.push({id: 'rec', icon: '🎙️', name: 'سجّل صوتك', sub: 'اسمع نفسك وأنت بتقرا', order: 59, open: openRecord});
 
+
+  // ---------- قراءة بطيئة جدًا (لضعاف السمع وصعوبات التعلم) ----------
+  function slowOn() { return prefs.slowBackup != null; }
+  function toggleSlow() {
+    const st = (typeof state !== 'undefined' && state) ? state.settings : null;
+    if (!st) return;
+    if (slowOn()) { st.rate = prefs.slowBackup; delete prefs.slowBackup; HX.toast('رجعت السرعة العادية'); }
+    else { prefs.slowBackup = st.rate || 1; st.rate = 0.5; HX.toast('القراءة بطيئة جدًا دلوقتي'); }
+    store(); try { HX.save(); } catch {}
+    const r = document.getElementById('globalRate'); if (r) r.value = st.rate;
+  }
+  HX.slowOn = slowOn; HX.toggleSlow = toggleSlow;
+  HX.features.push({id: 'slow', icon: '🐢', name: 'قراءة بطيئة جدًا', sub: 'شغّل أو أطفي', order: 58.5, open: toggleSlow});
+
   // ---------- مؤثرات صوتية حسب الكلمات ----------
   const FX = [
     {k: 'rain', re: /مطر|شتا|rain|storm/i, name: 'مطر'},
@@ -94,4 +108,27 @@
   }
   document.addEventListener('click', e => { const b = e.target.closest('[data-hx-fx]'); if (b) play(b.dataset.hxFx); });
   HX.addReaderTool({id: 'fx', icon: '🌧️', label: 'مؤثرات', order: 16, onClick: openFx});
+
+  // ---------- تشجيع بالصوت: تصفيق ونغمة لما الطفل يخلّص قصة أو يجاوب صح ----------
+  function cheer(big) {
+    ac = ac || new (window.AudioContext || window.webkitAudioContext)();
+    for (let i = 0; i < (big ? 9 : 4); i++) setTimeout(() => noise(90, 2500, 0.35, 'highpass'), i * 110);
+    [523, 659, 784, 1046].slice(0, big ? 4 : 2).forEach((f, i) => setTimeout(() => {
+      const o = ac.createOscillator(), g = ac.createGain(); o.frequency.value = f; g.gain.value = 0.12 * cap();
+      o.connect(g); g.connect(ac.destination); o.start(); g.gain.exponentialRampToValueAtTime(0.001, ac.currentTime + 0.3); o.stop(ac.currentTime + 0.32);
+    }, i * 140));
+  }
+  HX.cheer = cheer;
+  const cheerOn = () => prefs.cheer !== false;
+  HX.on('finished', () => { if (cheerOn()) cheer(true); });
+  HX.on('quizdone', d => { if (cheerOn() && d && d.total && d.score === d.total) cheer(true); });
+  function openCheer() {
+    HX.dialog('hxCheer', 'تشجيع بالصوت', `<p class="hx-muted">تصفيق ونغمة لما تخلّص قصة أو تجاوب كل الأسئلة صح.</p><div class="modal-actions"><button class="button ${cheerOn() ? 'primary' : 'secondary'}" id="hxCheerToggle" type="button" aria-pressed="${cheerOn()}">${cheerOn() ? 'شغّال' : 'مقفول'}</button><button class="button secondary" id="hxCheerTry" type="button">جرّب</button></div>`);
+    HX.open('hxCheer');
+  }
+  document.addEventListener('click', e => {
+    if (e.target.closest('#hxCheerToggle')) { prefs.cheer = !cheerOn(); store(); openCheer(); }
+    if (e.target.closest('#hxCheerTry')) cheer(true);
+  });
+  HX.features.push({id: 'cheer', icon: '👏', name: 'تشجيع بالصوت', sub: 'تصفيق ونغمة', order: 60, open: openCheer});
 })();

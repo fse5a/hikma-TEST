@@ -20,5 +20,9 @@ const vol = await page.evaluate(() => { const u = new SpeechSynthesisUtterance('
 ok(vol <= 0.35, 'speech volume is capped: ' + vol);
 await page.evaluate(() => HX.features.find(f => f.id === 'rec').open()); await page.waitForTimeout(200);
 ok(await page.isVisible('#hxRecGo') || await page.isVisible('#hxRec'), 'record dialog opens');
+const sl = await page.evaluate(() => { const r0 = state.settings.rate; HX.toggleSlow(); const on = state.settings.rate; HX.toggleSlow(); return [r0, on, state.settings.rate]; });
+ok(sl[1] === 0.5 && sl[2] === sl[0], 'very slow reading on then back to original: ' + sl.join('>'));
+const ch = await page.evaluate(() => { try { HX.cheer(true); HX.emit('quizdone', {score: 3, total: 3}); return typeof HX.cheer === 'function'; } catch (e) { return String(e); } });
+ok(ch === true, 'cheer sound plays without errors: ' + ch);
 ok(errs.length === 0, 'no errors ' + errs.join('|')); ok(speech.length === 0, 'speech api never called');
 await browser.close(); stop(); process.exit(summary('care') ? 1 : 0);
