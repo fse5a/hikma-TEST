@@ -1477,6 +1477,17 @@
           if (current) window.renderLines(meta.start + current.charIndex);
         });
       }
+      else if (meta?.text && window.renderLines) {
+        // no word timings from the server: move the highlight word by word, proportional to audio progress
+        const starts = [];
+        meta.text.replace(/\S+/g, (w, i) => { starts.push(i); return w; });
+        let lastIdx = -1;
+        audio.addEventListener('timeupdate', () => {
+          if (activeAudio !== audio || !starts.length || !(audio.duration > 0)) return;
+          const idx = Math.min(starts.length - 1, Math.floor(audio.currentTime / audio.duration * starts.length));
+          if (idx !== lastIdx) { lastIdx = idx; window.renderLines(meta.start + starts[idx]); }
+        });
+      }
       audio.addEventListener('ended', () => {
         if (activeAudio !== audio) return;
         chunkIndex++;
