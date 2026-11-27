@@ -13,7 +13,8 @@ await page.evaluate(() => HX.features.find(f => f.id === 'mine').open()); await 
 await page.fill('#hxMName', 'عم أحمد'); await page.fill('#hxMPhone', '0123'); await page.fill('#hxMAddr', 'شارع النيل'); await page.click('#hxMSave');
 ok(await page.evaluate(() => HX.mineText()) === 'اسمي عم أحمد. رقمي 0 1 2 3. عنواني شارع النيل', 'my info saved and spoken text built');
 await page.evaluate(() => HX.features.find(f => f.id === 'adhkar').open()); await page.waitForTimeout(200);
-ok(await page.isVisible('#hxAdhSay'), 'adhkar dialog opens');
+ok(await page.isVisible('#hxAdhAudio') && !(await page.$('#hxAdhSay')), 'adhkar uses a real recording, no synthetic voice button');
+ok(await page.evaluate(() => /archive\.org\/download\/AZKAR_MICHARY/.test(HX.adhkarAudio.morning)), 'adhkar audio source');
 await page.evaluate(() => HX.features.find(f => f.id === 'quran').open()); await page.waitForTimeout(200);
 ok((await page.$$('button[data-hx-sura]')).length >= 10, 'quran surah buttons shown');
 await page.evaluate(() => HX.features.find(f => f.id === 'big').open()); await page.waitForTimeout(200);

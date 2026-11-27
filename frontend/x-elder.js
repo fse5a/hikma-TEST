@@ -18,15 +18,17 @@
     morning: ['أصبحنا وأصبح الملك لله، والحمد لله، لا إله إلا الله وحده لا شريك له.', 'اللهم بك أصبحنا، وبك أمسينا، وبك نحيا، وبك نموت، وإليك النشور.', 'سبحان الله وبحمده، مئة مرة.', 'أعوذ بكلمات الله التامات من شر ما خلق، ثلاث مرات.', 'بسم الله الذي لا يضر مع اسمه شيء في الأرض ولا في السماء وهو السميع العليم، ثلاث مرات.'],
     evening: ['أمسينا وأمسى الملك لله، والحمد لله، لا إله إلا الله وحده لا شريك له.', 'اللهم بك أمسينا، وبك أصبحنا، وبك نحيا، وبك نموت، وإليك المصير.', 'سبحان الله وبحمده، مئة مرة.', 'أعوذ بكلمات الله التامات من شر ما خلق، ثلاث مرات.', 'اللهم عافني في بدني، اللهم عافني في سمعي، اللهم عافني في بصري.']
   };
+  // تسجيلات حقيقية بصوت بشري (الشيخ مشاري العفاسي) من archive.org/details/AZKAR_MICHARY. مفيش صوت مولّد أبدًا للأذكار.
+  const ADH_AUDIO = {morning: 'https://archive.org/download/AZKAR_MICHARY/sabah_for_mobile_64kb.mp3', evening: 'https://archive.org/download/AZKAR_MICHARY/masaa_for_mobile_64kb.mp3'};
+  HX.adhkarAudio = ADH_AUDIO;
   const part = () => (new Date().getHours() < 15 ? 'morning' : 'evening');
   function openAdhkar(which = part()) {
     const list = ADHKAR[which];
-    HX.dialog('hxAdhkar', which === 'morning' ? 'أذكار الصباح' : 'أذكار المساء', `<div class="hx-row"><button class="button${which === 'morning' ? ' primary' : ''}" data-hx-adh="morning" type="button">الصباح</button><button class="button${which === 'evening' ? ' primary' : ''}" data-hx-adh="evening" type="button">المساء</button></div><ol class="hx-list" style="font-size:1.25em;line-height:2">${list.map(t => `<li>${esc(t)}</li>`).join('')}</ol><div class="modal-actions"><button class="button primary" id="hxAdhSay" data-w="${which}" type="button">🔊 اسمعها</button></div>`);
+    HX.dialog('hxAdhkar', which === 'morning' ? 'أذكار الصباح' : 'أذكار المساء', `<div class="hx-row"><button class="button${which === 'morning' ? ' primary' : ''}" data-hx-adh="morning" type="button">الصباح</button><button class="button${which === 'evening' ? ' primary' : ''}" data-hx-adh="evening" type="button">المساء</button></div><ol class="hx-list" style="font-size:1.25em;line-height:2">${list.map(t => `<li>${esc(t)}</li>`).join('')}</ol><p class="hx-muted">الصوت تسجيل حقيقي بصوت الشيخ مشاري العفاسي (مش صوت كمبيوتر)، من أرشيف الإنترنت، ومحتاج نت.</p><audio controls preload="none" id="hxAdhAudio" src="${ADH_AUDIO[which]}" style="width:100%"></audio>`);
     HX.open('hxAdhkar');
   }
   document.addEventListener('click', e => {
     const b = e.target.closest('button[data-hx-adh]'); if (b) openAdhkar(b.dataset.hxAdh);
-    const s = e.target.closest('#hxAdhSay'); if (s) speak(ADHKAR[s.dataset.w].join(' . '));
   });
   HX.adhkar = ADHKAR;
   feat('adhkar', '🤲', 'أذكار الصباح والمساء', 'بتتقرا بصوت', 50, () => openAdhkar());
@@ -38,7 +40,7 @@
   let qAudio = null;
   function openQuran() {
     const rec = prefs.reciter || REC[0][0];
-    HX.dialog('hxQuran', 'القرآن الكريم', `<label class="hx-muted" for="hxQRec">القارئ</label><select id="hxQRec">${REC.map(r => `<option value="${r[0]}"${r[0] === rec ? ' selected' : ''}>${r[1]}</option>`).join('')}</select><div class="hx-row" style="flex-wrap:wrap;margin-top:10px">${SURAHS.map(s => `<button class="button" data-hx-sura="${s[0]}" type="button">${s[1]}</button>`).join('')}</div><p class="hx-muted" id="hxQMsg" role="status">محتاج إنترنت عشان الصوت.</p><div class="modal-actions"><button class="button" id="hxQStop" type="button">⏹ وقّف</button></div>`);
+    HX.dialog('hxQuran', 'القرآن الكريم', `<label class="hx-muted" for="hxQRec">القارئ</label><select id="hxQRec">${REC.map(r => `<option value="${r[0]}"${r[0] === rec ? ' selected' : ''}>${r[1]}</option>`).join('')}</select><div class="hx-row" style="flex-wrap:wrap;margin-top:10px">${SURAHS.map(s => `<button class="button" data-hx-sura="${s[0]}" type="button">${s[1]}</button>`).join('')}</div><p class="hx-muted" id="hxQMsg" role="status">الصوت تلاوة حقيقية بصوت القارئ نفسه (مش صوت كمبيوتر ولا ذكاء اصطناعي). محتاج نت.</p><div class="modal-actions"><button class="button" id="hxQStop" type="button">⏹ وقّف</button></div>`);
     HX.open('hxQuran');
   }
   function playSura(n) {
