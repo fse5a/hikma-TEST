@@ -15,8 +15,8 @@ export async function startServer() {
   return () => child.kill();
 }
 // صفحة جديدة بـ API مقلّد (ما بنكلّمش خدمات الكلام أبدًا)
-export async function newPage(browser, {w = 420, h = 900, seed, api = {}} = {}) {
-  const ctx = await browser.newContext({viewport: {width: w, height: h}, locale: 'ar-EG'});
+export async function newPage(browser, {w = 420, h = 900, seed, api = {}, ctx: ctxOpts = {}} = {}) {
+  const ctx = await browser.newContext({viewport: {width: w, height: h}, locale: 'ar-EG', ...ctxOpts});
   const page = await ctx.newPage();
   const errs = [], speech = [];
   page.on('pageerror', e => errs.push(String(e)));

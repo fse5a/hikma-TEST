@@ -146,4 +146,17 @@
   const NEWS = ['بومة حكمة الجديدة بتتحرك وبتغيّر تعبيرها', 'أذكار وقرآن وزر كبير لكبار السن', 'ملخص وعبرة لأي نص، وأصوات مؤثرات للقصة', 'قراءة بطيئة جدًا وتسجيل صوت الطفل', 'صوت مختلف لكل شخصية، وجو صوتي لكل مشهد'];
   HX.changelog = NEWS;
   feat('changelog', '🆕', 'الجديد في الموقع', 'آخر التحسينات', 58, () => { HX.dialog('hxNew', 'الجديد في الموقع', `<ul class="hx-list">${NEWS.map(n => `<li>${esc(n)}</li>`).join('')}</ul>`); HX.open('hxNew'); });
+
+  // ---------- اقتراح الأذكار حسب الوقت (لما يفتح الموقع، والقسم متفعّل) ----------
+  HX.dhikrWindow = (h = new Date().getHours()) => (h >= 4 && h < 11 ? 'morning' : h >= 16 && h < 22 ? 'evening' : null);
+  setTimeout(() => {
+    if (!religious()) return;
+    const w = HX.dhikrWindow(); if (!w) return;
+    const key = HX.today() + '-' + w;
+    if (prefs.lastPrompt === key) return;
+    prefs.lastPrompt = key; store();
+    HX.dialog('hxAdhPrompt', w === 'morning' ? 'صباح الخير' : 'مساء الخير', `<p class="hx-moral-text" role="status">${w === 'morning' ? 'اسمع أذكار الصباح بصوت حقيقي؟' : 'اسمع أذكار المساء بصوت حقيقي؟'}</p><div class="modal-actions"><button class="button primary" id="hxAdhPromptGo" data-w="${w}" type="button">افتحها</button><button class="button" id="hxAdhPromptNo" type="button" data-close="hxAdhPrompt">مش دلوقتي</button></div>`);
+    HX.open('hxAdhPrompt');
+  }, 3500);
+  document.addEventListener('click', e => { const g = e.target.closest('#hxAdhPromptGo'); if (g) { HX.close('hxAdhPrompt'); openAdhkar(g.dataset.w); } });
 })();
