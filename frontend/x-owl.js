@@ -15,9 +15,10 @@
   const isOwl = el => el.tagName === 'IMG' && (el.dataset.owl || /mascots\/hikma\.webp/.test(el.getAttribute('src') || ''));
   const owls = () => [...document.querySelectorAll('img')].filter(isOwl);
   function paint(name) {
+    if ((root.dataset.skin || 'hikma') !== 'hikma') return; // الشخصيات التانية ليها صورها، البومة بس لسكين حكمة
     owls().forEach(el => {
       if (!el.dataset.owl) { el.dataset.owl = '1'; el.dataset.box = ''; }
-      if (el.dataset.pose !== name) { el.src = P(name); el.dataset.pose = name; }
+      if (el.dataset.pose !== name || !/assets\/owl\//.test(el.getAttribute('src') || '')) { el.src = P(name); el.dataset.pose = name; }
     });
   }
   function set(name, ms) {
@@ -38,7 +39,7 @@
   }
   POSES.forEach(n => { const i = new Image(); i.src = P(n); });
   const skinIsHikma = () => (root.dataset.skin || 'hikma') === 'hikma';
-  new MutationObserver(() => { if (skinIsHikma()) paint(pose); }).observe(document.documentElement, {childList: true, subtree: true});
+  new MutationObserver(() => { if (skinIsHikma()) paint(pose); }).observe(document.documentElement, {childList: true, subtree: true, attributes: true, attributeFilter: ['data-skin']});
   const HXon = (n, f) => window.HX?.on ? window.HX.on(n, f) : null;
   addEventListener('hikma:finished', () => set('celebrating', 4500));
   addEventListener('hikma:wrong', () => set('encourage', 2800));

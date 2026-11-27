@@ -12,15 +12,20 @@
     const h = D.heritage.find(x => x.id === 'cart-doraemon'), s = state.stories.find(x => x.id === 'cart-doraemon');
     if (h && s && s.text !== h.text && /مشهد من خيالنا/.test(h.text) && !/مشهد من خيالنا/.test(s.text)) { s.text = h.text; save(); }
   })();
-  (function seedRealStories() {
-    if (state.settings.realStoriesV2) return;
+  function seedRealStories() {
+    // لو المكتبة فاضية نرجّع القصص الجاهزة دايمًا (حتى لو العلامة متسجلة)
+    if (state.settings.realStoriesV2 && state.stories.length) return;
     state.stories = state.stories.filter(s => s.id !== 'seed-2' && !(s.id === 'seed-1' && /الأرنب/.test(s.title)) && !['wor-twain-fence','wor-aesop-crow','wor-clason-purse','bk-little-prince'].includes(s.id));
     const real = D.heritage.filter(h => ['classic', 'myth', 'lore', 'books'].includes(h.group)).reverse();
     real.forEach(h => { if (!state.stories.some(s => s.id === h.id)) state.stories.unshift({id: h.id, title: h.title, text: h.text, lang: 'ar', translation: '', progress: 0, icon: h.icon, moral: h.moral, quiz: h.quiz}); });
     state.settings.realStoriesV2 = true;
     save();
     renderLibrary();
-  })();
+  }
+  seedRealStories();
+  HX.seedStories = seedRealStories;
+  // بعد «إعادة ضبط التطبيق» القصص الجاهزة ترجع على طول
+  document.addEventListener('click', e => { if (e.target.closest('#resetApp')) setTimeout(() => { state.settings.realStoriesV2 = false; seedRealStories(); }, 50); });
 
   // ---------- 8) مكتبة التراث ----------
   function openHeritage() {
