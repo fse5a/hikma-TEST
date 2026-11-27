@@ -1,7 +1,7 @@
 // Interactive mascot: a small companion on every screen, hero mascot that follows the pointer,
 // skin mascot in the reader header, reactions to reading and finishing a story.
 (() => {
-  const FILES = ['hikma', 'doraemon', 'mickey', 'anbu', 'uchiha', 'zelda', 'doom'];
+  const FILES = ['hikma', 'doraemon', 'mickey', 'anbu', 'uchiha', 'zelda', 'doom', 'cat', 'bot'];
   const root = document.documentElement;
   const skin = () => root.dataset.skin || 'hikma';
   const reduced = () => root.dataset.reducedMotion === 'true';
