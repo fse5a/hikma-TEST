@@ -30,6 +30,11 @@
     if (innerWidth <= 760) return;
     const tb = document.querySelector('.topbar'); if (!tb) return;
     const t = tb.getBoundingClientRect();
+    if (!t.width || !t.height || getComputedStyle(tb).display === 'none') { // شاشة الدخول: مفيش شريط جانبي، نرجّع المكان الأصلي
+      delete b.dataset.nospace;
+      ['inset-inline-start', 'right', 'left', 'bottom'].forEach(k => b.style.removeProperty(k));
+      const im = b.querySelector('.buddy-img'); ['width', 'height'].forEach(k => im.style.removeProperty(k)); return;
+    }
     if (t.width > 340) { b.dataset.nospace = '1'; return; } // مفيش شريط جانبي: مفيش مكان آمن
     let top = t.top;
     document.querySelectorAll('.topbar button, .topbar a, .topbar [role=button], .a11y, .topbar .brand').forEach(e => { if (visible(e)) top = Math.max(top, e.getBoundingClientRect().bottom); });

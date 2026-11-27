@@ -23,4 +23,11 @@ const rr = await newPage(browser, {w: 1280, h: 800, seed, ctx: {reducedMotion: '
 await rr.page.waitForTimeout(1200);
 ok(!(await rr.page.evaluate(() => !!document.querySelector('.hx-dots') || !!sessionStorage.getItem('hx-dots'))), 'reduced motion: no dots');
 await rr.ctx.close();
+for (const [w, h] of [[1280, 800], [768, 900], [1920, 1000]]) {
+  const g = await newPage(browser, {w, h});
+  await g.page.waitForTimeout(1800);
+  const rc = await g.page.evaluate(() => { const i = document.querySelector('#mascotBuddy .buddy-img'); const b = i.getBoundingClientRect(); return {l: b.left, r: b.right, t: b.top, b: b.bottom, vw: innerWidth, vh: innerHeight, d: getComputedStyle(document.getElementById('mascotBuddy')).display}; });
+  ok(rc.d === 'none' || (rc.l >= 0 && rc.r <= rc.vw && rc.t >= 0 && rc.b <= rc.vh), `gate ${w}x${h}: helper fully on screen ${JSON.stringify(rc)}`);
+  await g.ctx.close();
+}
 await browser.close(); stop(); process.exit(summary('motion') ? 1 : 0);
