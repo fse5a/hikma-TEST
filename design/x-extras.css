@@ -220,3 +220,7 @@ body.hikma-reading .play-control::after { content: ""; position: absolute; inset
   :root .topbar .top-actions #hxOpen > span { font-size: 22px; line-height: 1; }
   :root .topbar .top-actions #hxOpen .hx-chip-n { font-size: 13px; }
 }
+.hx-paint { object-fit: contain; color: inherit; filter: none; }
+.hx-tile-ico .hx-paint { width: 34px; height: 34px; }
+.play-control .hx-paint { width: 40px; height: 40px; filter: drop-shadow(0 1px 1px rgba(0,0,0,.25)); }
+.round-control .hx-paint { width: 24px; height: 24px; }
