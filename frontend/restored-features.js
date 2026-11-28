@@ -1560,6 +1560,25 @@
     return speechInflight.get(k).then(r => ({blob: r.blob, meta: {start, text: r.text, words: r.words}}));
   }
 
+  // تسخين خفيف: أول ما قصة تتفتح بالصوت الطبيعي، بنجهّز أول جملة (طلب واحد صغير، مرة لكل قصة)
+  const prewarmed = new Set();
+  const origChoose = window.chooseStory;
+  if (typeof origChoose === 'function') {
+    window.chooseStory = function (...args) {
+      const out = origChoose.apply(this, args);
+      try {
+        const st = window.hikmaReader?.story;
+        if (st && !prewarmed.has(st.id) && navigator.onLine && window.hikmaBackendHealth?.integrations?.speech === 'configured' && !/^(device|friend:)/.test(settings.voiceSource || 'neural')) {
+          prewarmed.add(st.id);
+          const first = window.hikmaReader.lines?.[window.hikmaReader.lineIndex ?? 0];
+          const voice = lang === 'ar' ? 'neural-ar' : 'neural-en';
+          if (first) setTimeout(() => splitSpeechChunks(first).forEach(c => fetchSpeechChunk(c, voice, window.hikmaBackendHealth?.providers?.speech || 'worker', false, 0).catch(() => {})), 300);
+        }
+      } catch {}
+      return out;
+    };
+  }
+
   // ده بتاع زر القراءة بالصوت الطبيعي: يجلب الصوت من الخادم أو من الذاكرة ثم يشغله
   async function speakNaturally() {
     if (!story) return;

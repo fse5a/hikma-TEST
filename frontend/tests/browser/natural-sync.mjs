@@ -9,9 +9,11 @@ await page.route('**/api/**', async route => {
   if (u.includes('/api/speech')) { calls++; await new Promise(r => setTimeout(r, 600)); return route.fulfill({status: 200, contentType: 'application/json', body: JSON.stringify({mode: 'configured', provider: 'mock', contentType: 'audio/wav', audioBase64: wav(2)})}); }
   route.fulfill({status: 200, contentType: 'application/json', body: JSON.stringify({ok: true, mode: 'production', integrations: {speech: 'configured'}})});
 });
-await page.evaluate(async () => { window.hikmaBackendHealth = {integrations: {speech: 'configured'}}; });
+await page.evaluate(async () => { window.hikmaBackendHealth = {integrations: {speech: 'configured'}}; state.settings.voiceSource = 'cloud'; });
 await page.getByText('اقرأ القصة').nth(1).click();
-await page.waitForTimeout(800);
+await page.waitForTimeout(1500);
+const warmCalls = calls;
+ok(warmCalls >= 1 && warmCalls <= 3, 'opening a story pre-warms the first sentence only (small): ' + warmCalls + ' request(s)');
 await page.evaluate(() => { window.hikmaBackendHealth = {integrations: {speech: 'configured'}}; });
 const line0 = await page.evaluate(() => document.querySelector('#readingText .active')?.dataset.line);
 const t0 = Date.now();
