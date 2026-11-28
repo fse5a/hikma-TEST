@@ -1294,6 +1294,9 @@
       draftButton.title = offline ? 'الترجمة تحتاج اتصالًا بالإنترنت' : '';
     }
     if (speechButton) speechButton.disabled = false;
+    const diaBtn = document.querySelector('#diacritizeText');
+    const diaHealth = window.hikmaBackendHealth?.integrations?.diacritization;
+    if (diaBtn && diaHealth && diaHealth !== 'configured') { diaBtn.disabled = true; diaBtn.title = 'التشكيل التلقائي غير متاح حاليًا'; }
     if (speechButton) {
       speechButton.textContent = settings.voiceSource === 'device'
         ? 'قراءة بصوت الجهاز (جودة أقل)'
