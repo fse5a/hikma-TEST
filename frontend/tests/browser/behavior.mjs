@@ -29,6 +29,7 @@ for (const [w, h, tag] of [[1280, 800, 'd'], [390, 800, 'm']]) {
   ok(s3 === 3 && hx === 3, `${tag}: opening a story today makes streak 3 on the card stats and in Hikma+ (${s3}/${hx})`);
   // 3) معنى الكلمة والجملة
   await p.click('.story-card [data-open]'); await p.waitForTimeout(600);
+  await p.locator('#readingText [data-line="1"]').scrollIntoViewIfNeeded(); await p.waitForTimeout(400);
   const pt = await p.evaluate(() => { const sp = document.querySelector('#readingText [data-line="1"]'); const tn = sp.firstChild; const rg = document.createRange(); rg.setStart(tn, 4); rg.setEnd(tn, 8); const b = rg.getBoundingClientRect(); return {x: b.left + b.width / 2, y: b.top + b.height / 2}; });
   await p.mouse.click(pt.x, pt.y); await p.waitForTimeout(900);
   const pop = await p.evaluate(() => document.querySelector('.word-pop')?.innerText || '');

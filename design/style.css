@@ -1098,3 +1098,15 @@ html[data-skin][data-hc=off][data-theme=dark] .dialog input, html[data-skin][dat
 .skin-choice small { display: block; font-size: .75em; opacity: .8; }
 .skin-locked { opacity: .72; border-style: dashed; }
 .brand-chip .skin-ico, #skinChip .skin-ico { width: 24px; height: 24px; vertical-align: middle; }
+
+/* قارئ أكبر وعمود إعدادات أقل زحمة */
+.reader-grid { grid-template-columns: minmax(0, 2.2fr) minmax(250px, .8fr); gap: 22px; }
+.reading-text { font-size: clamp(22px, 2.3vw, 27px); padding: 24px 28px; }
+:root[data-mode=kids] .reading-text { font-size: clamp(25px, 2.6vw, 30px); }
+.reader-grid .voice-panel { padding: 18px; max-height: 70vh; overflow-y: auto; }
+.reader-grid .voice-panel .field { margin-bottom: 14px; }
+.reader-grid .voice-panel .button { margin-top: 12px; }
+.reader-grid .voice-panel .divider { margin: 18px 0; }
+@media (max-width: 760px) { .reader-grid { grid-template-columns: 1fr; } .reading-text { font-size: 22px; padding: 18px; } :root[data-mode=kids] .reading-text { font-size: 24px; } .reader-grid .voice-panel { max-height: none; } }
+.reader-grid .rate-presets { display: grid !important; grid-template-columns: repeat(5, 1fr); gap: 4px !important; }
+.reader-grid .rate-presets .button { width: auto; margin: 0; padding: 8px 2px; font-size: 12px; white-space: nowrap; min-width: 0; }
