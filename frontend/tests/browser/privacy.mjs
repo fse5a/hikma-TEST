@@ -1,0 +1,20 @@
+// خصوصيتي: الجرد بيظهر، والمسح مقفول لحد ما نأكد، وبعد المسح الموقع بيرجع من الصفر (بوابة الدخول).
+import {launch, newPage, ok, summary, startServer} from './helpers.mjs';
+const stop = await startServer(); const browser = await launch();
+const {page, errs, speech} = await newPage(browser, {w: 420, h: 900, seed: {activated: true, age: 'o16', a11y: false, skin: 'hikma', theme: 'light'}});
+await page.evaluate(() => { state.stories.unshift({id: 'priv-t', title: 'قصة سرية', text: 'نص تجريبي للخصوصية. جملة تانية هنا. وجملة تالتة.', lang: 'ar', progress: 0, icon: '📖'}); save(); });
+await page.evaluate(() => HX.features.find(f => f.id === 'privacy').open());
+await page.waitForTimeout(500);
+const t = await page.locator('#hxPrivacy').innerText();
+ok(/\d+ قصة/.test(t) && /إيه اللي بيخرج/.test(t), 'inventory and what-leaves sections are shown');
+ok(await page.locator('#hxEraseGo').isDisabled(), 'erase button is disabled until the user confirms');
+await page.screenshot({path: '/tmp/privacy.png'});
+await page.locator('#hxEraseOk').check();
+ok(await page.locator('#hxEraseGo').isEnabled(), 'confirm checkbox enables erase');
+await Promise.all([page.waitForNavigation({timeout: 8000}).catch(() => {}), page.locator('#hxEraseGo').click()]);
+await page.waitForTimeout(1500);
+const after = await page.evaluate(() => ({fresh: !state.stories.some(x => x.id === 'priv-t'), has: JSON.stringify(localStorage).includes('قصة سرية') || JSON.stringify(localStorage).includes('priv-t')}));
+ok(after.fresh, 'after erase and reload the library no longer has the story (test re-seeds settings, so the gate itself is not checked)');
+ok(!after.has, 'the story is gone from storage');
+ok(errs.length === 0, 'no errors ' + errs.join('|')); ok(speech.length === 0, 'speech never called');
+await browser.close(); stop(); process.exit(summary('privacy') ? 1 : 0);
