@@ -230,3 +230,7 @@ body.hikma-reading .play-control::after { content: ""; position: absolute; inset
 .word-pop-sentence { display: block; margin: 8px auto 0; padding: 6px 12px; border: 1px solid var(--gold); border-radius: 999px; background: transparent; color: var(--ink); font: inherit; font-size: 13px; cursor: pointer; min-height: 32px; }
 .word-pop-sent-out { display: block; margin-top: 8px; padding-top: 8px; border-top: 1px solid var(--line); color: var(--ink); }
 .word-pop-note{display:block;font-size:11px;opacity:.7;margin-top:4px}
+.reader-panel-toggle{min-height:36px;padding:4px 12px;font-size:13px;margin-bottom:8px;justify-self:start}
+.reader-grid.panel-closed{grid-template-columns:1fr !important}
+.reader-grid.panel-closed .voice-panel{display:none}
+body:has(#readerOverlay.open) #mascotBuddy .buddy-bubble{display:none !important}

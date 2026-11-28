@@ -19,3 +19,28 @@
   ['pointerdown', 'keydown'].forEach(ev => document.addEventListener(ev, wake, true));
   HX.on('finished', () => document.body.classList.remove('hx-drowsy'));
 })();
+
+// زر "إعدادات القراءة": يخفي/يظهر لوحة الصوت الجانبية علشان النص ياخد مساحته (افتراضي: مقفول لو الشاشة قصيرة)
+(() => {
+  const root = document.getElementById('readerContent');
+  if (!root) return;
+  const KEY = 'hikma-reader-panel';
+  const pref = () => { const v = localStorage.getItem(KEY); return v ? v === 'open' : innerHeight >= 760 && innerWidth >= 1000; };
+  const apply = grid => {
+    const open = pref();
+    grid.classList.toggle('panel-closed', !open);
+    const b = grid.querySelector('.reader-panel-toggle');
+    if (b) { b.setAttribute('aria-expanded', String(open)); b.textContent = open ? 'إخفاء إعدادات القراءة' : 'إعدادات القراءة'; }
+  };
+  const inject = () => {
+    const grid = root.querySelector('.reader-grid');
+    if (!grid || grid.querySelector('.reader-panel-toggle') || innerWidth < 900) return;
+    const b = document.createElement('button');
+    b.type = 'button'; b.className = 'button secondary reader-panel-toggle';
+    b.addEventListener('click', () => { localStorage.setItem(KEY, pref() ? 'closed' : 'open'); apply(grid); });
+    grid.querySelector('.reader-main')?.prepend(b);
+    apply(grid);
+  };
+  new MutationObserver(inject).observe(root, {childList: true, subtree: false});
+  inject();
+})();
