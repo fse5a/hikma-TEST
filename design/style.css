@@ -922,7 +922,7 @@ html[data-skin=mickey][data-hc=off] body {
   background: linear-gradient(color-mix(in srgb, var(--paper) 70%, transparent), color-mix(in srgb, var(--paper) 86%, transparent)), url(assets/scenes/mickey.webp) center / cover fixed no-repeat, var(--paper) !important;
 }
 html[data-skin=mickey][data-hc=off] body::before {
-  background-image: radial-gradient(circle, #8a6a55 0 2px, transparent 3px), radial-gradient(circle, #8a6a55 0 3.5px, transparent 5px);
+  background-image: none;
   background-size: 180px 230px, 310px 270px; opacity: .55;
   animation: fx-down 90s linear infinite;
 }

@@ -81,7 +81,7 @@
   document.addEventListener('keydown', e => { if (e.altKey && (e.key === 'r' || e.key === 'ر')) { e.preventDefault(); readPage(); } });
 
   // ---------- نص بديل لكل صورة وشخصية ----------
-  const ALT = [[/owl|بومة|hikma/i, 'البومة حكمة بقبعة التخرج'], [/cat|قطة/i, 'قطة الفضاء'], [/bot|robot|روبوت/i, 'الروبوت الودود'], [/doraemon|دورايمون/i, 'دورايمون'], [/mickey|ميكي/i, 'ميكي'], [/zelda/i, 'شخصية زيلدا'], [/anbu|uchiha|naruto/i, 'شخصية أنمي']];
+  const ALT = [[/owl|بومة|hikma/i, 'البومة حكمة بقبعة التخرج'], [/cat|قطة/i, 'قطة الفضاء'], [/bot|robot|روبوت/i, 'الروبوت الودود'], [/doraemon|دورايمون/i, 'دورايمون'], [/mickey|الأرنب|rabbit/i, 'الأرنب الأبيض'], [/zelda/i, 'شخصية زيلدا'], [/anbu|uchiha|naruto/i, 'شخصية أنمي']];
   function fixAlt() {
     document.querySelectorAll('img:not([alt])').forEach(img => {
       const hint = (img.src + ' ' + img.className + ' ' + (img.title || '')).toString();

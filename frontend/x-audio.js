@@ -162,7 +162,7 @@
   HX.addReaderTool({id: 'roles', icon: '🎭', label: () => rolesOn ? 'إيقاف الأدوار' : 'قراءة بالأدوار', order: 31, onClick: () => { if (rolesOn) { stopRoles(); HX.refreshBar(); } else playRoles(); }});
 
   // ---------- قاموس النطق (كلمات زي Zelda) ----------
-  const defaults = {Zelda: 'زيلدا', Doraemon: 'دورايمون', Mickey: 'ميكي', Hikma: 'حِكمة'};
+  const defaults = {Zelda: 'زيلدا', Doraemon: 'دورايمون', Mickey: 'الأرنب الأبيض', Hikma: 'حِكمة'};
   const dict = () => ({...defaults, ...HX.X.pronounce});
   const dictRe = () => {
     const keys = Object.keys(dict()).sort((a, b) => b.length - a.length).map(k => k.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'));
