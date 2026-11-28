@@ -32,8 +32,8 @@
     clearTimeout(timer); timer = setTimeout(() => { bubble.hidden = true; }, 5200);
     if (window.HikmaMascotLines) window.HikmaMascotLines.pose([img, ...document.querySelectorAll('.reader-owl img')]);
     else { img.classList.remove('jump'); void img.offsetWidth; img.classList.add('jump'); }
-    if (talk && 'speechSynthesis' in window && !document.body.classList.contains('hikma-reading')) {
-      try { speechSynthesis.cancel(); const u = new SpeechSynthesisUtterance(text); u.lang = 'ar-EG'; speechSynthesis.speak(u); } catch {}
+    if (talk && !document.body.classList.contains('hikma-reading')) {
+      try { window.HikmaSpeak.speak(text, {lang: 'ar'}); } catch {}
     }
   }
   const next = list => list[(turn++) % list.length];

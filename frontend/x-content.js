@@ -83,7 +83,7 @@
     if (e.target.closest('#hxBranchSay') && br) { HX.say(br.story.nodes[br.at].text, 'ar'); return; }
     if (e.target.closest('#hxBranchList')) openBranching();
   });
-  document.addEventListener('click', e => { if (e.target.closest('[data-close="hxBranch"]')) { try { speechSynthesis.cancel(); } catch {} } });
+  document.addEventListener('click', e => { if (e.target.closest('[data-close="hxBranch"]')) { try { window.HikmaSpeak.stop(); } catch {} } });
 
   // ---------- 23 + 25) رابط مشاركة القصة وكود QR ----------
   const b64 = bytes => btoa(String.fromCharCode(...bytes)).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');

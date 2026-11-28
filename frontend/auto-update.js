@@ -13,7 +13,7 @@
   function isBusy() {
     if (document.querySelector('.overlay.open')) return true;
     if (document.body.classList.contains('hikma-reading')) return true;
-    if (window.speechSynthesis?.speaking) return true;
+    if (window.HikmaSpeak?.isSpeaking()) return true;
     if (document.querySelector('#storyText')?.value.trim()) return true;
     return Array.from(document.querySelectorAll('audio')).some(audio => !audio.paused);
   }

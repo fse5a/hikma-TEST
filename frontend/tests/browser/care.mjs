@@ -16,7 +16,7 @@ ok(r.cap0 === 1, 'no volume cap by default');
 await page.evaluate(() => HX.features.find(f => f.id === 'cap').open()); await page.waitForTimeout(200);
 await page.click('[data-hx-cap=low]'); await page.waitForTimeout(200);
 ok(await page.evaluate(() => HX.volumeCap()) === 0.35, 'low volume cap applies (child hearing)');
-const vol = await page.evaluate(() => { const u = new SpeechSynthesisUtterance('x'); u.volume = 1; speechSynthesis.cancel(); speechSynthesis.speak(u); speechSynthesis.cancel(); return u.volume; });
+const vol = await page.evaluate(() => { let v = -1; const orig = speechSynthesis.speak; speechSynthesis.speak = u => { v = u.volume; }; window.HikmaSpeak.speakDevice('x'); speechSynthesis.speak = orig; return v; });
 ok(vol <= 0.35, 'speech volume is capped: ' + vol);
 await page.evaluate(() => HX.features.find(f => f.id === 'rec').open()); await page.waitForTimeout(200);
 ok(await page.isVisible('#hxRecGo') || await page.isVisible('#hxRec'), 'record dialog opens');

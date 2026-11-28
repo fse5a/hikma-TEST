@@ -129,25 +129,20 @@
   HX.charVoice = profileFor; HX.charProfiles = profiles;
   function speakSegment(seg, lang, speakers) {
     return new Promise(resolve => {
-      const u = new SpeechSynthesisUtterance(seg.t);
-      u.lang = lang === 'en' ? 'en-US' : 'ar-EG';
       const base = Math.min(1.5, Math.max(0.5, state.settings.rate || 1));
-      u.rate = base;
-      const voices = speechSynthesis.getVoices().filter(v => v.lang.toLowerCase().startsWith(u.lang.slice(0, 2)));
-      if (seg.who === 'narrator') u.pitch = 1;
-      else {
+      let o = {lang, rate: base, pitch: 1, queue: true};
+      if (seg.who !== 'narrator') {
         const pr = profileFor(seg.who, seg.fem);
         if (!speakers.has(seg.who)) speakers.set(seg.who, pr);
-        u.pitch = pr.p; u.rate = Math.min(2, base * pr.r);
-        if (voices.length > 1) u.voice = voices[(pr.v + 1) % voices.length];
+        o = {...o, pitch: pr.p, rate: Math.min(2, base * pr.r), voiceIndex: (pr.v + 1)};
       }
-      u.onend = resolve; u.onerror = resolve;
-      speechSynthesis.speak(u);
+      // أدوار الشخصيات بصوت الجهاز لأن كل شخصية محتاجة نغمة مختلفة
+      window.HikmaSpeak.speakDevice(seg.t, o).then(() => resolve());
     });
   }
   async function playRoles() {
     const r = window.hikmaReader;
-    if (!r?.story || !('speechSynthesis' in window)) { HX.toast('القراءة الصوتية مش مدعومة هنا'); return; }
+    if (!r?.story) { HX.toast('القراءة الصوتية مش مدعومة هنا'); return; }
     r.stop();
     rolesOn = true; const my = ++rolesToken;
     HX.refreshBar();
@@ -158,7 +153,7 @@
     }
     if (my === rolesToken) { rolesOn = false; HX.refreshBar(); if (r.index >= HX.lines().length - 1) window.dispatchEvent(new CustomEvent('hikma:finished')); }
   }
-  function stopRoles() { if (!rolesOn) return; rolesOn = false; rolesToken++; try { speechSynthesis.cancel(); } catch {} }
+  function stopRoles() { if (!rolesOn) return; rolesOn = false; rolesToken++; try { window.HikmaSpeak.stop(); } catch {} }
   HX.addReaderTool({id: 'roles', icon: '🎭', label: () => rolesOn ? 'إيقاف الأدوار' : 'قراءة بالأدوار', order: 31, onClick: () => { if (rolesOn) { stopRoles(); HX.refreshBar(); } else playRoles(); }});
 
   // ---------- قاموس النطق (كلمات زي Zelda) ----------

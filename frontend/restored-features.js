@@ -169,17 +169,8 @@
   // ============================================================
   // بينطق جملة قصيرة للمستخدم بصوت الجهاز
   function say(text, language = 'ar-EG') {
-    if (!('speechSynthesis' in window) || !text) return;
-    speechSynthesis.cancel();
-    const utterance = new SpeechSynthesisUtterance(text);
-    utterance.lang = language;
-    utterance.rate = SPEECH_SETTINGS.clampRate(settings.announcementRate);
-    utterance.pitch = Math.pow(2, SPEECH_SETTINGS.clampPitch(settings.pitch) / 12);
-    const voices = speechSynthesis.getVoices();
-    const preferred = language.startsWith('en') ? settings.enVoice : settings.arVoice;
-    const voice = voices.find(item => item.name === preferred) || voices.find(item => item.lang.toLowerCase().startsWith(language.slice(0, 2)));
-    if (voice) utterance.voice = voice;
-    speechSynthesis.speak(utterance);
+    if (!text) return;
+    window.HikmaSpeak.speak(text, {lang: language.startsWith('en') ? 'en' : 'ar', rate: SPEECH_SETTINGS.clampRate(settings.announcementRate)});
   }
 
   // نغمة قصيرة مميزة لكل سكن
@@ -730,7 +721,7 @@
       renderSettings();
     } else if (event.target.closest('#resetApp')) {
       if (!confirm('إعادة ضبط التطبيق وحذف القصص والإعدادات المحفوظة؟')) return;
-      speechSynthesis?.cancel();
+      window.HikmaSpeak?.stop();
       state.stories = SEED.map(item => ({...item, progress: 0}));
       Object.assign(settings, {parentPinHash: '', parentPinSalt: '', activated: false, age: null, a11y: null, skin: 'hikma', theme: 'light', stars: 0, arVoice: '', enVoice: '', ...SPEECH_SETTINGS.defaults});
       try { localStorage.removeItem(KEY); } catch {}
@@ -1228,6 +1219,11 @@
       settings.neuralDefaultV2 = true;
       if (settings.voiceSource === 'device') { settings.voiceSource = 'cloud'; settings.voiceSourcePinned = false; }
     }
+    // الصوت الطبيعي هو الافتراضي لكل الكلام (مرة واحدة نفك تثبيت صوت الجهاز القديم)
+    if (speechConfigured && !settings.neuralDefaultV3) {
+      settings.neuralDefaultV3 = true;
+      settings.voiceSource = 'cloud'; settings.voiceSourcePinned = false;
+    }
     if (speechConfigured && settings.voiceSource === 'device' && !settings.voiceSourcePinned) {
       settings.voiceSource = 'cloud';
     }
@@ -1255,11 +1251,7 @@
     populate();
     panel.querySelector('#playQualitySentence').addEventListener('click', () => {
       const text = cases[language.value][Number(sentence.value)];
-      speechSynthesis.cancel();
-      const utterance = new SpeechSynthesisUtterance(text);
-      utterance.lang = language.value === 'ar' ? 'ar-EG' : 'en-US';
-      utterance.rate = SPEECH_SETTINGS.clampRate(settings.rate);
-      speechSynthesis.speak(utterance);
+      window.HikmaSpeak.speak(text, {lang: language.value === 'ar' ? 'ar' : 'en', rate: SPEECH_SETTINGS.clampRate(settings.rate)});
     });
   }
   // بيغيّر مصدر الصوت
@@ -1563,6 +1555,25 @@
     return speechInflight.get(k).then(r => ({blob: r.blob, meta: {start, text: r.text, words: r.words}}));
   }
 
+  // صوت سحابي لأي جملة قصيرة (كل الأماكن اللي بتتكلم بتستخدمه): نفس الذاكرة ونفس السلسلة
+  window.hikmaCloudBlob = async function (text, language, voiceName) {
+    const l = language === 'en' ? 'en' : 'ar';
+    const voice = /^[A-Z][A-Za-z]{2,30}$/.test(voiceName || '') ? voiceName : (l === 'ar' ? 'neural-ar' : 'neural-en');
+    const provider = window.hikmaBackendHealth?.providers?.speech || 'worker';
+    const clean = String(text || '').replace(/\s+/g, ' ').trim().slice(0, 600);
+    if (!clean) throw new Error('empty');
+    for (const name of [provider, 'edge']) {
+      const hit = await getSpeechCache(await speechCacheKey(name, voice, l, clean));
+      if (hit?.blob) return hit.blob;
+    }
+    if (!navigator.onLine) throw new Error('offline-uncached');
+    const result = await api.speech(clean, l, voice, settings.rate, settings.pitch);
+    if (result.mode !== 'configured' || !result.audioBase64) throw new Error('demo');
+    const blob = audioBlobFromBase64(result.audioBase64, result.contentType);
+    await saveSpeechCache(await speechCacheKey(result.provider || provider, voice, l, clean), blob, null);
+    return blob;
+  };
+
   // تسخين خفيف: أول ما قصة تتفتح بالصوت الطبيعي، بنجهّز أول جملة (طلب واحد صغير، مرة لكل قصة)
   const prewarmed = new Set();
   const origChoose = window.chooseStory;
@@ -1574,7 +1585,7 @@
         if (st && !prewarmed.has(st.id) && navigator.onLine && window.hikmaBackendHealth?.integrations?.speech === 'configured' && !/^(device|friend:)/.test(settings.voiceSource || 'neural')) {
           prewarmed.add(st.id);
           const first = window.hikmaReader.lines?.[window.hikmaReader.lineIndex ?? 0];
-          const voice = lang === 'ar' ? 'neural-ar' : 'neural-en';
+          const voice = window.HikmaSpeak?.skinVoice?.() || (lang === 'ar' ? 'neural-ar' : 'neural-en');
           if (first) setTimeout(() => splitSpeechChunks(first).forEach(c => fetchSpeechChunk(c, voice, window.hikmaBackendHealth?.providers?.speech || 'worker', false, 0).catch(() => {})), 300);
         }
       } catch {}
@@ -1586,7 +1597,7 @@
   async function speakNaturally() {
     if (!story) return;
     const selectedVoice = settings.voiceSource.startsWith('friend:') ? settings.voiceSource.slice(7) : '';
-    const voice = selectedVoice || (lang === 'ar' ? 'neural-ar' : 'neural-en');
+    const voice = selectedVoice || window.HikmaSpeak?.skinVoice?.() || (lang === 'ar' ? 'neural-ar' : 'neural-en');
     const sourceText = lines[lineIndex] || story.text;
     const chunks = splitSpeechChunks(sourceText);
     const speechHealth = window.hikmaBackendHealth?.integrations?.speech;

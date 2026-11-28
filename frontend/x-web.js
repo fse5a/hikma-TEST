@@ -1,7 +1,7 @@
 // ============================================================
 // مزايا الموقع: اقرأ لي الصفحة، جرّب القلم، وضع مكفوف مع ديمو صوتي، أوضاع (طفل/مكفوف/طالب/مدرسة)،
 // تحذير الصوت، نص بديل، اختصارات، بحث، سرعة القراءة، تقييم، مراجع الطلاب، صفحة المشروع.
-// كله بصوت الجهاز (speechSynthesis) ومحلي: مفيش حصة ولا خدمة مدفوعة.
+// الكلام كله بيعدّي من x-speak.js (صوت طبيعي أولاً وصوت الجهاز آخر حل).
 // ============================================================
 (() => {
   'use strict';
@@ -15,17 +15,7 @@
   // ---------- نطق بصوت الجهاز مع كشف الصوت المكتوم ----------
   let lastSpeakStart = 0;
   function speak(text, {lang = 'ar', rate = 0.95, onend, queue = false} = {}) {
-    if (!canSpeak) { warnSound('no-tts'); return false; }
-    if (!queue) speechSynthesis.cancel();
-    const u = new SpeechSynthesisUtterance(String(text).replace(/\s+/g, ' ').trim());
-    u.lang = lang === 'ar' ? 'ar-EG' : 'en-US';
-    u.rate = rate;
-    let started = false;
-    u.onstart = () => { started = true; lastSpeakStart = Date.now(); };
-    u.onend = () => { if (onend) onend(); };
-    speechSynthesis.speak(u);
-    setTimeout(() => { if (!started && speechSynthesis.speaking === false && !speechSynthesis.pending) warnSound('silent'); }, 3500);
-    return true;
+    return window.HikmaSpeak.speak(text, {lang, rate, onend, queue, onNoTts: () => warnSound('no-tts'), onSilent: () => warnSound('silent')});
   }
   HX.speak = speak;
   let warned = 0;
@@ -66,7 +56,7 @@
     return parts.join('. ');
   }
   let reading = false;
-  function stopReadPage() { reading = false; fab.classList.remove('on'); fab.querySelector('b').textContent = 'اقرأ لي الصفحة'; if (canSpeak) speechSynthesis.cancel(); }
+  function stopReadPage() { reading = false; fab.classList.remove('on'); fab.querySelector('b').textContent = 'اقرأ لي الصفحة'; window.HikmaSpeak.stop(); }
   function readPage() {
     if (reading) { stopReadPage(); return; }
     const t = pageText();
@@ -158,7 +148,7 @@
   ];
   let touring = false;
   function voiceTour() {
-    if (touring) { touring = false; speechSynthesis.cancel(); return; }
+    if (touring) { touring = false; window.HikmaSpeak.stop(); return; }
     touring = true; let i = 0;
     const next = () => { if (!touring || i >= TOUR.length) { touring = false; return; } speak(TOUR[i++], {onend: next}); };
     next();

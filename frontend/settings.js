@@ -7,7 +7,7 @@
     pitch: 0,
     announcementRate: 1,
     a11y: false,
-    voiceSource: 'device',
+    voiceSource: 'cloud',
     textScale: 100,
     lineSpacing: 2.1,
     highContrast: false,

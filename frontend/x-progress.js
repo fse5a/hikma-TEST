@@ -158,7 +158,7 @@
   HX.on('tick', async () => {
     if (!limit() || locked || HX.secondsToday() / 60 < limit() + (HX.prefs.extraMin?.[HX.today()] || 0)) return;
     locked = true;
-    window.hikmaReader?.stop?.(); try { speechSynthesis.cancel(); } catch {}
+    window.hikmaReader?.stop?.(); try { window.HikmaSpeak.stop(); } catch {}
     HX.ambient?.stop();
     HX.dialog('hxTimeUp', 'وقت الراحة 🌙', `<div class="hx-result"><div class="hx-big" aria-hidden="true">🌙</div><h3>خلص وقت القراءة النهاردة</h3><p>خد استراحة، وبكرة نكمل.</p><div class="modal-actions"><button class="button primary" id="hxTimeOk" type="button">تمام</button><button class="button secondary" id="hxTimeMore" type="button">زيادة وقت (الأهل)</button></div></div>`);
     HX.open('hxTimeUp');

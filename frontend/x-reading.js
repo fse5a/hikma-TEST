@@ -41,12 +41,7 @@
   const seeded = seed => { let x = seed || 1; return () => { x = (x * 1103515245 + 12345) & 0x7fffffff; return x / 0x7fffffff; }; };
   const splitSentences = t => (String(t).match(/[^.!؟?\n]+[.!؟?]*/g) || []).map(s => s.trim()).filter(Boolean);
   const say = (text, language = 'ar') => {
-    if (!('speechSynthesis' in window)) return;
-    speechSynthesis.cancel();
-    const u = new SpeechSynthesisUtterance(text);
-    u.lang = language === 'ar' ? 'ar-EG' : 'en-US';
-    u.rate = 0.9;
-    speechSynthesis.speak(u);
+    window.HikmaSpeak.speak(text, {lang: language === 'ar' ? 'ar' : 'en', rate: 0.95});
   };
   HX.say = say; HX.strip = strip; HX.splitSentences = splitSentences; HX.tokens = tokens;
 

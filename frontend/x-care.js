@@ -10,7 +10,7 @@
   const KEY = 'hikma-care-v1';
   const prefs = (() => { try { return JSON.parse(localStorage.getItem(KEY) || '{}'); } catch { return {}; } })();
   const store = () => { try { localStorage.setItem(KEY, JSON.stringify(prefs)); } catch {} };
-  const speak = (t, lang = 'ar') => { try { HX.say ? HX.say(t, lang) : speechSynthesis.speak(Object.assign(new SpeechSynthesisUtterance(t), {lang: lang === 'en' ? 'en-US' : 'ar-EG'})); } catch {} };
+  const speak = (t, lang = 'ar') => { try { HX.say(t, lang); } catch {} };
 
   // ---------- الوقت والتاريخ ----------
   function timeText() {
@@ -32,8 +32,7 @@
   const LEVELS = [['off', 'من غير سقف', 1], ['mid', 'متوسط', 0.6], ['low', 'هادي (للأطفال)', 0.35]];
   const cap = () => (LEVELS.find(l => l[0] === (prefs.cap || 'off')) || LEVELS[0])[2];
   HX.volumeCap = cap;
-  const origSpeak = window.speechSynthesis && window.speechSynthesis.speak.bind(window.speechSynthesis);
-  if (origSpeak) window.speechSynthesis.speak = u => { try { if (u) u.volume = Math.min(u.volume ?? 1, cap()); } catch {} return origSpeak(u); };
+  window.HikmaSpeak?.setVolumeCap(cap);
   function openCap() {
     HX.dialog('hxCap', 'سقف الصوت', `<p class="hx-muted">بيحدّد أعلى صوت ممكن، عشان سمع الطفل.</p><div class="hx-row" role="radiogroup" aria-label="سقف الصوت">${LEVELS.map(l => `<button class="button ${(prefs.cap || 'off') === l[0] ? 'primary' : 'secondary'}" type="button" role="radio" aria-checked="${(prefs.cap || 'off') === l[0]}" data-hx-cap="${l[0]}">${l[1]}</button>`).join('')}</div>`);
     HX.open('hxCap');
