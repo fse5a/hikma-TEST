@@ -1,0 +1,25 @@
+// تدريب النطق: بنسجّل بميكروفون وهمي وبنتأكد إن زر "صوتي" بيتفعّل، وإن الرفض بيطلع رسالة.
+import {chromium} from 'playwright-core';
+import {BASE, CHROME, ok, summary, startServer} from './helpers.mjs';
+const stop = await startServer();
+const b = await chromium.launch({executablePath: CHROME, args: ['--no-sandbox', '--use-fake-ui-for-media-stream', '--use-fake-device-for-media-stream']});
+const ctx = await b.newContext({viewport: {width: 420, height: 900}, permissions: ['microphone'], locale: 'ar-EG'});
+const page = await ctx.newPage(); const errs = [];
+page.on('pageerror', e => errs.push(String(e)));
+await page.route('**/api/**', r => r.fulfill({status: r.request().url().includes('/api/speech') ? 503 : 200, contentType: 'application/json', body: '{"ok":true,"mode":"production","integrations":{}}'}));
+await page.addInitScript(() => { if (!localStorage.getItem('__s')) { localStorage.setItem('hikma-library-v2', JSON.stringify({settings: {activated: true, age: 'o16', a11y: false, skin: 'hikma', theme: 'light'}})); localStorage.setItem('__s', '1'); } });
+await page.goto(BASE + '/'); await page.waitForTimeout(800);
+await page.evaluate(() => { state.stories.unshift({id: 'pr-t', title: 'اختبار', text: 'ذهب سامي إلى السوق مع أمه. اشترى سامي تفاحا أحمر. عاد سامي إلى البيت.', lang: 'ar', progress: 0, icon: '📖'}); save(); renderLibrary(); chooseStory('pr-t'); });
+await page.waitForTimeout(600);
+await page.evaluate(() => HX.features.find(f => f.id === 'pron').open());
+await page.waitForTimeout(300);
+ok(await page.locator('#hxVoiceSel option').count() >= 3, 'practice list has words and sentences: ' + await page.locator('#hxVoiceSel option').count());
+ok(await page.locator('#hxVoiceMine').isDisabled(), '"my voice" is disabled before recording');
+await page.locator('#hxVoiceRec').click(); await page.waitForTimeout(1500);
+ok(/بيسجّل/.test(await page.locator('#hxVoiceMsg').innerText()), 'recording state is shown');
+await page.locator('#hxVoiceRec').click(); await page.waitForTimeout(800);
+ok(await page.locator('#hxVoiceMine').isEnabled(), 'after stopping, "my voice" playback is enabled');
+ok(/اتسجّل/.test(await page.locator('#hxVoiceMsg').innerText()), 'saved message shown');
+await page.screenshot({path: '/tmp/pron.png'});
+ok(errs.length === 0, 'no errors ' + errs.join('|'));
+await b.close(); stop(); process.exit(summary('pronounce') ? 1 : 0);
