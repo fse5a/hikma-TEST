@@ -1,0 +1,25 @@
+// نص عربي طويل جدًا (~60 ألف حرف): الإضافة والفتح وملخص وكويز ومعنى الكلمة لازم يشتغلوا من غير تهنيج.
+import {launch, newPage, ok, summary, startServer} from './helpers.mjs';
+const stop = await startServer(); const browser = await launch();
+const para = 'كان في قديم الزمان ولد صغير اسمه سالم بيحب القراءة جدًا. كل يوم كان بيروح المكتبة ويقرا حكاية جديدة عن البحر والجبل والصحرا. وفي يوم قابل راجل عجوز علّمه إن الصبر مفتاح الفرج، وإن اللي بيتعب النهارده بيرتاح بكرة. '; 
+const TEXT = Array.from({length: 150}, (_, i) => para + `الفقرة رقم ${i + 1}.`).join('\n\n');
+const {page, errs, speech} = await newPage(browser, {w: 1100, seed: {activated: true, age: 'o16', a11y: false, skin: 'hikma', theme: 'light'}});
+let t0 = Date.now();
+const id = await page.evaluate(t => { HX.addStory({title: 'نص طويل جدًا', text: t, lang: 'ar'}); return state.stories.find(x => x.title === 'نص طويل جدًا')?.id; }, TEXT);
+ok(!!id, 'long story added (' + TEXT.length + ' chars) in ' + (Date.now() - t0) + 'ms');
+t0 = Date.now();
+await page.evaluate(i => window.chooseStory ? window.chooseStory(i) : document.querySelector('[data-open="' + i + '"]')?.click(), id);
+await page.waitForTimeout(1500);
+const open = Date.now() - t0;
+const tapAt = async (n) => { const pt = await page.evaluate(n => { const sp = document.querySelector(`#readingText [data-line="${n}"]`); if (!sp) return null; sp.scrollIntoView({block: 'center'}); const tn = sp.firstChild; const rg = document.createRange(); rg.setStart(tn, 4); rg.setEnd(tn, 8); const b = rg.getBoundingClientRect(); return {x: b.left + b.width / 2, y: b.top + b.height / 2}; }, n); if (!pt) return false; await page.mouse.click(pt.x, pt.y); await page.waitForTimeout(900); return await page.evaluate(() => !!document.querySelector('.word-pop')); };
+const nLines = await page.evaluate(() => document.querySelectorAll('#readingText [data-line]').length);
+ok(nLines > 100, 'reader rendered ' + nLines + ' sentences, open ' + open + 'ms');
+const fast = await page.evaluate(t => { const a = performance.now(); HX.summarize(t, 2); HX.autoMoral(t); return performance.now() - a; }, TEXT);
+ok(fast < 3000, 'summary+moral on long text ' + Math.round(fast) + 'ms');
+ok(await tapAt(1), 'tap meaning works at the start of a long text');
+const w1 = await page.evaluate(() => document.querySelector('.word-pop-word')?.textContent);
+const tapped = await tapAt(nLines - 2); const w2 = await page.evaluate(() => document.querySelector('.word-pop-word')?.textContent);
+ok(tapped && w2 && w2 !== w1, 'tap meaning works near the end of a long text: ' + w1 + ' -> ' + w2);
+await page.screenshot({path: '/tmp/long.png'});
+ok(errs.length === 0, 'no errors ' + errs.join('|')); ok(speech.length === 0, 'speech never called');
+await browser.close(); stop(); process.exit(summary('longtext') ? 1 : 0);
