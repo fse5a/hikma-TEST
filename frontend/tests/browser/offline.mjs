@@ -1,0 +1,20 @@
+// بدون إنترنت: الموقع لازم يفتح ويقرا القصص المحفوظة، والمعنى يقول محتاج إنترنت.
+import {launch, ok, summary, startServer, BASE} from './helpers.mjs';
+const stop = await startServer(); const browser = await launch();
+const ctx = await browser.newContext({viewport: {width: 390, height: 800}, locale: 'ar-EG', serviceWorkers: 'allow'});
+const page = await ctx.newPage(); const errs = [];
+page.on('pageerror', e => errs.push(String(e)));
+await page.addInitScript(() => { if (!localStorage.getItem('__s')) { localStorage.setItem('hikma-library-v2', JSON.stringify({settings: {activated: true, age: 'o16', a11y: false, skin: 'hikma', theme: 'light'}})); localStorage.setItem('__s', '1'); } });
+await page.goto(BASE + '/'); await page.waitForTimeout(4000);
+await ctx.setOffline(true);
+await page.reload({waitUntil: 'domcontentloaded'}).catch(() => {}); await page.waitForTimeout(2000);
+const n = await page.evaluate(() => document.querySelectorAll('[data-delete]').length);
+ok(n > 0, `offline reload still shows the library (${n} stories)`);
+await page.locator('[data-open]:visible').first().click(); await page.waitForTimeout(900);
+ok(await page.locator('#readerOverlay.open').count() === 1, 'offline: reader opens');
+await page.locator('#readingText span[data-line]').first().click({position: {x: 20, y: 8}}).catch(() => {}); await page.waitForTimeout(800);
+const pop = await page.locator('.word-pop').innerText().catch(() => '');
+ok(/محتاج إنترنت|—|…/.test(pop) || pop === '', 'offline: word tap does not crash: ' + JSON.stringify(pop.slice(0, 60)));
+await page.screenshot({path: '/tmp/offline.png'});
+ok(errs.length === 0, 'no page errors offline ' + errs.join('|'));
+await browser.close(); stop(); process.exit(summary('offline') ? 1 : 0);

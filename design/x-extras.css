@@ -234,3 +234,4 @@ body.hikma-reading .play-control::after { content: ""; position: absolute; inset
 .reader-grid.panel-closed{grid-template-columns:1fr !important}
 .reader-grid.panel-closed .voice-panel{display:none}
 body:has(#readerOverlay.open) #mascotBuddy .buddy-bubble{display:none !important}
+.story-tag{display:inline-block;padding:2px 10px;border-radius:999px;line-height:1.5}
