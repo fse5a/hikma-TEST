@@ -110,8 +110,8 @@ export function createGeminiSpeechProvider(environment = process.env, fetchImpl 
       clearTimeout(timeoutId);
     }
   }
-  async function synthesizePrebuilt(voiceName, text) {
-    const result = await postJson(`${API_BASE}/models/${model}:generateContent`, {
+  async function synthesizePrebuilt(voiceName, text, useModel = model) {
+    const result = await postJson(`${API_BASE}/models/${useModel}:generateContent`, {
       // النص بيتبعت لوحده: أي جملة تعليمات قبله كان الصوت بينطقها بصوت عالي
       contents: [{parts: [{text: String(text)}]}],
       generationConfig: {responseModalities: ['AUDIO'], speechConfig: {voiceConfig: {prebuiltVoiceConfig: {voiceName}}}}
@@ -153,7 +153,16 @@ export function createGeminiSpeechProvider(environment = process.env, fetchImpl 
       if (NATIVE_VOICE.test(requested)) {
         try { audioBase64 = await synthesizeInteraction(requested, text); } catch { audioBase64 = ''; }
       }
-      if (!audioBase64) audioBase64 = await synthesizePrebuilt(NATIVE_VOICE.test(requested) ? fallbackVoice : requested, text);
+      if (!audioBase64) {
+        const classic = NATIVE_VOICE.test(requested) ? fallbackVoice : requested;
+        // النص بيتبعت لوحده من غير تعليمات؛ لو الطريقة الكلاسيكية فشلت نجرب Interactions بنفس الصوت
+        try { audioBase64 = await synthesizePrebuilt(classic, text); }
+        catch {
+          // لو الموديل وصل للحد المجاني بنجرب موديل تاني مجاني قبل ما نسيب الدور للمزود اللي بعده
+          try { audioBase64 = await synthesizeInteraction(classic, text); }
+          catch { audioBase64 = await synthesizePrebuilt(classic, text, 'gemini-2.5-flash-preview-tts'); }
+        }
+      }
       const wav = wavFromPcm(audioBase64);
       if (wav.length > 4_200_000) throw new Error('Gemini TTS audio chunk is too large.');
       const pcmBytes = Buffer.from(audioBase64, 'base64');
