@@ -235,3 +235,10 @@ body.hikma-reading .play-control::after { content: ""; position: absolute; inset
 .reader-grid.panel-closed .voice-panel{display:none}
 body:has(#readerOverlay.open) #mascotBuddy .buddy-bubble{display:none !important}
 .story-tag{display:inline-block;padding:2px 10px;border-radius:999px;line-height:1.5}
+
+/* لما القارئ مفتوح: الشخصية بتختفي وزر «اقرأ لي الصفحة» بيبقى أيقونة صغيرة في شريط القارئ فوق، مبيغطيش النص */
+body:has(#readerOverlay.open) #mascotBuddy { display: none !important; }
+body:has(#readerOverlay.open) .hx-fab { inset-inline-start: auto !important; right: auto !important; bottom: auto !important; top: 18px !important; left: calc(max(0px, (100vw - 980px) / 2) + 150px) !important; min-height: 40px !important; width: 40px; padding: 0 !important; justify-content: center; }
+body:has(#readerOverlay.open) .hx-fab b { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+@media (max-width: 600px) { body:has(#readerOverlay.open) .hx-fab { top: 20px !important; left: 150px !important; min-height: 36px !important; width: 36px; } }
+@media (max-width: 600px) { #readerOverlay .dialog-head h2 { margin-left: 52px; font-size: 16px; } }
