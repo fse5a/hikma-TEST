@@ -34,6 +34,7 @@ export default async function handler(request, response) {
     ai: integrationStatus('ai', process.env.AI_API_KEY || process.env.AI_PROVIDER),
     translation: integrationStatus('translation', process.env.TRANSLATION_WORKER_URL || process.env.OPENAI_API_KEY || process.env.GEMINI_API_KEY),
     speech: integrationStatus('speech', process.env.SPEECH_WORKER_URL || (process.env.SPEECH_PROVIDER === 'google' && process.env.GOOGLE_TTS_API_KEY) || (process.env.SPEECH_PROVIDER === 'gemini' && process.env.GEMINI_API_KEY) || (createEdgeSpeechProvider() ? 'edge' : null)),
+    showcaseVoice: integrationStatus('showcase-voice', process.env.ELEVENLABS_API_KEY),
     quotas: integrationStatus('quotas', process.env.SUPABASE_URL && process.env.SUPABASE_SERVICE_ROLE_KEY),
     privateAudioStorage: integrationStatus('private-audio-storage', process.env.SUPABASE_URL && process.env.SUPABASE_SERVICE_ROLE_KEY),
     diacritization: integrationStatus('diacritization', process.env.DIACRITIZATION_WORKER_URL),

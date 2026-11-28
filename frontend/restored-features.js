@@ -391,7 +391,7 @@
     const mascot = document.querySelector('.welcome .owl');
     if (mascot) mascot.outerHTML = settings.skin === 'hikma' ? originalMascot : (art[settings.skin] || botArt);
     // شعار الهيدر الصغير كمان بيتحوّل مع السكنز المقفولة
-    if (brandMark) brandMark.innerHTML = skin.locked && art[settings.skin] ? art[settings.skin].replace('class="owl" ', 'aria-hidden="true" ').replace(/role="img" aria-label="[^"]*"/, '') : originalBrandMark;
+    if (brandMark) brandMark.innerHTML = settings.skin !== 'hikma' && art[settings.skin] ? art[settings.skin].replace('class="owl" ', 'aria-hidden="true" ').replace(/role="img" aria-label="[^"]*"/, '') : originalBrandMark;
     const liveMascot = document.querySelector('.welcome .owl');
     if (liveMascot) { liveMascot.setAttribute('tabindex', '0'); liveMascot.setAttribute('role', 'button'); liveMascot.setAttribute('aria-label', `${skin.name}، المسه ليتكلم`); }
     const welcome = document.querySelector('.welcome h1');

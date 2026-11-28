@@ -16,6 +16,8 @@
     zelda: {voice: 'Leda', rate: 1},
     doom: {voice: 'Charon', rate: 0.9}
   };
+  const SHOWCASE_IDS = ['bk-rich-dad', 'bk-kotler', 'cart-naruto', 'cart-doraemon', 'lol-swain', 'myth-icarus', 'myth-isis', 'myth-thor'];
+  let creditShown = false;
   const settings = () => (typeof state !== 'undefined' && state.settings) || {};
   const profile = () => SKIN_VOICES[document.documentElement.dataset.skin || settings().skin] || SKIN_VOICES.hikma;
   let token = 0, audio = null, audioUrl = null, capFn = () => 1;
@@ -98,7 +100,15 @@
 
   window.HikmaSpeak = {
     speak, speakDevice, stop, prefetch,
-    skinVoice: () => profile().voice,
+    // قصص العرض بس: صوت ElevenLabs المجاني (حد شهري على السيرفر). غير كده صوت الشخصية.
+    skinVoice: () => {
+      const st = window.hikmaReader?.story;
+      if (st && (st.showcase === true || SHOWCASE_IDS.includes(st.id)) && window.hikmaBackendHealth?.integrations?.showcaseVoice === 'configured') {
+        if (!creditShown) { creditShown = true; try { window.HX?.toast('صوت القصة دي من ElevenLabs'); } catch {} }
+        return 'Eleven';
+      }
+      return profile().voice;
+    },
     isSpeaking: () => Boolean(audio && !audio.paused) || Boolean(window.speechSynthesis?.speaking),
     setVolumeCap: fn => { capFn = fn; },
     voices: SKIN_VOICES

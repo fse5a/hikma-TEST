@@ -5,6 +5,7 @@ import {sendError, parseJsonBody, validateRequired, getRequestId, sendJson} from
 import {createSpeechProvider, createGoogleSpeechProvider} from '../lib/speech-provider.js';
 import {createGeminiSpeechProvider} from '../lib/gemini-provider.js';
 import {createEdgeSpeechProvider} from '../lib/edge-provider.js';
+import {createElevenSpeechProvider, ELEVEN_VOICE} from '../lib/eleven-provider.js';
 import {resolveSupabaseUser} from '../lib/supabase-auth.js';
 import {enforceApiQuota} from '../lib/quota.js';
 import {loadPrivateAudio, storePrivateAudio} from '../lib/audio-cache.js';
@@ -35,7 +36,8 @@ export default async function handler(request, response) {
   }
 
   // Ordered fallback chain: if a provider fails (quota, outage), the next one answers.
-  const providers = [createSpeechProvider(), createGoogleSpeechProvider(), createGeminiSpeechProvider(), createEdgeSpeechProvider()].filter(Boolean);
+  const showcase = voice === ELEVEN_VOICE ? createElevenSpeechProvider() : null;
+  const providers = [showcase, createSpeechProvider(), createGoogleSpeechProvider(), createGeminiSpeechProvider(), createEdgeSpeechProvider()].filter(Boolean);
   const provider = providers[0];
   const supabaseConfigured = Boolean(process.env.SUPABASE_URL && process.env.SUPABASE_ANON_KEY);
   const cacheConfigured = Boolean(process.env.SUPABASE_URL && process.env.SUPABASE_SERVICE_ROLE_KEY);
@@ -103,7 +105,9 @@ async function synthesizeWithFallback(providers, payload) {
   let lastError;
   for (const candidate of providers) {
     try {
-      return await candidate.synthesize(payload);
+      // صوت العرض خاص بـElevenLabs بس؛ باقي المزودات بتاخد صوتها العادي
+      const own = candidate.name === 'elevenlabs' || payload.voice !== ELEVEN_VOICE ? payload : {...payload, voice: 'device'};
+      return await candidate.synthesize(own);
     } catch (error) {
       lastError = error;
     }
