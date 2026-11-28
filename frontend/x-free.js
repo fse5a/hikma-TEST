@@ -61,7 +61,7 @@
   // شخصيات: لو ليها صورة في assets/mascots بنستخدمها، وإلا رسمة بسيطة
   const W = pat => new RegExp('(?<![\\u0600-\\u06FFA-Za-z])[وفبلك]?(?:ال)?(?:' + pat + ')(?![\\u0600-\\u06FFA-Za-z])', 'i');
   const CHARS = [
-    ['doraemon', W('دورايمون|doraemon'), 'دورايمون', 'doraemon'], ['mickey', W('الأرنب الأبيض|white rabbit|mickey'), 'الأرنب الأبيض', 'mickey'],
+    ['doraemon', W('دورايمون|doraemon'), 'دورايمون', 'doraemon'], ['mickey', W('بوباي|popeye|mickey'), 'بوباي', 'mickey'],
     ['zelda', W('لينك|زيلدا|zelda'), 'لينك', 'zelda'], ['doom', W('دوم|doom'), 'دكتور دوم', 'doom'],
     ['uchiha', W('أوتشيها|ساسكي|uchiha|sasuke'), 'أوتشيها', 'uchiha'], ['anbu', W('أنبو|anbu'), 'أنبو', 'anbu'],
     ['owl', W('بومة|owl'), 'البومة حكمة', 'hikma'],
