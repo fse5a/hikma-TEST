@@ -16,7 +16,7 @@ test('admin code: every locked skin is unlocked by the gate logic', async () => 
   const lockedInSkins = [...src.matchAll(/^\s{4}(\w+): \{locked: true/gm)].map(m => m[1]).sort();
   const {SKIN_CODE_HASHES} = await import('../lib/skin-codes.js');
   const skinCodeTargets = Object.values(SKIN_CODE_HASHES).sort();
-  assert.equal(lockedInSkins.length, 6);
+  assert.equal(lockedInSkins.length, 7);
   assert.deepEqual(lockedInSkins, skinCodeTargets, 'admin unlock list (all locked skins) equals every skin that has a code');
   // the client unlocks Object.keys(skins).filter(locked) when the server says admin:true
   assert.match(readFileSync(new URL('../../frontend/restored-features.js', import.meta.url), 'utf8'), /result\.admin\) settings\.unlockedSkins = Object\.keys\(skins\)\.filter\(k => skins\[k\]\.locked\)/);

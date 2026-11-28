@@ -112,7 +112,8 @@ export function createGeminiSpeechProvider(environment = process.env, fetchImpl 
   }
   async function synthesizePrebuilt(voiceName, text) {
     const result = await postJson(`${API_BASE}/models/${model}:generateContent`, {
-      contents: [{parts: [{text: `Read aloud the following text exactly as written, with no additions:\n\n${text}`}]}],
+      // النص بيتبعت لوحده: أي جملة تعليمات قبله كان الصوت بينطقها بصوت عالي
+      contents: [{parts: [{text: String(text)}]}],
       generationConfig: {responseModalities: ['AUDIO'], speechConfig: {voiceConfig: {prebuiltVoiceConfig: {voiceName}}}}
     });
     const data = String(result?.candidates?.[0]?.content?.parts?.[0]?.inlineData?.data || '');

@@ -931,8 +931,11 @@
     event.preventDefault();
     event.stopImmediatePropagation();
     if (target.id === 'playPause') {
-      if (activeAudio.paused) activeAudio.play().catch(() => toast('تعذر استئناف التسجيل'));
-      else activeAudio.pause();
+      const a = activeAudio;
+      // مفيش حاجة بتضيع: لو اليوزر ضغط وقف والصوت لسه ما بدأش، نفتكرها ونوقّفه أول ما يبدأ
+      if (a.__wantPaused) { a.__wantPaused = false; a.play().catch(() => toast('تعذر استئناف التسجيل')); }
+      else if (a.paused && (a.__started || !generatedAudios.has(a))) a.play().catch(() => toast('تعذر استئناف التسجيل'));
+      else { a.__wantPaused = true; a.pause(); }
       return;
     }
     const wasPlaying = !activeAudio.paused;
@@ -1444,7 +1447,7 @@
 
   // بيولّد مفتاح تخزين الصوت
   async function speechCacheKey(provider, voice, language, text) {
-    const payload = JSON.stringify([provider, voice, language, text, settings.rate, settings.pitch]);
+    const payload = JSON.stringify(['v2-clean-prompt', provider, voice, language, text, settings.rate, settings.pitch]);
     const bytes = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(payload));
     return `speech-${[...new Uint8Array(bytes)].map(byte => byte.toString(16).padStart(2, '0')).join('')}`;
   }
@@ -1458,6 +1461,7 @@
   }
 
   // بيشغّل أجزاء الصوت الطبيعي مع تمييز الكلمات
+  const generatedAudios = new WeakSet();
   async function playGeneratedAudio(items) {
     stopSpeech();
     stopAudio();
@@ -1473,7 +1477,10 @@
       if (activeAudioUrl) URL.revokeObjectURL(activeAudioUrl);
       activeAudioUrl = URL.createObjectURL(item.blob);
       const audio = new Audio(activeAudioUrl);
+      generatedAudios.add(audio);
       activeAudio = audio;
+      audio.onplay = () => { audio.__started = true; if (audio.__wantPaused) { audio.pause(); return; } $('#playIcon').textContent = 'Ⅱ'; $('#playPause').setAttribute('aria-label', 'إيقاف مؤقت'); setReadingState(true); };
+      audio.onpause = () => { if (activeAudio !== audio || audio.ended) return; $('#playIcon').textContent = '▶'; $('#playPause').setAttribute('aria-label', 'متابعة القراءة'); $('#readerMessage').textContent = 'القراءة واقفة. اضغط للمتابعة.'; setReadingState(false); };
       audio.playbackRate = SPEECH_SETTINGS.clampRate(settings.rate);
       audio.preservesPitch = true;
       audio.webkitPreservesPitch = true;
@@ -1612,8 +1619,19 @@
   }
 
   // ده بتاع زر القراءة بالصوت الطبيعي: يجلب الصوت من الخادم أو من الذاكرة ثم يشغله
+  let naturalToken = 0, naturalPending = false;
+  // وقف القراءة (صوت الجهاز أو الصوت الطبيعي قبل ما يبدأ) من زر الإيقاف المؤقت
+  function pauseReading() {
+    naturalToken++; naturalPending = false;
+    stopSpeech();
+    $('#playPause').setAttribute('aria-label', 'متابعة القراءة من بداية الجملة');
+    $('#readerMessage').textContent = 'القراءة واقفة. اضغط للمتابعة.';
+  }
+  window.hikmaPauseReading = pauseReading;
   async function speakNaturally() {
     if (!story) return;
+    const myToken = ++naturalToken; naturalPending = true;
+    if ($('#playIcon')) $('#playIcon').textContent = 'Ⅱ';
     const selectedVoice = settings.voiceSource.startsWith('friend:') ? settings.voiceSource.slice(7) : '';
     const voice = selectedVoice || window.HikmaSpeak?.skinVoice?.() || (lang === 'ar' ? 'neural-ar' : 'neural-en');
     const sourceText = lines[lineIndex] || story.text;
@@ -1637,9 +1655,13 @@
       }
       items.forEach(it => it.catch(() => {}));
       await items[0];
+      if (myToken !== naturalToken) return; // اليوزر وقّف القراءة وإحنا بنجهّز الصوت
+      naturalPending = false;
       await playGeneratedAudio(items);
       cloudStatus('يعمل الصوت الخلفي المحفوظ على هذا الجهاز.');
     } catch (error) {
+      if (myToken !== naturalToken) return;
+      naturalPending = false;
       if (error?.code !== 'demo' && error?.code !== 'offline_uncached') cloudStatus(`${api.toFriendlyMessage(error)} يعمل صوت الجهاز بدلًا منه.`, true);
       window.startSpeech();
     }
@@ -1767,6 +1789,10 @@
       }
     }
     if (settings.voiceSource === 'device' || !event.target.closest('#playPause, #readingText [data-line]')) return;
+    // الصوت شغال بالفعل (صوت الجهاز كبديل أو الصوت الطبيعي بيتجهّز): زر التشغيل بيوقّف مش بيبدأ من الأول
+    if (event.target.closest('#playPause') && (naturalPending || document.body.classList.contains('hikma-reading'))) {
+      event.preventDefault(); event.stopImmediatePropagation(); pauseReading(); return;
+    }
     event.preventDefault();
     event.stopImmediatePropagation();
     speakNaturally();

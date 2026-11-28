@@ -10,7 +10,7 @@ function digest(value) {
 
 // هنا: مفتاح التخزين المؤقت لجزء صوتي
 function cacheHash({provider, voice, language, text, rate, pitch}) {
-  return digest(JSON.stringify([provider, voice, language, text, rate, pitch]));
+  return digest(JSON.stringify(['v2-clean-prompt', provider, voice, language, text, rate, pitch]));
 }
 
 // هيدرز الاتصال بـSupabase بصلاحية السيرفر

@@ -12,6 +12,7 @@ export const SKIN_CODE_HASHES = {
     '6807201c60fcb133daca16a6e1fe4ef80f3813e1ec860728861a6df16330f592': 'uchiha',
     'd948b07a514a4f1b53aab02b7c07587b37507b419b7914d3eaf5c4202e6bdde1': 'zelda',
     'd9d99c9a8ce4b2cb1c7e5bd4d6dfb78434234b90a0bb0f28672c025ef695a64d': 'doom',
+    '3c1fe9a289fead4ca411d65c87a18fa65ec49d695a70b808bd5227d0007e980f': 'felix',
 };
 
 // بيرجّع اسم السكن لو الكود صح، أو null لو غلط

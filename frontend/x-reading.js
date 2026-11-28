@@ -192,6 +192,11 @@
     rec.onend = () => { rep.rec = null; };
     rec.start();
   }
+  // لما الشباك يتقفل الميكروفون لازم يقف (كان بيفضل شغال)
+  const stopRepeatMic = () => { try { rep.rec?.abort(); } catch {} rep.rec = null; };
+  document.addEventListener('click', e => { if (e.target.closest('[data-close="hxRepeat"], #hxRepeat .hx-close, #hxRepeat [aria-label="إغلاق"]')) stopRepeatMic(); });
+  document.addEventListener('keydown', e => { if (e.key === 'Escape') stopRepeatMic(); });
+  window.addEventListener('pagehide', stopRepeatMic);
   document.addEventListener('click', e => {
     if (e.target.closest('#hxRepeatMic')) listenOnce();
     else if (e.target.closest('#hxRepeatListen')) { const r = window.hikmaReader; say(HX.lines()[rep.i], r.story.lang); }

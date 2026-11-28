@@ -6,7 +6,7 @@ let r = await newPage(browser, {w: 390, h: 800, seed: {activated: true, age: 'o1
 await r.page.evaluate(() => { document.getElementById('settingsButton')?.click?.(); const t = [...document.querySelectorAll('button')].find(b => /الإعدادات/.test(b.textContent) && b.offsetParent); t?.click(); });
 await r.page.waitForTimeout(700);
 let info = await r.page.evaluate(() => ({open: [...document.querySelectorAll('#settingsSkins [data-skin]')].map(b => b.dataset.skin), locked: [...document.querySelectorAll('#settingsSkins [data-locked-skin]')].map(b => b.dataset.lockedSkin), imgs: [...document.querySelectorAll('#settingsSkins .skin-ico')].map(i => i.getAttribute('src')), text: document.getElementById('settingsSkins').innerText}));
-ok(info.open.length + info.locked.length === 10 && info.locked.length === 6, 'all 10 cards shown, 6 locked: ' + info.open + ' | ' + info.locked);
+ok(info.open.length + info.locked.length === 10 && info.locked.length === 7, 'all 10 cards shown, 7 locked: ' + info.open + ' | ' + info.locked);
 ok(new Set(info.imgs).size === 10 && info.imgs.every(s => /skinicons\/\w+\.webp/.test(s)), 'every card has its own painted icon');
 ok(!/[\u{1F300}-\u{1FAFF}\u2600-\u27BF]/u.test(info.text.replace(/🔒/g, '')), 'no emoji icon text on cards');
 await r.page.locator('#settingsSkins').screenshot({path: '/downloads/skin-cards-390.png'});
