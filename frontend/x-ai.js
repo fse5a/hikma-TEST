@@ -73,7 +73,7 @@
     document.querySelectorAll('button[data-hx-aiq]').forEach(x => x.disabled = true);
     setTimeout(() => { qi++; showQ(); }, ok ? 900 : 2200);
   });
-  feat('aiquiz', '❓', 'أسئلة عن القصة', 'إيه حصل الأول؟', 24, openQuiz);
+  feat('aiquiz', '🎯', 'أسئلة عن القصة', 'إيه حصل الأول؟', 24, openQuiz);
 
   function openKeys() {
     const k = HX.keywords(curText());
@@ -88,5 +88,5 @@
     HX.dialog('hxAiLvl', 'مستوى النص', r ? `<p class="hx-moral-text" role="status">مستوى النص: ${esc(r.name)}</p><p class="hx-muted">${esc(r.who)}</p><p class="hx-muted">${r.sentences} جملة، ${r.words} كلمة، متوسط الجملة ${r.avgSentence} كلمة.</p>` : '<p class="hx-muted">النص قصير جدًا للتقدير.</p>');
     HX.open('hxAiLvl');
   }
-  feat('ailevel', '📏', 'مستوى النص', 'سهل ولا صعب؟', 26, openLevel);
+  feat('ailevel', '📊', 'مستوى النص', 'سهل ولا صعب؟', 26, openLevel);
 })();
