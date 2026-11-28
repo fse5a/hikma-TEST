@@ -1077,3 +1077,6 @@ html[data-skin][data-hc=off][data-theme=dark] .dialog input, html[data-skin][dat
 /* على الموبايل المساعد العايم مخفي عشان ما يغطيش أزرار ولا نص (البومة موجودة في الرئيسية وشاشة القراءة) */
 #mascotBuddy .buddy-bubble { max-width: min(220px, 52vw); }
 @media (max-width: 760px) { #mascotBuddy { display: none !important; } }
+
+/* Phone: no drifting decorative dots (they read as stray marks) */
+@media (max-width: 700px) { html body::before { background-image: none !important; animation: none !important; } }
