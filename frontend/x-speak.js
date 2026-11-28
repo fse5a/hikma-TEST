@@ -7,6 +7,7 @@
   const SKIN_VOICES = {
     hikma: {voice: 'Aoede', rate: 0.95},
     cat: {voice: 'Fenrir', rate: 1.05},
+    felix: {voice: 'Achird', rate: 1.05},
     bot: {voice: 'Zephyr', rate: 0.95},
     doraemon: {voice: 'Puck', rate: 1.05},
     mickey: {voice: 'Charon', rate: 0.95},

@@ -1,7 +1,7 @@
 import {launch, newPage, ok, summary, startServer} from './helpers.mjs';
 const stop = await startServer(); const browser = await launch();
-const skins = ['hikma', 'doraemon', 'mickey', 'anbu', 'uchiha', 'zelda', 'doom', 'cat', 'bot'];
-const un = ['doraemon', 'mickey', 'anbu', 'uchiha', 'zelda', 'doom', 'cat', 'bot', 'robot'];
+const skins = ['hikma', 'doraemon', 'mickey', 'anbu', 'uchiha', 'zelda', 'doom', 'cat', 'bot', 'felix'];
+const un = ['doraemon', 'mickey', 'anbu', 'uchiha', 'zelda', 'doom', 'cat', 'bot', 'felix', 'robot'];
 for (const [w, h] of [[1280, 700], [1280, 560], [1920, 1000], [1024, 640], [800, 600], [390, 800]]) for (const sk of (w === 1280 && h === 700 ? skins : ['hikma', 'doraemon'])) {
   const r = await newPage(browser, {w, h, seed: {activated: true, age: 'o16', a11y: false, skin: sk, theme: 'dark', unlockedSkins: un}});
   await r.page.waitForTimeout(1800);

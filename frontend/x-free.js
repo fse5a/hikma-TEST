@@ -64,6 +64,7 @@
     ['doraemon', W('دورايمون|doraemon'), 'دورايمون', 'doraemon'], ['mickey', W('بوباي|popeye|mickey'), 'بوباي', 'mickey'],
     ['zelda', W('لينك|زيلدا|zelda'), 'لينك', 'zelda'], ['doom', W('دوم|doom'), 'دكتور دوم', 'doom'],
     ['uchiha', W('أوتشيها|ساسكي|uchiha|sasuke'), 'أوتشيها', 'uchiha'], ['anbu', W('أنبو|anbu'), 'أنبو', 'anbu'],
+    ['felix', W('فيليكس|felix'), 'فيليكس', 'felix'],
     ['owl', W('بومة|owl'), 'البومة حكمة', 'hikma'],
     ['boy', W('نوبيتا|ولد|طفل|صبي|boy|child'), 'ولد', null], ['girl', W('بنت|فتاة|سوزوكا|girl'), 'بنت', null], ['rabbit', W('أرنب|ارنب|rabbit|hare|bunny'), 'أرنب', null]
   ];

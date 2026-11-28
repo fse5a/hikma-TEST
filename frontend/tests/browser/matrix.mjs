@@ -1,6 +1,6 @@
 // مصفوفة: كل الثيمات x الوضعين x اللغات x الموبايل/الديسكتوب. بتفحص أخطاء الكونسول والـ overflow وأزرار صغيرة. شغّلها بـ ONLY=cat,bot
 import {launch, newPage, ok, summary, startServer} from './helpers.mjs';
-const all = ['hikma', 'cat', 'bot', 'doraemon', 'mickey', 'anbu', 'uchiha', 'zelda', 'doom'];
+const all = ['hikma', 'cat', 'bot', 'felix', 'doraemon', 'mickey', 'anbu', 'uchiha', 'zelda', 'doom'];
 const stop = await startServer(); const b = await launch();
 for (const skin of (process.env.ONLY || all.join(',')).split(','))
   for (const theme of ['light', 'dark']) for (const lang of ['ar', 'en', 'es', 'fr']) for (const [w, h] of [[390, 800], [1280, 800]]) {
