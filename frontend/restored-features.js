@@ -1445,25 +1445,26 @@
   }
 
   // بيشغّل أجزاء الصوت الطبيعي مع تمييز الكلمات
-  async function playGeneratedAudio(blobs, metaChunks = null) {
+  async function playGeneratedAudio(items) {
     stopSpeech();
     stopAudio();
     let chunkIndex = 0;
     const playChunk = async () => {
-      if (chunkIndex >= blobs.length) {
+      if (chunkIndex >= items.length) {
         activeAudio = null;
         if (activeAudioUrl) URL.revokeObjectURL(activeAudioUrl);
         activeAudioUrl = null;
         return;
       }
+      const item = await items[chunkIndex];
       if (activeAudioUrl) URL.revokeObjectURL(activeAudioUrl);
-      activeAudioUrl = URL.createObjectURL(blobs[chunkIndex]);
+      activeAudioUrl = URL.createObjectURL(item.blob);
       const audio = new Audio(activeAudioUrl);
       activeAudio = audio;
       audio.playbackRate = SPEECH_SETTINGS.clampRate(settings.rate);
       audio.preservesPitch = true;
       audio.webkitPreservesPitch = true;
-      const meta = metaChunks?.[chunkIndex];
+      const meta = item.meta;
       setReadingState(true);
       if (meta?.words?.length && window.renderLines) {
         audio.addEventListener('timeupdate', () => {
@@ -1491,7 +1492,7 @@
       audio.addEventListener('ended', () => {
         if (activeAudio !== audio) return;
         chunkIndex++;
-        if (chunkIndex < blobs.length) playChunk();
+        if (chunkIndex < items.length) playChunk().catch(onChunkFail);
         else finishSentence();
       }, {once: true});
       await audio.play();
@@ -1514,7 +1515,49 @@
         window.dispatchEvent(new CustomEvent('hikma:finished'));
       }
     };
+    const onChunkFail = error => { cloudStatus(`${api.toFriendlyMessage(error)} يعمل صوت الجهاز بدلًا منه.`, true); window.startSpeech(); };
     await playChunk();
+  }
+
+  // بيجيب صوت جزء واحد (من الذاكرة أو الخادم)؛ الطلبات بتتم بالتوازي ومفيش طلب يتكرر
+  const speechInflight = new Map();
+  function fetchSpeechChunk(chunk, voice, configuredProvider, offline, start) {
+    const k = `${voice}|${lang}|${chunk}`;
+    if (!speechInflight.has(k)) {
+      const pr = (async () => {
+        let cachedEntry = null;
+        for (const providerName of [configuredProvider, 'edge']) {
+          if (cachedEntry) break;
+          const key = await speechCacheKey(providerName, voice, lang, chunk);
+          cachedEntry = await getSpeechCache(key);
+        }
+        let audioBlob = cachedEntry?.blob || null;
+        let chunkWords = cachedEntry?.words || null;
+        if (!audioBlob) {
+          if (offline) { cloudStatus('هذا الجزء غير محفوظ بعد؛ يعمل صوت الجهاز بدلًا منه.'); throw Object.assign(new Error('offline-uncached'), {code: 'offline_uncached'}); }
+          const result = await api.speech(chunk, lang, voice, settings.rate, settings.pitch);
+          if (result.mode !== 'configured' || !result.audioBase64) { cloudStatus('الصوت الخلفي في الوضع التجريبي؛ يعمل صوت الجهاز بدلًا منه.'); throw Object.assign(new Error('demo'), {code: 'demo'}); }
+          audioBlob = audioBlobFromBase64(result.audioBase64, result.contentType);
+          chunkWords = Array.isArray(result.words) ? result.words : null;
+          const finalKey = await speechCacheKey(result.provider || configuredProvider, voice, lang, chunk);
+          await saveSpeechCache(finalKey, audioBlob, chunkWords);
+        }
+        if (chunkWords?.length) {
+          let pointer = 0;
+          chunkWords = chunkWords.map(word => {
+            let charIndex = chunk.indexOf(word.text, pointer);
+            if (charIndex === -1) charIndex = chunk.indexOf(word.text);
+            if (charIndex >= 0) pointer = charIndex + word.text.length;
+            return {...word, charIndex: Math.max(0, charIndex)};
+          }).filter(word => word.charIndex >= 0 && chunk.includes(word.text));
+        }
+        return {blob: audioBlob, words: chunkWords, text: chunk};
+      })();
+      pr.catch(() => speechInflight.delete(k));
+      speechInflight.set(k, pr);
+      if (speechInflight.size > 40) speechInflight.delete(speechInflight.keys().next().value);
+    }
+    return speechInflight.get(k).then(r => ({blob: r.blob, meta: {start, text: r.text, words: r.words}}));
   }
 
   // ده بتاع زر القراءة بالصوت الطبيعي: يجلب الصوت من الخادم أو من الذاكرة ثم يشغله
@@ -1530,55 +1573,23 @@
     const workerConfigured = !offline && speechHealth === 'configured';
     cloudStatus(offline ? 'بلا اتصال: سيُستخدم الصوت المحفوظ إن وُجد، وإلا صوت الجهاز.' : workerConfigured ? 'جارٍ تجهيز الصوت...' : 'جارٍ التحقق من الصوت الخلفي...');
     try {
-      const audioChunks = [];
-      const metaChunks = [];
-      let resultProvider = 'worker';
       let searchFrom = 0;
-      for (const chunk of chunks) {
+      const items = chunks.map(chunk => {
         const chunkStart = Math.max(0, sourceText.indexOf(chunk, searchFrom));
         searchFrom = chunkStart + chunk.length;
-        let cachedEntry = null;
-        for (const providerName of [configuredProvider, 'edge']) {
-          if (cachedEntry) break;
-          const key = await speechCacheKey(providerName, voice, lang, chunk);
-          cachedEntry = await getSpeechCache(key);
-        }
-        let audioBlob = cachedEntry?.blob || null;
-        let chunkWords = cachedEntry?.words || null;
-        if (!audioBlob) {
-          if (offline) {
-            cloudStatus('هذا الجزء غير محفوظ بعد؛ يعمل صوت الجهاز بدلًا منه.');
-            window.startSpeech();
-            return;
-          }
-          const result = await api.speech(chunk, lang, voice, settings.rate, settings.pitch);
-          if (result.mode !== 'configured' || !result.audioBase64) {
-            cloudStatus('الصوت الخلفي في الوضع التجريبي؛ يعمل صوت الجهاز بدلًا منه.');
-            window.startSpeech();
-            return;
-          }
-          resultProvider = result.provider || resultProvider;
-          audioBlob = audioBlobFromBase64(result.audioBase64, result.contentType);
-          chunkWords = Array.isArray(result.words) ? result.words : null;
-          const finalKey = await speechCacheKey(resultProvider, voice, lang, chunk);
-          await saveSpeechCache(finalKey, audioBlob, chunkWords);
-        }
-        if (chunkWords?.length) {
-          let pointer = 0;
-          chunkWords = chunkWords.map(word => {
-            let charIndex = chunk.indexOf(word.text, pointer);
-            if (charIndex === -1) charIndex = chunk.indexOf(word.text);
-            if (charIndex >= 0) pointer = charIndex + word.text.length;
-            return {...word, charIndex: Math.max(0, charIndex)};
-          }).filter(word => word.charIndex >= 0 && chunk.includes(word.text));
-        }
-        audioChunks.push(audioBlob);
-        metaChunks.push({start: chunkStart, text: chunk, words: chunkWords});
+        return fetchSpeechChunk(chunk, voice, configuredProvider, offline, chunkStart);
+      });
+      // نجهّز الجملتين الجاية في الخلفية علشان مفيش وقفة بين الجمل
+      if (!offline) for (let k = 1; k <= 2; k++) {
+        const nextText = lines[lineIndex + k];
+        if (nextText) splitSpeechChunks(nextText).forEach(c => fetchSpeechChunk(c, voice, configuredProvider, false, 0).catch(() => {}));
       }
-      await playGeneratedAudio(audioChunks, metaChunks);
+      items.forEach(it => it.catch(() => {}));
+      await items[0];
+      await playGeneratedAudio(items);
       cloudStatus('يعمل الصوت الخلفي المحفوظ على هذا الجهاز.');
     } catch (error) {
-      cloudStatus(`${api.toFriendlyMessage(error)} يعمل صوت الجهاز بدلًا منه.`, true);
+      if (error?.code !== 'demo' && error?.code !== 'offline_uncached') cloudStatus(`${api.toFriendlyMessage(error)} يعمل صوت الجهاز بدلًا منه.`, true);
       window.startSpeech();
     }
   }

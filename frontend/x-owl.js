@@ -37,7 +37,9 @@
       blink();
     }, 2800 + Math.random() * 3200);
   }
-  POSES.forEach(n => { const i = new Image(); i.src = P(n); });
+  // الأوضاع التانية بتتحمّل بعد ما الصفحة تهدا، علشان الفتح يبقى أسرع
+  ['neutral', 'happy', 'thoughtful', 'reading'].forEach(n => { const i = new Image(); i.src = P(n); });
+  setTimeout(() => POSES.forEach(n => { const i = new Image(); i.src = P(n); }), 6000);
   const skinIsHikma = () => (root.dataset.skin || 'hikma') === 'hikma';
   new MutationObserver(() => { if (skinIsHikma()) paint(pose); }).observe(document.documentElement, {childList: true, subtree: true, attributes: true, attributeFilter: ['data-skin']});
   const HXon = (n, f) => window.HX?.on ? window.HX.on(n, f) : null;
