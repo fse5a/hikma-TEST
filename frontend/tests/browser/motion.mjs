@@ -3,6 +3,7 @@ const stop = await startServer(); const browser = await launch();
 const seed = {activated: true, age: 'o16', a11y: false, skin: 'hikma', theme: 'light'};
 for (const [w, h, tag] of [[1280, 800, 'd'], [390, 800, 'm']]) {
   const r = await newPage(browser, {w, h, seed});
+  await r.page.evaluate(() => { localStorage.setItem('hikma-dot-intro', '1'); sessionStorage.removeItem('hx-dots'); }); await r.page.reload();
   await r.page.waitForTimeout(100);
   const started = await r.page.evaluate(() => sessionStorage.getItem('hx-dots'));
   await r.page.waitForTimeout(700);

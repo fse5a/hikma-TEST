@@ -65,6 +65,21 @@
   helperButton.style.setProperty('place-items', 'center');
   helperButton.style.setProperty('font-size', '0');
   const originalMascot = document.querySelector('.welcome .owl').outerHTML;
+
+  // نص الترحيب لكل شخصية: من عالمها هي، مش نص واحد للكل
+  const HERO = {
+    hikma: ['هووو! أهلاً بيك.', 'أنا حكمة. اختار قصة وأقرأها معاك بهدوء، أو أضف نصك.'],
+    cat: ['ميو! جاهز نطير بين النجوم؟', 'اختار قصة ونسافر بيها في الفضاء، أو أضف نصك.'],
+    bot: ['بيب بوب! النظام جاهز.', 'اختار قصة وأنا أقرأها معاك، أو أضف نصك.'],
+    felix: ['أهلاً! الشنطة مليانة حيل وقصص.', 'افتح الشنطة واختار قصة، أو حط نصك جواها.'],
+    doraemon: ['أهلاً يا صاحبي! جيبي مليان قصص.', 'اختار قصة من الجيب السحري، أو أضف نصك.'],
+    mickey: ['أهلاً يا بحار! المركب جاهزة.', 'اختار قصة ونبحر سوا، أو أضف نصك.'],
+    anbu: ['في هدوء. المهمة جاهزة.', 'اختار قصتك بصمت وركّز، أو أضف نصك.'],
+    uchiha: ['التدريب بدأ. ركّز.', 'اختار قصتك وقوّي عقلك، أو أضف نصك.'],
+    zelda: ['هاي يا مغامر! الطريق مفتوح.', 'اختار قصة من الخريطة، أو أضف نصك.'],
+    doom: ['أهلاً أيها القارئ! عرش القصص مستنيك.', 'اختار قصتك وأنا أقرأها لك، أو أضف نصك.']
+  };
+  const skinImg = key => `<img class="skin-ico" src="assets/skinicons/${key}.webp" alt="" width="40" height="40">`;
   const brandMark = document.querySelector('.brand-mark');
   const originalBrandMark = brandMark ? brandMark.innerHTML : '';
   window.originalMascotSvg = originalMascot;
@@ -203,7 +218,7 @@
       actions.appendChild(chip);
     }
     chip.classList.toggle('star-chip', settings.age === 'u16');
-    chip.textContent = settings.age === 'u16' ? `⭐ ${settings.stars} نجوم` : `${skins[settings.skin].icon} ${skins[settings.skin].name}`;
+    if (settings.age === 'u16') chip.textContent = `⭐ ${settings.stars} نجوم`; else chip.innerHTML = `${skinImg(settings.skin)} ${skins[settings.skin].name}`;
     if (!document.querySelector('#settingsOpen')) {
       const button = document.createElement('button');
       button.id = 'settingsOpen';
@@ -395,7 +410,8 @@
     const liveMascot = document.querySelector('.welcome .owl');
     if (liveMascot) { liveMascot.setAttribute('tabindex', '0'); liveMascot.setAttribute('role', 'button'); liveMascot.setAttribute('aria-label', `${skin.name}، المسه ليتكلم`); }
     const welcome = document.querySelector('.welcome h1');
-    if (welcome) welcome.textContent = settings.age === 'u16' ? `أهلاً يا بطل! ${skin.icon}` : 'كل قصة، عالم جديد.';
+    const heroCopy = HERO[settings.skin] || HERO.hikma;
+    if (welcome) { welcome.textContent = heroCopy[0]; const hp = welcome.parentElement && welcome.parentElement.querySelector('p'); if (hp) hp.textContent = heroCopy[1]; }
     const subtitle = document.querySelector('.brand-sub');
     if (subtitle) subtitle.textContent = skin.name;
     helperButton.hidden = false;
@@ -416,7 +432,7 @@
       button.setAttribute('aria-pressed', String(settings.age === button.dataset.ageChoice));
       button.classList.toggle('primary', settings.age === button.dataset.ageChoice);
     });
-    $('#settingsSkins').innerHTML = Object.entries(skins).filter(([key, skin]) => !skin.locked || (settings.unlockedSkins || []).includes(key)).map(([key, skin]) => `<button class="skin-choice" type="button" data-skin="${key}" aria-pressed="${settings.skin === key}"><span class="skin-swatch" style="--swatch:${skin.green}"></span><span>${skin.icon} ${skin.name}</span></button>`).join('');
+    $('#settingsSkins').innerHTML = Object.entries(skins).map(([key, skin]) => { const open = !skin.locked || (settings.unlockedSkins || []).includes(key); return open ? `<button class="skin-choice" type="button" data-skin="${key}" aria-pressed="${settings.skin === key}">${skinImg(key)}<span>${skin.name}</span></button>` : `<button class="skin-choice skin-locked" type="button" data-locked-skin="${key}" aria-label="${skin.name}، مقفول، بيتفتح بكود القلم">${skinImg(key)}<span>${skin.name}<small>🔒 <span>بكود القلم</span></small></span></button>`; }).join('');
     $('#settingsA11y').textContent = settings.a11y ? 'المساعدة مفعّلة، اضغط للإيقاف' : 'المساعدة متوقفة، اضغط للتفعيل';
     $('#settingsA11y').setAttribute('aria-pressed', String(!!settings.a11y));
     $('#a11yTextScale').value = Math.max(100, Math.min(200, Number(settings.textScale || 100)));
@@ -634,7 +650,7 @@
     } else {
       content = `<p>خط أكبر وتباين أوضح وقراءة صوتية لعناصر التطبيق.</p><div class="gate-actions"><button class="button primary" data-a11y="on"><span aria-hidden="true">♿</span> أحتاج مساعدة</button><button class="button secondary" data-a11y="off"><span aria-hidden="true">▶</span> ابدأ بشكل عادي</button></div>`;
     }
-    gate.innerHTML = `<section class="gate-panel"><div class="gate-brand"><span>${skins[settings.skin]?.icon || '🦉'}</span>حِكمة</div><h1>${heading}</h1>${content}</section>`;
+    gate.innerHTML = `<section class="gate-panel"><div class="gate-brand"><span>${skinImg(settings.skin in skins ? settings.skin : 'hikma')}</span>حِكمة</div><h1>${heading}</h1>${content}</section>`;
     syncResponsiveControls();
   }
 
@@ -693,6 +709,8 @@
       return;
     }
     const themeButton = event.target.closest('[data-theme-choice]');
+    const lockedCard = event.target.closest('[data-locked-skin]');
+    if (lockedCard) { const sc = document.querySelector('#skinCode'); if (sc) { sc.scrollIntoView({block: 'center'}); sc.focus(); } return; }
     const skinButton = event.target.closest('[data-skin]:not(html)');
     const ageButton = event.target.closest('[data-age-choice]');
     if (themeButton) {

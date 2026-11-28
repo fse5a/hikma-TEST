@@ -1093,3 +1093,8 @@ html[data-skin][data-hc=off][data-theme=dark] .dialog input, html[data-skin][dat
 
 /* Phone: no drifting decorative dots (they read as stray marks) */
 @media (max-width: 700px) { html body::before { background-image: none !important; animation: none !important; } }
+
+.skin-ico { width: 40px; height: 40px; border-radius: 50%; object-fit: cover; flex: none; background: var(--mint); }
+.skin-choice small { display: block; font-size: .75em; opacity: .8; }
+.skin-locked { opacity: .72; border-style: dashed; }
+.brand-chip .skin-ico, #skinChip .skin-ico { width: 24px; height: 24px; vertical-align: middle; }

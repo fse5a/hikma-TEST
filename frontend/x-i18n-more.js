@@ -3,6 +3,17 @@
 (() => {
   const I = window.HikmaI18n; if (!I) return;
   const E = {
+    'هووو! أهلاً بيك.': 'Hoo! Welcome.', 'أنا حكمة. اختار قصة وأقرأها معاك بهدوء، أو أضف نصك.': "I'm Hikma. Pick a story and I'll read it with you, or add your own text.",
+    'ميو! جاهز نطير بين النجوم؟': 'Meow! Ready to fly among the stars?', 'اختار قصة ونسافر بيها في الفضاء، أو أضف نصك.': 'Pick a story and we travel through space with it, or add your own text.',
+    'بيب بوب! النظام جاهز.': 'Beep boop! System ready.', 'اختار قصة وأنا أقرأها معاك، أو أضف نصك.': "Pick a story and I'll read it with you, or add your own text.",
+    'أهلاً! الشنطة مليانة حيل وقصص.': 'Hi! The bag is full of tricks and stories.', 'افتح الشنطة واختار قصة، أو حط نصك جواها.': 'Open the bag and pick a story, or put your own text inside.',
+    'أهلاً يا صاحبي! جيبي مليان قصص.': 'Hi, friend! My pocket is full of stories.', 'اختار قصة من الجيب السحري، أو أضف نصك.': 'Pick a story from the magic pocket, or add your own text.',
+    'أهلاً يا بحار! المركب جاهزة.': 'Ahoy, sailor! The boat is ready.', 'اختار قصة ونبحر سوا، أو أضف نصك.': "Pick a story and we'll sail together, or add your own text.",
+    'في هدوء. المهمة جاهزة.': 'Quietly. The mission is ready.', 'اختار قصتك بصمت وركّز، أو أضف نصك.': 'Pick your story in silence and focus, or add your own text.',
+    'التدريب بدأ. ركّز.': 'Training has begun. Focus.', 'اختار قصتك وقوّي عقلك، أو أضف نصك.': 'Pick your story and strengthen your mind, or add your own text.',
+    'هاي يا مغامر! الطريق مفتوح.': 'Hey, adventurer! The road is open.', 'اختار قصة من الخريطة، أو أضف نصك.': 'Pick a story from the map, or add your own text.',
+    'أهلاً أيها القارئ! عرش القصص مستنيك.': 'Welcome, reader! The throne of stories awaits.', 'اختار قصتك وأنا أقرأها لك، أو أضف نصك.': "Pick your story and I'll read it to you, or add your own text.",
+    'بكود القلم': 'with pen code',
     'لو بتستخدم قارئ شاشة (NVDA أو VoiceOver أو TalkBack)، الجملة الحالية بتتقرأ تلقائيًا أثناء التنقل.': 'If you use a screen reader (NVDA, VoiceOver or TalkBack), the current sentence is read automatically as you move.',
     'التطبيق بيعدّي على الأزرار واحد واحد، وتضغط مسافة أو Enter (أو أي زر موصّل بالكيبورد) لاختيار الزر المميّز.': 'The app moves through the buttons one by one. Press Space or Enter (or any switch wired to the keyboard) to pick the highlighted button.',
     'اختصارات الكيبورد في القارئ: مسافة للتشغيل، الأسهم للجمل، Esc للإغلاق.': 'Reader keyboard shortcuts: Space to play, arrows for sentences, Esc to close.',

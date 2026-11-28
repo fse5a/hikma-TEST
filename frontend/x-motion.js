@@ -28,7 +28,7 @@
   // بومة من نقط (مرة واحدة في الجلسة، وبس على الصورة الأصلية)
   function dots() {
     const img = document.querySelector('.welcome img.owl');
-    if (!img || reduced() || sessionStorage.getItem('hx-dots')) return;
+    if (!img || reduced() || sessionStorage.getItem('hx-dots') || !localStorage.getItem('hikma-dot-intro')) return; // المقدمة بالنقط متقفلة: كانت بتخلّي البومة تبان مكسورة
     if (!/mascots\/hikma|assets\/owl\//.test(img.getAttribute('src') || '')) return;
     const go = () => {
       const w = img.clientWidth, h = img.clientHeight; if (!w || !h) return;
