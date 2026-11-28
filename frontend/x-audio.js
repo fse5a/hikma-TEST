@@ -136,8 +136,11 @@
         if (!speakers.has(seg.who)) speakers.set(seg.who, pr);
         o = {...o, pitch: pr.p, rate: Math.min(2, base * pr.r), voiceIndex: (pr.v + 1)};
       }
-      // أدوار الشخصيات بصوت الجهاز لأن كل شخصية محتاجة نغمة مختلفة
-      window.HikmaSpeak.speakDevice(seg.t, o).then(() => resolve());
+      // أدوار الشخصيات: لو صوت Piper منزّل بنستخدمه (النغمة بتتغير بسرعة التشغيل)، وإلا صوت الجهاز لأن كل شخصية محتاجة نغمة مختلفة
+      const done = () => window.HikmaSpeak.speakDevice(seg.t, o).then(() => resolve());
+      if (lang === 'ar' && window.HikmaSpeak.piperAllowed?.()) {
+        window.HikmaSpeak.speakPiper(seg.t, {rate: o.rate / (o.pitch || 1), pitchShift: o.pitch || 1}).then(ok => ok ? resolve() : done());
+      } else done();
     });
   }
   async function playRoles() {

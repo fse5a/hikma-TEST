@@ -53,6 +53,25 @@
     });
   }
 
+  // Piper: صوت احتياطي من جوه المتصفح (لو المستخدم نزّله). بيرجع true لو اشتغل.
+  const piperAllowed = () => (settings().voiceSource || 'cloud') !== 'device' && Boolean(window.HikmaPiper?.ready?.());
+  async function speakPiper(text, {rate = 1, pitchShift = 1, onend, queue = false} = {}) {
+    try {
+      if (!queue) { /* الإيقاف بيتم من stop() قبل كده */ }
+      const my = queue ? token : token;
+      const blob = await window.HikmaPiper.synth(text);
+      if (my !== token) return true;
+      audioUrl = URL.createObjectURL(blob);
+      const a = new Audio(audioUrl);
+      audio = a;
+      a.preservesPitch = pitchShift === 1;
+      a.playbackRate = Math.min(2, Math.max(0.5, (rate || 1) * pitchShift));
+      a.volume = Math.min(1, capFn());
+      await new Promise((resolve, reject) => { a.onended = () => { onend?.(); resolve(); }; a.onerror = () => reject(new Error('audio-error')); a.play().catch(reject); });
+      return true;
+    } catch { return false; }
+  }
+
   async function playBlob(blob, my, rate, onend) {
     audioUrl = URL.createObjectURL(blob);
     const a = new Audio(audioUrl);
@@ -76,7 +95,11 @@
     const my = token;
     const p = profile();
     const rate = (opts.rate || 1) * (p.rate || 1);
-    const fallback = () => { if (my === token || opts.queue) speakDevice(clean, {...opts, lang, rate}); };
+    const fallback = () => {
+      if (my !== token && !opts.queue) return;
+      if (lang === 'ar' && piperAllowed()) { speakPiper(clean, {rate, onend: opts.onend}).then(ok => { if (!ok && (my === token || opts.queue)) speakDevice(clean, {...opts, lang, rate}); }); return; }
+      speakDevice(clean, {...opts, lang, rate});
+    };
     if (!cloudAllowed()) { fallback(); return true; }
     const timer = setTimeout(() => { if (my === token && !audio) { token++; fallback(); } }, opts.maxWaitMs || 7000);
     window.hikmaCloudBlob(clean, lang, p.voice).then(async blob => {
@@ -99,7 +122,7 @@
   }
 
   window.HikmaSpeak = {
-    speak, speakDevice, stop, prefetch,
+    speak, speakDevice, speakPiper, piperAllowed, stop, prefetch,
     // قصص العرض بس: صوت ElevenLabs المجاني (حد شهري على السيرفر). غير كده صوت الشخصية.
     skinVoice: () => {
       const st = window.hikmaReader?.story;

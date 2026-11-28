@@ -96,7 +96,7 @@
   const settingsOverlay = document.createElement('div');
   settingsOverlay.id = 'appSettingsOverlay';
   settingsOverlay.className = 'overlay';
-  settingsOverlay.innerHTML = `<section class="dialog narrow" role="dialog" aria-modal="true" aria-labelledby="appSettingsTitle"><header class="dialog-head"><h2 id="appSettingsTitle">إعدادات حكمة</h2><button class="icon-button" data-close="appSettingsOverlay" aria-label="إغلاق">×</button></header><div class="dialog-body feature-settings"><div class="feature-setting-block"><h3>العمر والواجهة</h3><div class="feature-setting-row"><button class="button secondary" data-age-choice="u16">وضع الأطفال</button><button class="button secondary" data-age-choice="o16">16 سنة أو أكثر</button></div></div><div class="feature-setting-block"><h3>المساعدة وإمكانية الوصول</h3><button class="button secondary" id="settingsA11y"></button></div><div class="feature-setting-block"><h3>شخصية القلم</h3><div class="skin-choices" id="settingsSkins"></div><form id="skinCodeForm" class="skin-code-form"><label for="skinCode">كود سكن جديد (مع القلم)</label><input id="skinCode" type="text" dir="ltr" autocomplete="off" autocapitalize="characters" spellcheck="false" placeholder="XXXX-XXXX-XXXX-XXXX"><button class="button secondary" type="submit">فتح السكن</button><p class="gate-error" id="skinCodeMsg" role="status"></p></form></div><div class="feature-setting-block"><button class="button secondary" id="changePin">رقم الأهل السري</button><a class="button secondary" href="/privacy.html" target="_blank" rel="noopener">سياسة الخصوصية (مسودة)</a><a class="button secondary" href="/terms.html" target="_blank" rel="noopener">شروط الاستخدام (مسودة)</a></div><div class="feature-setting-block"><button class="button secondary" id="resetApp">إعادة ضبط التطبيق</button></div></div></section>`;
+  settingsOverlay.innerHTML = `<section class="dialog narrow" role="dialog" aria-modal="true" aria-labelledby="appSettingsTitle"><header class="dialog-head"><h2 id="appSettingsTitle">إعدادات حكمة</h2><button class="icon-button" data-close="appSettingsOverlay" aria-label="إغلاق">×</button></header><div class="dialog-body feature-settings"><div class="feature-setting-block"><h3>العمر والواجهة</h3><div class="feature-setting-row"><button class="button secondary" data-age-choice="u16">وضع الأطفال</button><button class="button secondary" data-age-choice="o16">16 سنة أو أكثر</button></div></div><div class="feature-setting-block"><h3>المساعدة وإمكانية الوصول</h3><button class="button secondary" id="settingsA11y"></button></div><div class="feature-setting-block"><h3>شخصية القلم</h3><div class="skin-choices" id="settingsSkins"></div><form id="skinCodeForm" class="skin-code-form"><label for="skinCode">كود سكن جديد (مع القلم)</label><input id="skinCode" type="text" dir="ltr" autocomplete="off" autocapitalize="characters" spellcheck="false" placeholder="XXXX-XXXX-XXXX-XXXX"><button class="button secondary" type="submit">فتح السكن</button><p class="gate-error" id="skinCodeMsg" role="status"></p></form></div><div class="feature-setting-block"><button class="button secondary" id="changePin">رقم الأهل السري</button><button class="button secondary" id="removePin" hidden>إلغاء رقم الأهل</button><a class="button secondary" href="/privacy.html" target="_blank" rel="noopener">سياسة الخصوصية (مسودة)</a><a class="button secondary" href="/terms.html" target="_blank" rel="noopener">شروط الاستخدام (مسودة)</a></div><div class="feature-setting-block"><button class="button secondary" id="resetApp">إعادة ضبط التطبيق</button></div></div></section>`;
   settingsOverlay.querySelector('.feature-settings').insertAdjacentHTML('afterbegin', `<div class="feature-setting-block"><label for="uiLanguage">لغة التطبيق</label><select id="uiLanguage">${window.HikmaI18n.languages.map(language => `<option value="${language}">${window.HikmaI18n.languageNames[language]}</option>`).join('')}</select></div>`);
   settingsOverlay.querySelector('.feature-settings').insertAdjacentHTML('afterbegin', '<div class="feature-setting-block"><h3>المظهر</h3><div class="feature-setting-row theme-choices" role="group" aria-label="اختيار المظهر"><button class="button secondary" data-theme-choice="light">☀️ فاتح</button><button class="button secondary" data-theme-choice="dark">🌙 داكن</button></div></div>');
   settingsOverlay.querySelector('#settingsA11y').closest('.feature-setting-block').insertAdjacentHTML('afterend', '<div class="feature-setting-block" id="accessibilityOptions"><h3>خيارات إمكانية الوصول</h3><label for="a11yTextScale">حجم النص <output id="a11yTextScaleValue">100%</output></label><input id="a11yTextScale" type="range" min="100" max="200" step="10"><label for="a11yLineSpacing">تباعد الأسطر</label><select id="a11yLineSpacing"><option value="1.6">مضغوط</option><option value="2">مريح</option><option value="2.4">واسع</option></select><label><input id="a11yHighContrast" type="checkbox"> تباين عالٍ</label><label><input id="a11yDyslexiaFont" type="checkbox"> خط ميسّر للقراءة</label><label><input id="a11yReducedMotion" type="checkbox"> تقليل الحركة</label><label><input id="a11yVoiceGuidance" type="checkbox"> إرشاد صوتي</label><label for="a11yAnnouncementRate">سرعة الإعلانات الصوتية <output id="a11yAnnouncementRateValue">1x</output></label><input id="a11yAnnouncementRate" type="range" min="0.5" max="2" step="0.05"><label><input id="a11ySimpleMode" type="checkbox"> الوضع المبسّط</label><label><input id="a11yHaptics" type="checkbox"> اهتزاز عند التفاعل</label><label for="a11yHighlightStyle">نمط تمييز الجملة</label><select id="a11yHighlightStyle"><option value="yellow">أصفر</option><option value="underline">تسطير</option><option value="outline">إطار</option></select></div>');
@@ -406,6 +406,7 @@
 
   // بيعبّي نافذة الإعدادات بالقيم الحالية
   function renderSettings() {
+    { const has = Boolean(settings.parentPinHash); const cp = document.getElementById('changePin'), rp = document.getElementById('removePin'); if (cp) cp.textContent = has ? 'غيّر رقم الأهل السري' : 'فعّل رقم الأهل السري (اختياري)'; if (rp) rp.hidden = !has; }
     $('#uiLanguage').value = settings.uiLanguage;
     settingsOverlay.querySelectorAll('[data-theme-choice]').forEach(button => {
       button.setAttribute('aria-pressed', String(settings.theme === button.dataset.themeChoice));
@@ -663,9 +664,6 @@
     const ageChoice = event.target.closest('button[data-age]');
     const accessChoice = event.target.closest('button[data-a11y]');
     if (ageChoice) {
-      if (ageChoice.dataset.age === 'u16' && !settings.parentPinHash) {
-        if (!(await setParentPin())) return;
-      }
       settings.age = ageChoice.dataset.age;
       save();
       renderGate();
@@ -707,9 +705,11 @@
       renderSettings();
       playChime();
     } else if (event.target.closest('#changePin')) {
-      if (await setParentPin(true)) say('اتغيّر الرقم السري.');
+      const had = Boolean(settings.parentPinHash);
+      if (await setParentPin(had)) { say(had ? 'اتغيّر الرقم السري.' : 'رقم الأهل اتفعّل.'); renderSettings(); }
+    } else if (event.target.closest('#removePin')) {
+      if (await askParentPin()) { settings.parentPinHash = ''; settings.parentPinSalt = ''; save(); renderSettings(); say('رقم الأهل اتلغى.'); }
     } else if (ageButton) {
-      if (ageButton.dataset.ageChoice === 'u16' && !settings.parentPinHash && !(await setParentPin())) return;
       settings.age = ageButton.dataset.ageChoice;
       save();
       applySkin();

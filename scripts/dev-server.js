@@ -11,6 +11,8 @@ const types = {
   '.html': 'text/html; charset=utf-8',
   '.js': 'text/javascript; charset=utf-8',
   '.mjs': 'text/javascript; charset=utf-8',
+  '.wasm': 'application/wasm',
+  '.data': 'application/octet-stream',
   '.json': 'application/json; charset=utf-8',
   '.svg': 'image/svg+xml',
   '.webmanifest': 'application/manifest+json; charset=utf-8'

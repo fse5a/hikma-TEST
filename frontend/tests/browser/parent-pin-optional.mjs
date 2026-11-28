@@ -1,0 +1,24 @@
+import {launch, newPage, ok, summary, startServer} from './helpers.mjs';
+// رقم الأهل: موجود في الموقع لكن مطفي افتراضيًا، وبيتفعّل من الإعدادات بس، ومش خطوة إجبارية
+const stop = await startServer(); const browser = await launch();
+const r = await newPage(browser, {w: 1280, h: 800, seed: {activated: true}});
+const p = r.page;
+await p.waitForSelector('button[data-age="u16"]');
+await p.click('button[data-age="u16"]');
+await p.waitForTimeout(500);
+const dialogOpen = await p.evaluate(() => Boolean([...document.querySelectorAll('[role=dialog]')].find(d => d.offsetParent && /رقم الأهل/.test(d.textContent) && d.querySelector('input'))));
+ok(!dialogOpen, 'choosing under-16 does not force a parent PIN');
+ok(await p.evaluate(() => state.settings.age === 'u16' && !state.settings.parentPinHash), 'age saved, no PIN set by default');
+await p.evaluate(() => { state.settings.a11y = false; });
+await p.reload(); await p.waitForTimeout(800);
+await p.evaluate(() => document.getElementById('settingsButton')?.click?.());
+const opened = await p.evaluate(() => { const t = [...document.querySelectorAll('button')].find(b => /الإعدادات/.test(b.textContent) && b.offsetParent); t?.click(); return Boolean(t); });
+await p.waitForTimeout(600);
+const txt = await p.evaluate(() => ({change: document.getElementById('changePin')?.textContent, removeHidden: document.getElementById('removePin')?.hidden, open: Boolean(document.querySelector('#appSettingsOverlay.open, #appSettingsOverlay:not([hidden])'))}));
+ok(opened && /اختياري/.test(txt.change || ''), 'settings open without asking for a PIN, and offer to turn it on: ' + JSON.stringify(txt));
+ok(txt.removeHidden === true, 'no "remove PIN" button while it is off');
+await p.evaluate(() => document.getElementById('changePin').click());
+await p.waitForTimeout(500);
+ok(await p.evaluate(() => Boolean([...document.querySelectorAll('input')].find(i => i.offsetParent && /pin|رقم|password/i.test((i.id || '') + (i.type || '') + (i.placeholder || '') + (i.autocomplete || '')) ))), 'turning it on from settings asks for a new PIN');
+ok(r.errs.length === 0, 'no errors ' + r.errs.join('|'));
+await browser.close(); stop(); process.exit(summary('parent-pin-optional') ? 1 : 0);
