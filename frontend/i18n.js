@@ -139,7 +139,11 @@
     nodeSources.set(node, current);
     const trimmed = current.trim();
     if (!trimmed) return;
-    const translated = dictionary[trimmed] || trimmed;
+    let translated = dictionary[trimmed];
+    if (translated === undefined && dictionary.__patterns) {
+      for (const [re, fn] of dictionary.__patterns) { const m = trimmed.match(re); if (m) { translated = fn(...m); break; } }
+    }
+    translated = translated || trimmed;
     const nextValue = current.replace(trimmed, translated);
     if (node.nodeValue !== nextValue) node.nodeValue = nextValue;
   }
